@@ -57,7 +57,12 @@ export const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({
   };
 
   const handleConfirmDelete = async () => {
-    if (confirmationText.trim().toUpperCase() !== CONFIRMATION_PHRASE.toUpperCase()) {
+    // Case-insensitive comparison for Latin scripts, case-sensitive for Arabic
+    const isValid = i18n.language === 'ar'
+      ? confirmationText.trim() === CONFIRMATION_PHRASE.trim()
+      : confirmationText.trim().toUpperCase() === CONFIRMATION_PHRASE.toUpperCase();
+
+    if (!isValid) {
       setError(t('profile.delete_account_error_mismatch'));
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       return;
@@ -227,12 +232,22 @@ export const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({
                     styles.dangerButton,
                     {
                       backgroundColor: colors.error,
-                      opacity: confirmationText.trim().toUpperCase() === CONFIRMATION_PHRASE.toUpperCase() && !isDeleting ? 1 : 0.5,
+                      opacity: (() => {
+                        const isValid = i18n.language === 'ar'
+                          ? confirmationText.trim() === CONFIRMATION_PHRASE.trim()
+                          : confirmationText.trim().toUpperCase() === CONFIRMATION_PHRASE.toUpperCase();
+                        return isValid && !isDeleting ? 1 : 0.5;
+                      })(),
                     },
                   ]}
                   onPress={handleConfirmDelete}
                   activeOpacity={0.8}
-                  disabled={confirmationText.trim().toUpperCase() !== CONFIRMATION_PHRASE.toUpperCase() || isDeleting}
+                  disabled={(() => {
+                    const isValid = i18n.language === 'ar'
+                      ? confirmationText.trim() === CONFIRMATION_PHRASE.trim()
+                      : confirmationText.trim().toUpperCase() === CONFIRMATION_PHRASE.toUpperCase();
+                    return !isValid || isDeleting;
+                  })()}
                 >
                   {isDeleting ? (
                     <ActivityIndicator color="#FFFFFF" />

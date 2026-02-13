@@ -402,6 +402,12 @@ CREATE POLICY "audit_log_insert" ON audit_log
 CREATE POLICY "admins_can_view_all_audit_logs" ON audit_log
   FOR SELECT TO authenticated USING (is_admin(auth.uid()));
 
+-- Immutable Audit Log: Explicitly deny UPDATE and DELETE for all users (including admins)
+CREATE POLICY "audit_log_immutable_no_update" ON audit_log
+  FOR UPDATE TO authenticated USING (false);
+CREATE POLICY "audit_log_immutable_no_delete" ON audit_log
+  FOR DELETE TO authenticated USING (false);
+
 -- =============================================
 -- 5. FUNCTIONS & TRIGGERS
 -- =============================================

@@ -1,0 +1,101 @@
+{
+  "common": {
+    "continue": "متابعة",
+    "skip": "تخطي",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "confirm": "تأكيد",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "back": "رجوع",
+    "next": "التالي",
+    "tnd": "د.ت"
+  },
+  "splash": {
+    "tagline": "الثقة الرقمية للجمعيات التونسية"
+  },
+  "onboarding": {
+    "screen1": {
+      "title": "رقمنة جمعياتك",
+      "description": "إدارة مجموعات الادخار الدوارة بشفافية وكفاءة"
+    },
+    "screen2": {
+      "title": "متابعة في الوقت الفعلي",
+      "description": "راقب المساهمات والجولات ومدفوعات الأعضاء في الوقت الفعلي"
+    },
+    "screen3": {
+      "title": "بناء الثقة",
+      "description": "اكسب درجات الثقة بناءً على سجل الدفع الخاص بك وافتح فرصًا أفضل"
+    }
+  },
+  "auth": {
+    "phone_title": "أدخل رقم هاتفك",
+    "phone_subtitle": "سنرسل لك رمز التحقق",
+    "otp_title": "أدخل رمز التحقق",
+    "otp_subtitle": "تم الإرسال إلى {{phone}}",
+    "profile_title": "أكمل ملفك الشخصي",
+    "profile_subtitle": "أخبرنا عن نفسك",
+    "first_name": "الاسم الأول",
+    "last_name": "اسم العائلة"
+  },
+  "dashboard": {
+    "title": "لوحة التحكم",
+    "total_savings": "إجمالي المدخرات النشطة",
+    "active_tontines": "الجمعيات النشطة",
+    "recent_activity": "النشاط الأخير",
+    "upcoming_deadlines": "المواعيد النهائية القادمة",
+    "view_all": "عرض الكل"
+  },
+  "tontine": {
+    "create": "إنشاء جمعية",
+    "name": "اسم الجمعية",
+    "contribution": "مبلغ المساهمة",
+    "frequency": "التكرار",
+    "members": "عدد الأعضاء",
+    "distribution": "منطق التوزيع",
+    "fixed": "ترتيب ثابت",
+    "random": "سحب عشوائي",
+    "trust": "على أساس الثقة",
+    "tours": "الجولات",
+    "members_list": "الأعضاء",
+    "history": "التاريخ",
+    "current": "الحالي",
+    "upcoming": "القادم",
+    "completed": "مكتمل",
+    "paid": "مدفوع",
+    "pending": "قيد الانتظار",
+    "late": "متأخر",
+    "weekly": "أسبوعي",
+    "monthly": "شهري"
+  },
+  "payment": {
+    "declare": "الإعلان عن دفع",
+    "method": "طريقة الدفع",
+    "cash": "نقدي",
+    "bank": "تحويل بنكي",
+    "d17": "D17",
+    "flouci": "فلوسي",
+    "pay_with_flouci": "الدفع بواسطة فلوسي",
+    "amount": "المبلغ",
+    "reference": "المرجع"
+  },
+  "trust": {
+    "title": "درجة الثقة",
+    "score": "درجتك",
+    "tier": "المستوى",
+    "novice": "مبتدئ",
+    "reliable": "موثوق",
+    "trusted": "موثوق",
+    "elite": "نخبة",
+    "master": "خبير"
+  },
+  "profile": {
+    "title": "الملف الشخصي",
+    "settings": "الإعدادات",
+    "language": "اللغة",
+    "theme": "السمة",
+    "dark": "الوضع الداكن",
+    "light": "الوضع الفاتح",
+    "logout": "تسجيل الخروج"
+  }
+}

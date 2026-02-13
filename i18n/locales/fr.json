@@ -1,0 +1,101 @@
+{
+  "common": {
+    "continue": "Continuer",
+    "skip": "Passer",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "back": "Retour",
+    "next": "Suivant",
+    "tnd": "DT"
+  },
+  "splash": {
+    "tagline": "La confiance numérisée pour les tontines tunisiennes"
+  },
+  "onboarding": {
+    "screen1": {
+      "title": "Digitalisez vos tontines",
+      "description": "Gérez vos groupes d'épargne rotative avec transparence et efficacité"
+    },
+    "screen2": {
+      "title": "Suivi en temps réel",
+      "description": "Surveillez les contributions, les tours et les paiements des membres en temps réel"
+    },
+    "screen3": {
+      "title": "Construisez la confiance",
+      "description": "Gagnez des scores de confiance basés sur votre historique de paiement et débloquez de meilleures opportunités"
+    }
+  },
+  "auth": {
+    "phone_title": "Entrez votre numéro de téléphone",
+    "phone_subtitle": "Nous vous enverrons un code de vérification",
+    "otp_title": "Entrez le code de vérification",
+    "otp_subtitle": "Envoyé au {{phone}}",
+    "profile_title": "Complétez votre profil",
+    "profile_subtitle": "Parlez-nous de vous",
+    "first_name": "Prénom",
+    "last_name": "Nom"
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "total_savings": "Épargne active totale",
+    "active_tontines": "Tontines actives",
+    "recent_activity": "Activité récente",
+    "upcoming_deadlines": "Échéances à venir",
+    "view_all": "Voir tout"
+  },
+  "tontine": {
+    "create": "Créer une tontine",
+    "name": "Nom de la tontine",
+    "contribution": "Montant de la cotisation",
+    "frequency": "Fréquence",
+    "members": "Nombre de membres",
+    "distribution": "Logique de distribution",
+    "fixed": "Ordre fixe",
+    "random": "Tirage aléatoire",
+    "trust": "Basé sur la confiance",
+    "tours": "Tours",
+    "members_list": "Membres",
+    "history": "Historique",
+    "current": "En cours",
+    "upcoming": "À venir",
+    "completed": "Terminé",
+    "paid": "Payé",
+    "pending": "En attente",
+    "late": "En retard",
+    "weekly": "Hebdomadaire",
+    "monthly": "Mensuel"
+  },
+  "payment": {
+    "declare": "Déclarer un paiement",
+    "method": "Méthode de paiement",
+    "cash": "Espèces",
+    "bank": "Virement bancaire",
+    "d17": "D17",
+    "flouci": "Flouci",
+    "pay_with_flouci": "Payer avec Flouci",
+    "amount": "Montant",
+    "reference": "Référence"
+  },
+  "trust": {
+    "title": "Score de confiance",
+    "score": "Votre score",
+    "tier": "Niveau",
+    "novice": "Novice",
+    "reliable": "Fiable",
+    "trusted": "Fiable",
+    "elite": "Élite",
+    "master": "Maître"
+  },
+  "profile": {
+    "title": "Profil",
+    "settings": "Paramètres",
+    "language": "Langue",
+    "theme": "Thème",
+    "dark": "Mode sombre",
+    "light": "Mode clair",
+    "logout": "Déconnexion"
+  }
+}

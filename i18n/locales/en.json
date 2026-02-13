@@ -1,0 +1,101 @@
+{
+  "common": {
+    "continue": "Continue",
+    "skip": "Skip",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "next": "Next",
+    "tnd": "TND"
+  },
+  "splash": {
+    "tagline": "Trust digitized for Tunisian tontines"
+  },
+  "onboarding": {
+    "screen1": {
+      "title": "Digitalize your tontines",
+      "description": "Manage your rotating savings groups with transparency and efficiency"
+    },
+    "screen2": {
+      "title": "Real-time tracking",
+      "description": "Monitor contributions, tours, and member payments in real-time"
+    },
+    "screen3": {
+      "title": "Build trust",
+      "description": "Earn trust scores based on your payment history and unlock better opportunities"
+    }
+  },
+  "auth": {
+    "phone_title": "Enter your phone number",
+    "phone_subtitle": "We'll send you a verification code",
+    "otp_title": "Enter verification code",
+    "otp_subtitle": "Sent to {{phone}}",
+    "profile_title": "Complete your profile",
+    "profile_subtitle": "Tell us about yourself",
+    "first_name": "First Name",
+    "last_name": "Last Name"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "total_savings": "Total Active Savings",
+    "active_tontines": "Active Tontines",
+    "recent_activity": "Recent Activity",
+    "upcoming_deadlines": "Upcoming Deadlines",
+    "view_all": "View All"
+  },
+  "tontine": {
+    "create": "Create Tontine",
+    "name": "Tontine Name",
+    "contribution": "Contribution Amount",
+    "frequency": "Frequency",
+    "members": "Number of Members",
+    "distribution": "Distribution Logic",
+    "fixed": "Fixed Order",
+    "random": "Random Draw",
+    "trust": "Trust-Based",
+    "tours": "Tours",
+    "members_list": "Members",
+    "history": "History",
+    "current": "Current",
+    "upcoming": "Upcoming",
+    "completed": "Completed",
+    "paid": "Paid",
+    "pending": "Pending",
+    "late": "Late",
+    "weekly": "Weekly",
+    "monthly": "Monthly"
+  },
+  "payment": {
+    "declare": "Declare Payment",
+    "method": "Payment Method",
+    "cash": "Cash",
+    "bank": "Bank Transfer",
+    "d17": "D17",
+    "flouci": "Flouci",
+    "pay_with_flouci": "Pay with Flouci",
+    "amount": "Amount",
+    "reference": "Reference"
+  },
+  "trust": {
+    "title": "Trust Score",
+    "score": "Your Score",
+    "tier": "Tier",
+    "novice": "Novice",
+    "reliable": "Reliable",
+    "trusted": "Trusted",
+    "elite": "Elite",
+    "master": "Master"
+  },
+  "profile": {
+    "title": "Profile",
+    "settings": "Settings",
+    "language": "Language",
+    "theme": "Theme",
+    "dark": "Dark Mode",
+    "light": "Light Mode",
+    "logout": "Logout"
+  }
+}

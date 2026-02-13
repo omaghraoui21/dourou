@@ -11,6 +11,15 @@ export interface User {
   createdAt: Date;
 }
 
+export interface TontineMember {
+  id: string;
+  name: string;
+  phone: string;
+  initials: string;
+  payoutOrder: number;
+  addedAt: Date;
+}
+
 export interface Tontine {
   id: string;
   name: string;
@@ -19,9 +28,11 @@ export interface Tontine {
   totalMembers: number;
   currentTour: number;
   distributionLogic: 'fixed' | 'random' | 'trust';
-  status: 'active' | 'completed';
+  status: 'draft' | 'active' | 'completed';
   createdAt: Date;
   nextDeadline: Date;
+  startDate?: Date;
+  members: TontineMember[];
 }
 
 export interface Tour {
@@ -73,4 +84,37 @@ export const getTrustTier = (score: number): TrustTier => {
   if (score >= 3.5) return 'trusted';
   if (score >= 3.0) return 'reliable';
   return 'novice';
+};
+
+export const generateToursFromTontine = (tontine: Tontine): Tour[] => {
+  const sorted = [...tontine.members].sort((a, b) => a.payoutOrder - b.payoutOrder);
+  const startDate = tontine.startDate || tontine.createdAt;
+
+  return sorted.map((member, index) => {
+    const deadline = new Date(startDate);
+    if (tontine.frequency === 'weekly') {
+      deadline.setDate(deadline.getDate() + ((index + 1) * 7));
+    } else {
+      deadline.setMonth(deadline.getMonth() + (index + 1));
+    }
+
+    let status: 'completed' | 'current' | 'upcoming';
+    if (index < tontine.currentTour - 1) {
+      status = 'completed';
+    } else if (index === tontine.currentTour - 1) {
+      status = 'current';
+    } else {
+      status = 'upcoming';
+    }
+
+    return {
+      id: `tour_${tontine.id}_${index + 1}`,
+      tontineId: tontine.id,
+      tourNumber: index + 1,
+      recipientId: member.id,
+      deadline,
+      status,
+      payments: [],
+    };
+  });
 };

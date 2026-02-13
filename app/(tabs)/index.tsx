@@ -25,8 +25,8 @@ export default function DashboardScreen() {
   const { tontines } = useTontines();
   const rtl = i18n.language === 'ar';
 
-  // Filter active tontines
-  const activeTontines = tontines.filter((t) => t.status === 'active');
+  // Filter active tontines (include draft for display)
+  const activeTontines = tontines.filter((t) => t.status === 'active' || t.status === 'draft');
 
   const totalSavings = activeTontines.reduce(
     (sum, tontine) => sum + tontine.contribution * tontine.currentTour,

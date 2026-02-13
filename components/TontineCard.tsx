@@ -14,12 +14,16 @@ interface TontineCardProps {
 
 export const TontineCard: React.FC<TontineCardProps> = ({ tontine }) => {
   const { colors } = useTheme();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const rtl = i18n.language === 'ar';
 
-  const progress = tontine.currentTour / tontine.totalMembers;
-  const daysUntilDeadline = Math.ceil(
-    (tontine.nextDeadline.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
-  );
+  const isDraft = tontine.status === 'draft';
+  const progress = isDraft ? 0 : tontine.currentTour / tontine.totalMembers;
+  const daysUntilDeadline = isDraft
+    ? 0
+    : Math.ceil(
+        (tontine.nextDeadline.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+      );
 
   const handlePress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -28,21 +32,47 @@ export const TontineCard: React.FC<TontineCardProps> = ({ tontine }) => {
 
   return (
     <TouchableOpacity
-      style={[styles.card, { backgroundColor: colors.card, borderColor: colors.gold }]}
+      style={[
+        styles.card,
+        {
+          backgroundColor: colors.card,
+          borderColor: isDraft ? colors.gold + '60' : colors.gold,
+        },
+      ]}
       onPress={handlePress}
       activeOpacity={0.8}
     >
-      <View style={styles.header}>
-        <View style={styles.titleContainer}>
-          <Text style={[styles.title, { color: colors.text }]}>{tontine.name}</Text>
-          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-            {tontine.totalMembers} {t('tontine.members')} • {t(`tontine.${tontine.frequency}`)}
+      <View style={[styles.header, rtl && { flexDirection: 'row-reverse' }]}>
+        <View style={[styles.titleContainer, rtl && { marginRight: 0, marginLeft: Spacing.md }]}>
+          <View style={[styles.nameRow, rtl && { flexDirection: 'row-reverse' }]}>
+            <Text style={[styles.title, { color: colors.text }]} numberOfLines={1}>
+              {tontine.name}
+            </Text>
+            {isDraft && (
+              <View style={[styles.draftBadge, { backgroundColor: colors.gold + '20' }]}>
+                <Text style={[styles.draftBadgeText, { color: colors.gold }]}>
+                  {t('tontine.draft_badge')}
+                </Text>
+              </View>
+            )}
+          </View>
+          <Text style={[styles.subtitle, { color: colors.textSecondary, textAlign: rtl ? 'right' : 'left' }]}>
+            {isDraft
+              ? `${tontine.members?.length || 0}/${tontine.totalMembers} ${t('tontine.members_list')}`
+              : `${tontine.totalMembers} ${t('tontine.members')} • ${t(`tontine.${tontine.frequency}`)}`}
           </Text>
         </View>
-        <ProgressRing progress={progress} size={50} />
+        {!isDraft && <ProgressRing progress={progress} size={50} />}
+        {isDraft && (
+          <View style={[styles.draftProgress, { borderColor: colors.gold + '40' }]}>
+            <Text style={[styles.draftProgressText, { color: colors.gold }]}>
+              {tontine.members?.length || 0}/{tontine.totalMembers}
+            </Text>
+          </View>
+        )}
       </View>
 
-      <View style={styles.details}>
+      <View style={[styles.details, rtl && { flexDirection: 'row-reverse' }]}>
         <View style={styles.detailItem}>
           <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>
             {t('tontine.contribution')}
@@ -54,24 +84,34 @@ export const TontineCard: React.FC<TontineCardProps> = ({ tontine }) => {
 
         <View style={styles.detailItem}>
           <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>
-            {t('tontine.current')}
+            {isDraft ? t('tontine.status_draft') : t('tontine.current')}
           </Text>
-          <Text style={[styles.detailValue, { color: colors.text }]}>
-            {tontine.currentTour}/{tontine.totalMembers}
+          <Text style={[styles.detailValue, { color: isDraft ? colors.gold : colors.text }]}>
+            {isDraft
+              ? t('tontine.status_draft')
+              : `${tontine.currentTour}/${tontine.totalMembers}`}
           </Text>
         </View>
 
         <View style={styles.detailItem}>
           <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>
-            {t('dashboard.upcoming_deadlines')}
+            {isDraft ? t('tontine.frequency') : t('dashboard.upcoming_deadlines')}
           </Text>
           <Text
             style={[
               styles.detailValue,
-              { color: daysUntilDeadline <= 3 ? colors.warning : colors.text },
+              {
+                color: isDraft
+                  ? colors.text
+                  : daysUntilDeadline <= 3
+                  ? colors.warning
+                  : colors.text,
+              },
             ]}
           >
-            {t('common.days_short', { count: daysUntilDeadline })}
+            {isDraft
+              ? t(`tontine.${tontine.frequency}`)
+              : t('common.days_short', { count: daysUntilDeadline })}
           </Text>
         </View>
       </View>
@@ -96,13 +136,42 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: Spacing.md,
   },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    marginBottom: Spacing.xs,
+  },
   title: {
     fontSize: FontSizes.lg,
     fontWeight: '600',
-    marginBottom: Spacing.xs,
+    flexShrink: 1,
+  },
+  draftBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  draftBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   subtitle: {
     fontSize: FontSizes.sm,
+  },
+  draftProgress: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    borderWidth: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  draftProgressText: {
+    fontSize: FontSizes.sm,
+    fontWeight: '700',
   },
   details: {
     flexDirection: 'row',

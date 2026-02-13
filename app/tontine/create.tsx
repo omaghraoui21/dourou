@@ -75,7 +75,7 @@ export default function CreateTontineScreen() {
       }
 
       // Create the tontine object
-      await addTontine({
+      const newTontine = await addTontine({
         name: data.name,
         contribution: parseInt(data.contribution),
         frequency: data.frequency,
@@ -87,20 +87,8 @@ export default function CreateTontineScreen() {
       // Success feedback
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
-      // Show success alert
-      Alert.alert(
-        t('tontine.created_title'),
-        t('tontine.created_message'),
-        [
-          {
-            text: t('common.ok'),
-            onPress: () => {
-              router.back();
-              router.push('/(tabs)');
-            },
-          },
-        ]
-      );
+      // Navigate to the new tontine detail screen to add members
+      router.replace(`/tontine/${newTontine.id}`);
     } catch (error) {
       console.error('Error creating tontine:', error);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);

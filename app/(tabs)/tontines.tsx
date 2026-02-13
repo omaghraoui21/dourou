@@ -21,8 +21,11 @@ export default function TontinesScreen() {
   const [filter, setFilter] = useState<'active' | 'completed'>('active');
   const rtl = i18n.language === 'ar';
 
-  const filteredTontines = tontines.filter((tontine) => tontine.status === filter);
-  const activeCount = tontines.filter((tontine) => tontine.status === 'active').length;
+  const filteredTontines = tontines.filter((tontine) => {
+    if (filter === 'active') return tontine.status === 'active' || tontine.status === 'draft';
+    return tontine.status === 'completed';
+  });
+  const activeCount = tontines.filter((tontine) => tontine.status === 'active' || tontine.status === 'draft').length;
   const completedCount = tontines.filter((tontine) => tontine.status === 'completed').length;
 
   const handleFilterChange = (newFilter: 'active' | 'completed') => {

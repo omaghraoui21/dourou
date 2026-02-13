@@ -236,5 +236,15 @@
     "stat_payment_rate": "معدل الدفع",
     "stat_tenure": "أشهر العضوية",
     "master_admin": "المشرف الرئيسي"
+  },
+  "notifications": {
+    "title": "الإشعارات",
+    "empty": "لا توجد إشعارات بعد",
+    "empty_subtext": "سنخطرك بالتحديثات المهمة",
+    "mark_all_read": "تعليم الكل كمقروء",
+    "just_now": "الآن",
+    "minutes_ago": "منذ {{count}} دقيقة",
+    "hours_ago": "منذ {{count}} ساعة",
+    "days_ago": "منذ {{count}} يوم"
   }
 }

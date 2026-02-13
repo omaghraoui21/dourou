@@ -236,5 +236,15 @@
     "stat_payment_rate": "Payment Rate",
     "stat_tenure": "Months of Tenure",
     "master_admin": "Master Admin"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No notifications yet",
+    "empty_subtext": "We'll notify you about important updates",
+    "mark_all_read": "Mark all as read",
+    "just_now": "Just now",
+    "minutes_ago": "{{count}}m ago",
+    "hours_ago": "{{count}}h ago",
+    "days_ago": "{{count}}d ago"
   }
 }

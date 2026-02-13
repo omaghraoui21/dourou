@@ -4,6 +4,8 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { Spacing, FontSizes, BorderRadius } from '@/constants/theme';
 import { NumismaticAvatar } from './NumismaticAvatar';
+import { TrustScoreBadge } from './TrustScoreBadge';
+import { getTrustTier } from '@/types';
 import * as Haptics from 'expo-haptics';
 
 export interface PaymentWithMember {
@@ -16,6 +18,8 @@ export interface PaymentWithMember {
   method?: 'cash' | 'bank' | 'd17' | 'flouci';
   declared_at?: Date;
   confirmed_at?: Date;
+  trust_score?: number | null;
+  user_id?: string | null;
 }
 
 interface PaymentStatusListProps {
@@ -135,6 +139,17 @@ export const PaymentStatusList: React.FC<PaymentStatusListProps> = ({
                       </>
                     )}
                   </View>
+                  {payment.user_id && payment.trust_score != null && (
+                    <View style={styles.trustScoreContainer}>
+                      <TrustScoreBadge
+                        score={payment.trust_score}
+                        tier={getTrustTier(payment.trust_score)}
+                        size="small"
+                        showLabel={false}
+                        showScore={true}
+                      />
+                    </View>
+                  )}
                 </View>
               </View>
 
@@ -239,6 +254,9 @@ const styles = StyleSheet.create({
   detailRow: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  trustScoreContainer: {
+    marginTop: 4,
   },
   amount: {
     fontSize: FontSizes.sm,

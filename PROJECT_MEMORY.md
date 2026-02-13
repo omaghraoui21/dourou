@@ -1529,11 +1529,58 @@ Production-ready from day one:
 - Transfer Kit (complete SQL portability)
 - This PROJECT_MEMORY.md document
 
+### Phase 5: Production Hardening (Completed) ⭐ NEW
+
+**Localization & Precision**:
+- ✅ Created timezone utilities (`/utils/timezone.ts`) locked to Africa/Tunis
+- ✅ Implemented Tunisian currency formatting (TND/DT)
+- ✅ Date/time formatters with locale support (FR, EN, AR)
+- ✅ Deadline calculation functions using Tunis timezone
+- ✅ Database triggers to enforce timezone on all timestamps
+
+**Security & Anti-Abuse**:
+- ✅ Rate limiting for invitation codes (3 failed attempts → 5-min cooldown)
+- ✅ Rate limiting for payment declarations (max 5 per minute)
+- ✅ Database tables: `invitation_attempts`, `payment_rate_limits`
+- ✅ Immutable audit logs (UPDATE/DELETE policies removed)
+- ✅ Security utilities (`/utils/security.ts`) with validation functions
+- ✅ SQL functions: `check_invitation_rate_limit()`, `check_payment_rate_limit()`
+
+**Privacy & User Control**:
+- ✅ Phone number masking utility (`/utils/privacy.ts`)
+- ✅ Legal Center UI with glassmorphic design (`/app/legal/`)
+  - Terms of Service screen
+  - Privacy Policy screen
+  - High-end scrollable content
+- ✅ Delete Account modal with confirmation flow
+- ✅ Haptic feedback on destructive actions
+- ✅ SQL function: `mask_phone_number()` for database-level masking
+- ✅ SQL function: `delete_user_account()` with safety checks
+
+**Production Readiness**:
+- ✅ Master SQL migration (`005_production_hardening.sql`)
+- ✅ Comprehensive deployment guide (`DEPLOYMENT_GUIDE.md`)
+- ✅ Environment switching procedures
+- ✅ Security checklist for production launch
+- ✅ Monitoring and maintenance guidelines
+- ✅ Updated PROJECT_MEMORY.md with Phase 5 details
+
+**Key Files Added**:
+- `/utils/timezone.ts` - Timezone and currency utilities
+- `/utils/privacy.ts` - Phone masking and privacy functions
+- `/utils/security.ts` - Rate limiting and input validation
+- `/app/legal/index.tsx` - Legal Center main screen
+- `/app/legal/terms.tsx` - Terms of Service
+- `/app/legal/privacy.tsx` - Privacy Policy
+- `/components/DeleteAccountModal.tsx` - Secure account deletion
+- `/supabase/migrations/005_production_hardening.sql` - Production migration
+- `/DEPLOYMENT_GUIDE.md` - Environment and deployment documentation
+
 ### Future Phases (Planned)
-- **Phase 5**: Payment Integrations (Flouci API, D17 API)
-- **Phase 6**: Push Notifications (Expo Notifications)
-- **Phase 7**: Advanced Analytics (Charts, insights)
-- **Phase 8**: AI-Powered Features (Newell AI integration)
+- **Phase 6**: Payment Integrations (Flouci API, D17 API)
+- **Phase 7**: Push Notifications (Expo Notifications)
+- **Phase 8**: Advanced Analytics (Charts, insights)
+- **Phase 9**: AI-Powered Features (Newell AI integration)
 
 ---
 
@@ -1635,6 +1682,13 @@ This app is not just a product—it's a **bridge between tradition and innovatio
   - Member limits harmonized to 3-50 across entire app
   - Trust Score calculation updated for new payment states
   - Launch button requires minimum 3 members
+- **v1.2** (Phase 5 - Production Hardening): ⭐ PRODUCTION-READY
+  - **Localization**: Africa/Tunis timezone enforcement, TND currency formatting
+  - **Security**: Rate limiting (invitation codes, payment declarations), immutable audit logs
+  - **Privacy**: Phone number masking, Legal Center, Delete Account flow
+  - **Production**: Deployment guide, environment switching, monitoring procedures
+  - **Database**: Migration 005_production_hardening.sql with all security features
+  - **Utilities**: timezone.ts, privacy.ts, security.ts for production features
 
 ---
 
@@ -1650,13 +1704,29 @@ When in doubt, **read this document**. The answer is likely here.
 
 ---
 
-*Last updated: Phase 4.5 - Logic Consistency & Production Readiness*
-*Document maintained by: Dourou AI Development Team*
-*For questions or clarifications, refer to CLAUDE.md or update this document.*
+## 🎉 PRODUCTION LAUNCH READY
 
-**Phase 4.5 Changes Summary**:
-- ✅ Fixed tontine joining logic (draft-only)
-- ✅ Refined payment states (4-state system)
-- ✅ Harmonized member limits (3-50)
-- ✅ Updated Trust Score calculation
-- ✅ Database migration created (004_refined_payment_states.sql)
+**Dourou is now production-ready!** Phase 5 (Production Hardening) has been completed with:
+
+✅ **Security**: Rate limiting, immutable audit logs, input sanitization
+✅ **Privacy**: Phone masking, secure account deletion, data protection
+✅ **Localization**: Africa/Tunis timezone, TND currency, multi-language
+✅ **Compliance**: Terms of Service, Privacy Policy, user rights
+✅ **Deployment**: Complete guide for Dev → Prod migration
+
+**All systems ready for Tunisian market launch.** 🇹🇳
+
+---
+
+*Last updated: Phase 5 - Production Hardening Complete* ✅
+*Document maintained by: Dourou AI Development Team*
+*For deployment, refer to DEPLOYMENT_GUIDE.md*
+
+**Phase 5 Changes Summary**:
+- ✅ Timezone utilities (Africa/Tunis enforcement)
+- ✅ Security rate limiting (3 strikes for invites, 5/min for payments)
+- ✅ Privacy controls (phone masking, delete account)
+- ✅ Legal Center (Terms of Service, Privacy Policy)
+- ✅ Immutable audit logs (no editing/deletion)
+- ✅ Production deployment guide created
+- ✅ Database migration 005_production_hardening.sql

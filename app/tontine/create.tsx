@@ -9,6 +9,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from 'react-native';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTranslation } from 'react-i18next';
@@ -16,6 +17,7 @@ import { router } from 'expo-router';
 import { Spacing, FontSizes, BorderRadius } from '@/constants/theme';
 import { GoldButton } from '@/components/GoldButton';
 import * as Haptics from 'expo-haptics';
+import { useTontines } from '@/contexts/TontineContext';
 
 type Step = 1 | 2 | 3 | 4 | 5;
 
@@ -30,6 +32,7 @@ interface TontineData {
 export default function CreateTontineScreen() {
   const { colors } = useTheme();
   const { t, i18n } = useTranslation();
+  const { addTontine } = useTontines();
   const [currentStep, setCurrentStep] = useState<Step>(1);
   const [loading, setLoading] = useState(false);
   const rtl = i18n.language === 'ar';
@@ -61,11 +64,54 @@ export default function CreateTontineScreen() {
 
   const handleCreate = async () => {
     setLoading(true);
-    setTimeout(() => {
+    try {
+      // Calculate next deadline based on frequency
+      const now = new Date();
+      const nextDeadline = new Date(now);
+      if (data.frequency === 'weekly') {
+        nextDeadline.setDate(now.getDate() + 7);
+      } else {
+        nextDeadline.setMonth(now.getMonth() + 1);
+      }
+
+      // Create the tontine object
+      await addTontine({
+        name: data.name,
+        contribution: parseInt(data.contribution),
+        frequency: data.frequency,
+        totalMembers: parseInt(data.members),
+        distributionLogic: data.distribution,
+        nextDeadline,
+      });
+
+      // Success feedback
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
+      // Show success alert
+      Alert.alert(
+        t('tontine.created_title'),
+        t('tontine.created_message'),
+        [
+          {
+            text: t('common.ok'),
+            onPress: () => {
+              router.back();
+              router.push('/(tabs)');
+            },
+          },
+        ]
+      );
+    } catch (error) {
+      console.error('Error creating tontine:', error);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      Alert.alert(
+        t('common.error'),
+        t('tontine.create_error'),
+        [{ text: t('common.ok') }]
+      );
+    } finally {
       setLoading(false);
-      router.back();
-      router.push('/(tabs)/tontines');
-    }, 1500);
+    }
   };
 
   const isStepValid = () => {

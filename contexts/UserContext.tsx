@@ -14,6 +14,7 @@ interface UserContextType {
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 const USER_STORAGE_KEY = '@tontine_user';
+const TONTINES_STORAGE_KEY = '@tontine_tontines';
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUserState] = useState<User | null>(null);
@@ -67,10 +68,12 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async () => {
     try {
-      await AsyncStorage.removeItem(USER_STORAGE_KEY);
+      // Clear all session data including user and tontines
+      await AsyncStorage.multiRemove([USER_STORAGE_KEY, TONTINES_STORAGE_KEY]);
       setUserState(null);
     } catch (error) {
       console.error('Error logging out:', error);
+      throw error;
     }
   };
 

@@ -12,68 +12,29 @@ import { useTranslation } from 'react-i18next';
 import { Spacing, FontSizes, BorderRadius } from '@/constants/theme';
 import { TontineCard } from '@/components/TontineCard';
 import { router } from 'expo-router';
-import { Tontine, Activity } from '@/types';
+import { Activity } from '@/types';
 import * as Haptics from 'expo-haptics';
 import { useUser } from '@/contexts/UserContext';
 import { SuperAdminBadge } from '@/components/SuperAdminBadge';
-
-// Mock data
-const mockTontines: Tontine[] = [
-  {
-    id: '1',
-    name: 'Famille Ben Ali',
-    contribution: 200,
-    frequency: 'monthly',
-    totalMembers: 6,
-    currentTour: 3,
-    distributionLogic: 'fixed',
-    status: 'active',
-    createdAt: new Date(),
-    nextDeadline: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
-  },
-  {
-    id: '2',
-    name: 'Coll\u00e8gues Bureau',
-    contribution: 150,
-    frequency: 'weekly',
-    totalMembers: 4,
-    currentTour: 2,
-    distributionLogic: 'random',
-    status: 'active',
-    createdAt: new Date(),
-    nextDeadline: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
-  },
-];
-
-const mockActivities: Activity[] = [
-  {
-    id: '1',
-    type: 'payment',
-    message: 'activity_payment',
-    timestamp: new Date(),
-    tontineId: '1',
-    tontineName: 'Famille Ben Ali',
-  },
-  {
-    id: '2',
-    type: 'tour_start',
-    message: 'activity_tour_start',
-    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
-    tontineId: '1',
-    tontineName: 'Famille Ben Ali',
-  },
-];
+import { useTontines } from '@/contexts/TontineContext';
 
 export default function DashboardScreen() {
   const { colors } = useTheme();
   const { t, i18n } = useTranslation();
   const { user, isSuperAdmin } = useUser();
+  const { tontines } = useTontines();
   const rtl = i18n.language === 'ar';
 
-  const totalSavings = mockTontines.reduce(
+  // Filter active tontines
+  const activeTontines = tontines.filter((t) => t.status === 'active');
+
+  const totalSavings = activeTontines.reduce(
     (sum, tontine) => sum + tontine.contribution * tontine.currentTour,
     0
   );
+
+  // Mock activities for now (will be replaced with real data later)
+  const mockActivities: Activity[] = [];
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -133,7 +94,7 @@ export default function DashboardScreen() {
             {totalSavings.toLocaleString()} {t('common.tnd')}
           </Text>
           <Text style={[styles.totalSubtext, { color: colors.textSecondary }]}>
-            {mockTontines.length} {t('dashboard.active_tontines')}
+            {activeTontines.length} {t('dashboard.active_tontines')}
           </Text>
         </View>
 
@@ -143,99 +104,119 @@ export default function DashboardScreen() {
             <Text style={[styles.sectionTitle, { color: colors.text }]}>
               {t('dashboard.active_tontines')}
             </Text>
-            <TouchableOpacity
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                router.push('/(tabs)/tontines');
-              }}
-            >
-              <Text style={[styles.viewAll, { color: colors.gold }]}>
-                {t('dashboard.view_all')}
-              </Text>
-            </TouchableOpacity>
+            {activeTontines.length > 0 && (
+              <TouchableOpacity
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  router.push('/(tabs)/tontines');
+                }}
+              >
+                <Text style={[styles.viewAll, { color: colors.gold }]}>
+                  {t('dashboard.view_all')}
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
 
-          {mockTontines.map((tontine) => (
-            <TontineCard key={tontine.id} tontine={tontine} />
-          ))}
+          {activeTontines.length > 0 ? (
+            activeTontines.slice(0, 3).map((tontine) => (
+              <TontineCard key={tontine.id} tontine={tontine} />
+            ))
+          ) : (
+            <View style={styles.emptyState}>
+              <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
+                {t('dashboard.no_tontines')}
+              </Text>
+              <TouchableOpacity
+                style={[styles.createButton, { backgroundColor: colors.gold }]}
+                onPress={handleCreateTontine}
+              >
+                <Text style={styles.createButtonText}>{t('tontine.create')}</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
 
         {/* Upcoming Deadlines */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.text, textAlign: rtl ? 'right' : 'left' }]}>
-            {t('dashboard.upcoming_deadlines')}
-          </Text>
+        {activeTontines.length > 0 && (
+          <View style={styles.section}>
+            <Text style={[styles.sectionTitle, { color: colors.text, textAlign: rtl ? 'right' : 'left' }]}>
+              {t('dashboard.upcoming_deadlines')}
+            </Text>
 
-          {mockTontines
-            .sort((a, b) => a.nextDeadline.getTime() - b.nextDeadline.getTime())
-            .map((tontine) => {
-              const daysUntil = Math.ceil(
-                (tontine.nextDeadline.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+            {activeTontines
+              .sort((a, b) => a.nextDeadline.getTime() - b.nextDeadline.getTime())
+              .map((tontine) => {
+                const daysUntil = Math.ceil(
+                  (tontine.nextDeadline.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+                );
+                return (
+                  <View
+                    key={tontine.id}
+                    style={[
+                      styles.deadlineCard,
+                      { backgroundColor: colors.card, borderColor: colors.border },
+                      rtl && styles.rowRTL,
+                    ]}
+                  >
+                    <View style={styles.deadlineInfo}>
+                      <Text style={[styles.deadlineName, { color: colors.text, textAlign: rtl ? 'right' : 'left' }]}>
+                        {tontine.name}
+                      </Text>
+                      <Text style={[styles.deadlineAmount, { color: colors.gold, textAlign: rtl ? 'right' : 'left' }]}>
+                        {tontine.contribution} {t('common.tnd')}
+                      </Text>
+                    </View>
+                    <Text
+                      style={[
+                        styles.deadlineDays,
+                        { color: daysUntil <= 3 ? colors.warning : colors.textSecondary },
+                      ]}
+                    >
+                      {t('common.days_short', { count: daysUntil })}
+                    </Text>
+                  </View>
+                );
+              })}
+          </View>
+        )}
+
+        {/* Recent Activity */}
+        {mockActivities.length > 0 && (
+          <View style={[styles.section, { marginBottom: Spacing.xxl }]}>
+            <Text style={[styles.sectionTitle, { color: colors.text, textAlign: rtl ? 'right' : 'left' }]}>
+              {t('dashboard.recent_activity')}
+            </Text>
+
+            {mockActivities.map((activity) => {
+              const hoursAgo = Math.floor(
+                (Date.now() - activity.timestamp.getTime()) / (1000 * 60 * 60)
               );
               return (
                 <View
-                  key={tontine.id}
+                  key={activity.id}
                   style={[
-                    styles.deadlineCard,
+                    styles.activityCard,
                     { backgroundColor: colors.card, borderColor: colors.border },
                     rtl && styles.rowRTL,
                   ]}
                 >
-                  <View style={styles.deadlineInfo}>
-                    <Text style={[styles.deadlineName, { color: colors.text, textAlign: rtl ? 'right' : 'left' }]}>
-                      {tontine.name}
+                  <View style={[styles.activityDot, rtl && { paddingRight: 0, paddingLeft: Spacing.sm }]}>
+                    <View style={[styles.dot, { backgroundColor: colors.gold }]} />
+                  </View>
+                  <View style={styles.activityContent}>
+                    <Text style={[styles.activityMessage, { color: colors.text, textAlign: rtl ? 'right' : 'left' }]}>
+                      {getActivityMessage(activity)}
                     </Text>
-                    <Text style={[styles.deadlineAmount, { color: colors.gold, textAlign: rtl ? 'right' : 'left' }]}>
-                      {tontine.contribution} {t('common.tnd')}
+                    <Text style={[styles.activityMeta, { color: colors.textSecondary, textAlign: rtl ? 'right' : 'left' }]}>
+                      {activity.tontineName} {'\u2022'} {t('common.hours_ago', { count: hoursAgo })}
                     </Text>
                   </View>
-                  <Text
-                    style={[
-                      styles.deadlineDays,
-                      { color: daysUntil <= 3 ? colors.warning : colors.textSecondary },
-                    ]}
-                  >
-                    {t('common.days_short', { count: daysUntil })}
-                  </Text>
                 </View>
               );
             })}
-        </View>
-
-        {/* Recent Activity */}
-        <View style={[styles.section, { marginBottom: Spacing.xxl }]}>
-          <Text style={[styles.sectionTitle, { color: colors.text, textAlign: rtl ? 'right' : 'left' }]}>
-            {t('dashboard.recent_activity')}
-          </Text>
-
-          {mockActivities.map((activity) => {
-            const hoursAgo = Math.floor(
-              (Date.now() - activity.timestamp.getTime()) / (1000 * 60 * 60)
-            );
-            return (
-              <View
-                key={activity.id}
-                style={[
-                  styles.activityCard,
-                  { backgroundColor: colors.card, borderColor: colors.border },
-                  rtl && styles.rowRTL,
-                ]}
-              >
-                <View style={[styles.activityDot, rtl && { paddingRight: 0, paddingLeft: Spacing.sm }]}>
-                  <View style={[styles.dot, { backgroundColor: colors.gold }]} />
-                </View>
-                <View style={styles.activityContent}>
-                  <Text style={[styles.activityMessage, { color: colors.text, textAlign: rtl ? 'right' : 'left' }]}>
-                    {getActivityMessage(activity)}
-                  </Text>
-                  <Text style={[styles.activityMeta, { color: colors.textSecondary, textAlign: rtl ? 'right' : 'left' }]}>
-                    {activity.tontineName} {'\u2022'} {t('common.hours_ago', { count: hoursAgo })}
-                  </Text>
-                </View>
-              </View>
-            );
-          })}
-        </View>
+          </View>
+        )}
       </ScrollView>
 
       {/* Floating Action Button */}
@@ -323,6 +304,24 @@ const styles = StyleSheet.create({
   },
   viewAll: {
     fontSize: FontSizes.sm,
+    fontWeight: '600',
+  },
+  emptyState: {
+    paddingVertical: Spacing.xl,
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontSize: FontSizes.md,
+    marginBottom: Spacing.md,
+  },
+  createButton: {
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    borderRadius: BorderRadius.md,
+  },
+  createButtonText: {
+    color: '#0F172A',
+    fontSize: FontSizes.md,
     fontWeight: '600',
   },
   deadlineCard: {

@@ -9,6 +9,7 @@
     "edit": "تعديل",
     "back": "رجوع",
     "next": "التالي",
+    "ok": "حسنًا",
     "tnd": "د.ت",
     "loading": "جاري التحميل...",
     "error": "خطأ",
@@ -62,7 +63,8 @@
     "recent_activity": "النشاط الأخير",
     "upcoming_deadlines": "المواعيد النهائية القادمة",
     "view_all": "عرض الكل",
-    "no_activity": "لا يوجد نشاط حديث"
+    "no_activity": "لا يوجد نشاط حديث",
+    "no_tontines": "لم تنضم إلى أي جمعيات بعد"
   },
   "tontines": {
     "title": "جمعياتي",
@@ -104,7 +106,10 @@
     "monthly": "شهري",
     "summary": "ملخص",
     "summary_description": "راجع المعلومات",
-    "tour_number": "الجولة {{number}}"
+    "tour_number": "الجولة {{number}}",
+    "created_title": "تم إنشاء الجمعية!",
+    "created_message": "تم إنشاء وحفظ جمعيتك بنجاح.",
+    "create_error": "فشل إنشاء الجمعية. يرجى المحاولة مرة أخرى."
   },
   "payment": {
     "declare": "الإعلان عن دفع",

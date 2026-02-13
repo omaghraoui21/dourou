@@ -9,6 +9,7 @@
     "edit": "Edit",
     "back": "Back",
     "next": "Next",
+    "ok": "OK",
     "tnd": "TND",
     "loading": "Loading...",
     "error": "Error",
@@ -62,7 +63,8 @@
     "recent_activity": "Recent Activity",
     "upcoming_deadlines": "Upcoming Deadlines",
     "view_all": "View All",
-    "no_activity": "No recent activity"
+    "no_activity": "No recent activity",
+    "no_tontines": "You haven't joined any tontines yet"
   },
   "tontines": {
     "title": "My Tontines",
@@ -104,7 +106,10 @@
     "monthly": "Monthly",
     "summary": "Summary",
     "summary_description": "Review the information",
-    "tour_number": "Tour {{number}}"
+    "tour_number": "Tour {{number}}",
+    "created_title": "Tontine Created!",
+    "created_message": "Your tontine has been successfully created and saved.",
+    "create_error": "Failed to create tontine. Please try again."
   },
   "payment": {
     "declare": "Declare Payment",

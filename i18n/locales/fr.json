@@ -9,6 +9,7 @@
     "edit": "Modifier",
     "back": "Retour",
     "next": "Suivant",
+    "ok": "OK",
     "tnd": "DT",
     "loading": "Chargement...",
     "error": "Erreur",
@@ -62,7 +63,8 @@
     "recent_activity": "Activité récente",
     "upcoming_deadlines": "Échéances à venir",
     "view_all": "Voir tout",
-    "no_activity": "Aucune activité récente"
+    "no_activity": "Aucune activité récente",
+    "no_tontines": "Vous n'avez pas encore rejoint de tontines"
   },
   "tontines": {
     "title": "Mes Tontines",
@@ -104,7 +106,10 @@
     "monthly": "Mensuel",
     "summary": "Récapitulatif",
     "summary_description": "Vérifiez les informations",
-    "tour_number": "Tour {{number}}"
+    "tour_number": "Tour {{number}}",
+    "created_title": "Tontine créée !",
+    "created_message": "Votre tontine a été créée et enregistrée avec succès.",
+    "create_error": "Échec de la création de la tontine. Veuillez réessayer."
   },
   "payment": {
     "declare": "Déclarer un paiement",

@@ -11,58 +11,19 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { Spacing, FontSizes } from '@/constants/theme';
 import { TontineCard } from '@/components/TontineCard';
-import { Tontine } from '@/types';
 import * as Haptics from 'expo-haptics';
-
-// Mock data
-const mockTontines: Tontine[] = [
-  {
-    id: '1',
-    name: 'Famille Ben Ali',
-    contribution: 200,
-    frequency: 'monthly',
-    totalMembers: 6,
-    currentTour: 3,
-    distributionLogic: 'fixed',
-    status: 'active',
-    createdAt: new Date(),
-    nextDeadline: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
-  },
-  {
-    id: '2',
-    name: 'Coll\u00e8gues Bureau',
-    contribution: 150,
-    frequency: 'weekly',
-    totalMembers: 4,
-    currentTour: 2,
-    distributionLogic: 'random',
-    status: 'active',
-    createdAt: new Date(),
-    nextDeadline: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
-  },
-  {
-    id: '3',
-    name: 'Amis Sousse',
-    contribution: 300,
-    frequency: 'monthly',
-    totalMembers: 8,
-    currentTour: 8,
-    distributionLogic: 'trust',
-    status: 'completed',
-    createdAt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000),
-    nextDeadline: new Date(),
-  },
-];
+import { useTontines } from '@/contexts/TontineContext';
 
 export default function TontinesScreen() {
   const { colors } = useTheme();
   const { t, i18n } = useTranslation();
+  const { tontines } = useTontines();
   const [filter, setFilter] = useState<'active' | 'completed'>('active');
   const rtl = i18n.language === 'ar';
 
-  const filteredTontines = mockTontines.filter((tontine) => tontine.status === filter);
-  const activeCount = mockTontines.filter((tontine) => tontine.status === 'active').length;
-  const completedCount = mockTontines.filter((tontine) => tontine.status === 'completed').length;
+  const filteredTontines = tontines.filter((tontine) => tontine.status === filter);
+  const activeCount = tontines.filter((tontine) => tontine.status === 'active').length;
+  const completedCount = tontines.filter((tontine) => tontine.status === 'completed').length;
 
   const handleFilterChange = (newFilter: 'active' | 'completed') => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);

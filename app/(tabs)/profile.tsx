@@ -250,8 +250,13 @@ export default function ProfileScreen() {
           style={[styles.logoutButton, { borderColor: colors.error }]}
           onPress={async () => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-            await logout();
-            router.replace('/');
+            try {
+              await logout();
+              // Navigate to onboarding after successful logout
+              router.replace('/onboarding');
+            } catch (error) {
+              console.error('Logout failed:', error);
+            }
           }}
         >
           <Text style={[styles.logoutText, { color: colors.error }]}>

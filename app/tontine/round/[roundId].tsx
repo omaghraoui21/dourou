@@ -158,8 +158,7 @@ export default function RoundDetailScreen() {
           table: 'payments',
           filter: `round_id=eq.${roundId}`,
         },
-        (payload) => {
-          console.log('Payment change:', payload);
+        () => {
           loadRoundData();
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         }

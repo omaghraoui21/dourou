@@ -20,7 +20,7 @@ import { SUPER_ADMIN_CONFIG } from '@/config/superAdmin';
 
 export default function AdminLoginScreen() {
   const { colors } = useTheme();
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
   const rtl = i18n.language === 'ar';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

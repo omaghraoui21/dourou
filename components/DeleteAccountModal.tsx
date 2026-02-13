@@ -41,7 +41,7 @@ export const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState('');
 
-  const CONFIRMATION_PHRASE = 'DELETE';
+  const CONFIRMATION_PHRASE = t('profile.delete_account_confirmation_phrase');
 
   const handleClose = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -57,7 +57,7 @@ export const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({
   };
 
   const handleConfirmDelete = async () => {
-    if (confirmationText.toUpperCase() !== CONFIRMATION_PHRASE) {
+    if (confirmationText.trim().toUpperCase() !== CONFIRMATION_PHRASE.toUpperCase()) {
       setError(t('profile.delete_account_error_mismatch'));
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       return;
@@ -199,7 +199,7 @@ export const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({
                 }}
                 placeholder={CONFIRMATION_PHRASE}
                 placeholderTextColor={colors.textSecondary}
-                autoCapitalize="characters"
+                autoCapitalize={i18n.language === 'ar' ? 'none' : 'characters'}
                 editable={!isDeleting}
               />
 
@@ -227,12 +227,12 @@ export const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({
                     styles.dangerButton,
                     {
                       backgroundColor: colors.error,
-                      opacity: confirmationText.toUpperCase() === CONFIRMATION_PHRASE && !isDeleting ? 1 : 0.5,
+                      opacity: confirmationText.trim().toUpperCase() === CONFIRMATION_PHRASE.toUpperCase() && !isDeleting ? 1 : 0.5,
                     },
                   ]}
                   onPress={handleConfirmDelete}
                   activeOpacity={0.8}
-                  disabled={confirmationText.toUpperCase() !== CONFIRMATION_PHRASE || isDeleting}
+                  disabled={confirmationText.trim().toUpperCase() !== CONFIRMATION_PHRASE.toUpperCase() || isDeleting}
                 >
                   {isDeleting ? (
                     <ActivityIndicator color="#FFFFFF" />

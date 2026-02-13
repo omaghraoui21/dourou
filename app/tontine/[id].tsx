@@ -132,44 +132,67 @@ export default function TontineDetailScreen() {
     }
   }, [tontine]);
 
-  // useEffect must be before conditional returns
+  // Subscribe to payments changes scoped to this tontine's round IDs
+  const roundIds = rounds.map((r) => r.id);
+
   useEffect(() => {
     if (tontine && tontine.status === 'active') {
       fetchRounds();
-
-      // Set up real-time subscription for rounds and payments
-      const roundsChannel = supabase
-        .channel(`tontine_rounds_${tontine.id}`)
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'rounds',
-            filter: `tontine_id=eq.${tontine.id}`,
-          },
-          () => {
-            fetchRounds();
-          }
-        )
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'payments',
-          },
-          () => {
-            fetchRounds();
-          }
-        )
-        .subscribe();
-
-      return () => {
-        supabase.removeChannel(roundsChannel);
-      };
     }
   }, [tontine, fetchRounds]);
+
+  // Set up real-time subscription for rounds (filtered by tontine_id)
+  useEffect(() => {
+    if (!tontine || tontine.status !== 'active') return;
+
+    const roundsChannel = supabase
+      .channel(`tontine_rounds_${tontine.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'rounds',
+          filter: `tontine_id=eq.${tontine.id}`,
+        },
+        () => {
+          fetchRounds();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(roundsChannel);
+    };
+  }, [tontine, fetchRounds]);
+
+  // Set up real-time subscription for payments (filtered by round_id for this tontine)
+  useEffect(() => {
+    if (!tontine || tontine.status !== 'active' || roundIds.length === 0) return;
+
+    // Subscribe to each round's payments to avoid global subscription overhead
+    const paymentsChannel = supabase
+      .channel(`tontine_payments_${tontine.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'payments',
+          filter: `round_id=in.(${roundIds.join(',')})`,
+        },
+        () => {
+          fetchRounds();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(paymentsChannel);
+    };
+    // Re-subscribe when round IDs change (e.g. after initial fetch)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tontine?.id, roundIds.join(','), fetchRounds]);
 
   // NOW handle conditional returns - after all hooks
   if (!tontine) {

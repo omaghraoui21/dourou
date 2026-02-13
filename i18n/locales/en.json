@@ -257,6 +257,7 @@
     "delete_account_confirm_title": "Final Confirmation",
     "delete_account_confirm_subtitle": "Type DELETE to confirm account deletion",
     "delete_account_type_delete": "Type DELETE",
+    "delete_account_confirmation_phrase": "DELETE",
     "delete_account_user": "Account",
     "delete_account_confirm": "Delete My Account",
     "delete_account_error_mismatch": "Please type DELETE to confirm",

@@ -214,36 +214,72 @@ export const TontineProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, [userId, refreshTontines]);
 
   // -------------------------------------------------------------------------
-  // Real-time subscriptions
+  // Real-time subscriptions — scoped by the user's known tontine IDs
   // -------------------------------------------------------------------------
+
+  // Derive a stable string of tontine IDs so we can re-subscribe when the
+  // set of tontines changes (e.g. after creating / joining a new one).
+  const tontineIds = tontines.map((t) => t.id).sort().join(',');
 
   useEffect(() => {
     if (!userId) return;
 
-    const channel = supabase
-      .channel('tontine-changes')
-      .on(
+    // When we have known tontine IDs, scope the subscription so we don't
+    // receive events for every row in the table. For brand-new users (no
+    // tontines yet) we use a creator_id filter so we still pick up their
+    // first tontine creation.
+    const ids = tontineIds ? tontineIds.split(',') : [];
+
+    const channel = supabase.channel(`tontine-changes-${userId}`);
+
+    if (ids.length > 0) {
+      channel
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'tontines',
+            filter: `id=in.(${ids.join(',')})`,
+          },
+          () => {
+            refreshTontines();
+          },
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'tontine_members',
+            filter: `tontine_id=in.(${ids.join(',')})`,
+          },
+          () => {
+            refreshTontines();
+          },
+        );
+    } else {
+      // No tontines yet — listen for tontines created by this user
+      channel.on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'tontines' },
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'tontines',
+          filter: `creator_id=eq.${userId}`,
+        },
         () => {
-          // Any change on the tontines table – refresh
           refreshTontines();
         },
-      )
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'tontine_members' },
-        () => {
-          // Any change on tontine_members – refresh
-          refreshTontines();
-        },
-      )
-      .subscribe();
+      );
+    }
+
+    channel.subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [userId, refreshTontines]);
+  }, [userId, tontineIds, refreshTontines]);
 
   // -------------------------------------------------------------------------
   // getTontineById

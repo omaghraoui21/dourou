@@ -14,6 +14,8 @@ import { Spacing, FontSizes, BorderRadius } from '@/constants/theme';
 import { GoldButton } from '@/components/GoldButton';
 import * as Haptics from 'expo-haptics';
 import { Tour, Member } from '@/types';
+import { isSuperAdmin } from '@/config/superAdmin';
+import { SuperAdminBadge } from '@/components/SuperAdminBadge';
 
 // Mock data
 const mockTours: Tour[] = [
@@ -67,6 +69,8 @@ const mockMembers: Member[] = [
       phone: '+21620123456',
       avatar: 'AB',
       trustScore: 4.5,
+      role: 'admin',
+      isVerified: true,
       createdAt: new Date(),
     },
     joinedAt: new Date(),
@@ -84,6 +88,8 @@ const mockMembers: Member[] = [
       phone: '+21620234567',
       avatar: 'FK',
       trustScore: 4.2,
+      role: 'member',
+      isVerified: true,
       createdAt: new Date(),
     },
     joinedAt: new Date(),
@@ -101,6 +107,8 @@ const mockMembers: Member[] = [
       phone: '+21620345678',
       avatar: 'MG',
       trustScore: 3.8,
+      role: 'member',
+      isVerified: true,
       createdAt: new Date(),
     },
     joinedAt: new Date(),
@@ -327,58 +335,81 @@ export default function TontineDetailScreen() {
 
         {activeTab === 'members' && (
           <View>
-            {mockMembers.map((member) => (
-              <View
-                key={member.id}
-                style={[
-                  styles.memberCard,
-                  { backgroundColor: colors.card, borderColor: colors.border },
-                ]}
-              >
-                <View style={[styles.memberAvatar, { borderColor: colors.gold }]}>
-                  <Text style={styles.memberAvatarText}>{member.user.avatar}</Text>
-                </View>
-
-                <View style={styles.memberInfo}>
-                  <Text style={[styles.memberName, { color: colors.text }]}>
-                    {member.user.firstName} {member.user.lastName}
-                  </Text>
-                  <Text style={[styles.memberRole, { color: colors.textSecondary }]}>
-                    {member.role === 'admin' ? '👑 Admin' : 'Membre'}
-                  </Text>
-                </View>
-
+            {mockMembers.map((member) => {
+              const isMemberSuperAdmin = isSuperAdmin(member.user.phone);
+              return (
                 <View
+                  key={member.id}
                   style={[
-                    styles.paymentStatusBadge,
+                    styles.memberCard,
                     {
-                      backgroundColor:
-                        member.paymentStatus === 'paid'
-                          ? colors.success + '20'
-                          : member.paymentStatus === 'pending'
-                          ? colors.warning + '20'
-                          : colors.late + '20',
+                      backgroundColor: colors.card,
+                      borderColor: isMemberSuperAdmin ? '#FFD700' : colors.border,
+                      borderWidth: isMemberSuperAdmin ? 2 : 1,
                     },
                   ]}
                 >
-                  <Text
+                  <View
                     style={[
-                      styles.paymentStatusText,
+                      styles.memberAvatar,
+                      { borderColor: isMemberSuperAdmin ? '#FFD700' : colors.gold },
+                    ]}
+                  >
+                    <Text style={styles.memberAvatarText}>
+                      {isMemberSuperAdmin ? '👑' : member.user.avatar}
+                    </Text>
+                  </View>
+
+                  <View style={styles.memberInfo}>
+                    <View style={styles.memberNameRow}>
+                      <Text style={[styles.memberName, { color: colors.text }]}>
+                        {member.user.firstName} {member.user.lastName}
+                      </Text>
+                      {isMemberSuperAdmin && (
+                        <SuperAdminBadge size="small" showLabel={false} />
+                      )}
+                    </View>
+                    <Text style={[styles.memberRole, { color: colors.textSecondary }]}>
+                      {isMemberSuperAdmin
+                        ? '👑 Master Admin'
+                        : member.role === 'admin'
+                        ? '👑 Admin'
+                        : 'Membre'}
+                    </Text>
+                  </View>
+
+                  <View
+                    style={[
+                      styles.paymentStatusBadge,
                       {
-                        color:
+                        backgroundColor:
                           member.paymentStatus === 'paid'
-                            ? colors.success
+                            ? colors.success + '20'
                             : member.paymentStatus === 'pending'
-                            ? colors.warning
-                            : colors.late,
+                            ? colors.warning + '20'
+                            : colors.late + '20',
                       },
                     ]}
                   >
-                    {t(`tontine.${member.paymentStatus}`)}
-                  </Text>
+                    <Text
+                      style={[
+                        styles.paymentStatusText,
+                        {
+                          color:
+                            member.paymentStatus === 'paid'
+                              ? colors.success
+                              : member.paymentStatus === 'pending'
+                              ? colors.warning
+                              : colors.late,
+                        },
+                      ]}
+                    >
+                      {t(`tontine.${member.paymentStatus}`)}
+                    </Text>
+                  </View>
                 </View>
-              </View>
-            ))}
+              );
+            })}
           </View>
         )}
 
@@ -554,10 +585,15 @@ const styles = StyleSheet.create({
   memberInfo: {
     flex: 1,
   },
+  memberNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+    marginBottom: Spacing.xs,
+  },
   memberName: {
     fontSize: FontSizes.md,
     fontWeight: '600',
-    marginBottom: Spacing.xs,
   },
   memberRole: {
     fontSize: FontSizes.sm,

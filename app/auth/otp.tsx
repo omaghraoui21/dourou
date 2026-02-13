@@ -19,7 +19,7 @@ export default function OTPScreen() {
   const { phone } = useLocalSearchParams();
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
-  const inputRefs = useRef<Array<TextInput | null>>([]);
+  const inputRefs = useRef<(TextInput | null)[]>([]);
 
   const handleOtpChange = (value: string, index: number) => {
     const newOtp = [...otp];
@@ -42,7 +42,10 @@ export default function OTPScreen() {
       // Simulate API call
       setTimeout(() => {
         setLoading(false);
-        router.replace('/auth/profile');
+        router.push({
+          pathname: '/auth/profile',
+          params: { phone: phone as string },
+        });
       }, 1000);
     }
   };

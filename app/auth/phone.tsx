@@ -12,24 +12,40 @@ import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { GoldButton } from '@/components/GoldButton';
 import { Spacing, FontSizes, BorderRadius } from '@/constants/theme';
+import { isSuperAdmin, getSuperAdminUser } from '@/config/superAdmin';
+import { useUser } from '@/contexts/UserContext';
 
 export default function PhoneAuthScreen() {
   const { colors } = useTheme();
   const { t } = useTranslation();
+  const { setUser } = useUser();
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleContinue = async () => {
     if (phone.length >= 8) {
       setLoading(true);
-      // Simulate API call
-      setTimeout(() => {
-        setLoading(false);
-        router.push({
-          pathname: '/auth/otp',
-          params: { phone: `+216${phone}` },
-        });
-      }, 1000);
+      const fullPhone = `+216${phone}`;
+
+      // Check if this is the Super Admin
+      if (isSuperAdmin(fullPhone)) {
+        // Bypass OTP and profile setup for Super Admin
+        const superAdminUser = getSuperAdminUser();
+        await setUser(superAdminUser);
+        setTimeout(() => {
+          setLoading(false);
+          router.replace('/(tabs)');
+        }, 1000);
+      } else {
+        // Normal authentication flow
+        setTimeout(() => {
+          setLoading(false);
+          router.push({
+            pathname: '/auth/otp',
+            params: { phone: fullPhone },
+          });
+        }, 1000);
+      }
     }
   };
 

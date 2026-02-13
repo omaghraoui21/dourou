@@ -3,8 +3,11 @@ export interface User {
   firstName: string;
   lastName: string;
   phone: string;
+  email?: string;
   avatar: string;
   trustScore: number;
+  role: 'admin' | 'member' | 'super_admin';
+  isVerified: boolean;
   createdAt: Date;
 }
 

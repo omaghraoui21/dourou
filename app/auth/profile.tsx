@@ -8,14 +8,18 @@ import {
   Platform,
 } from 'react-native';
 import { useTheme } from '@/contexts/ThemeContext';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { GoldButton } from '@/components/GoldButton';
 import { Spacing, FontSizes, BorderRadius } from '@/constants/theme';
+import { useUser } from '@/contexts/UserContext';
+import { User } from '@/types';
 
 export default function ProfileSetupScreen() {
   const { colors } = useTheme();
   const { t } = useTranslation();
+  const { setUser } = useUser();
+  const { phone } = useLocalSearchParams();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [loading, setLoading] = useState(false);
@@ -23,6 +27,22 @@ export default function ProfileSetupScreen() {
   const handleContinue = async () => {
     if (firstName && lastName) {
       setLoading(true);
+
+      // Create user object
+      const newUser: User = {
+        id: `user_${Date.now()}`,
+        firstName,
+        lastName,
+        phone: phone as string,
+        avatar: `${firstName.charAt(0)}${lastName.charAt(0)}`,
+        trustScore: 3.0, // Starting trust score
+        role: 'member',
+        isVerified: true,
+        createdAt: new Date(),
+      };
+
+      await setUser(newUser);
+
       // Simulate API call
       setTimeout(() => {
         setLoading(false);

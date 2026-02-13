@@ -14,6 +14,8 @@ import { TontineCard } from '@/components/TontineCard';
 import { router } from 'expo-router';
 import { Tontine, Activity } from '@/types';
 import * as Haptics from 'expo-haptics';
+import { useUser } from '@/contexts/UserContext';
+import { SuperAdminBadge } from '@/components/SuperAdminBadge';
 
 // Mock data
 const mockTontines: Tontine[] = [
@@ -65,6 +67,7 @@ const mockActivities: Activity[] = [
 export default function DashboardScreen() {
   const { colors } = useTheme();
   const { t } = useTranslation();
+  const { user, isSuperAdmin } = useUser();
 
   const totalSavings = mockTontines.reduce(
     (sum, t) => sum + t.contribution * t.currentTour,
@@ -85,7 +88,7 @@ export default function DashboardScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <View>
+          <View style={styles.headerLeft}>
             <Text style={[styles.greeting, { color: colors.textSecondary }]}>
               {new Date().getHours() < 12
                 ? 'Bonjour'
@@ -93,7 +96,12 @@ export default function DashboardScreen() {
                 ? 'Bon après-midi'
                 : 'Bonsoir'}
             </Text>
-            <Text style={[styles.userName, { color: colors.text }]}>Ahmed</Text>
+            <View style={styles.userNameRow}>
+              <Text style={[styles.userName, { color: colors.text }]}>
+                {user?.firstName || 'Ahmed'}
+              </Text>
+              {isSuperAdmin && <SuperAdminBadge size="small" showLabel={false} />}
+            </View>
           </View>
         </View>
 
@@ -238,6 +246,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  headerLeft: {
+    flex: 1,
+  },
+  userNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
   },
   greeting: {
     fontSize: FontSizes.sm,

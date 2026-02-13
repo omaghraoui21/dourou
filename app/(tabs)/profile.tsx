@@ -15,12 +15,16 @@ import { ProgressRing } from '@/components/ProgressRing';
 import { getTrustTier } from '@/types';
 import * as Haptics from 'expo-haptics';
 import { changeLanguage } from '@/i18n/config';
+import { useUser } from '@/contexts/UserContext';
+import { SuperAdminBadge } from '@/components/SuperAdminBadge';
+import { router } from 'expo-router';
 
 export default function ProfileScreen() {
   const { colors, toggleTheme, isDark } = useTheme();
   const { t, i18n } = useTranslation();
+  const { user, isSuperAdmin, logout } = useUser();
 
-  const trustScore = 4.2;
+  const trustScore = user?.trustScore || 4.2;
   const tier = getTrustTier(trustScore);
 
   const handleLanguageChange = async (lang: string) => {
@@ -42,11 +46,30 @@ export default function ProfileScreen() {
       >
         {/* Profile Header */}
         <View style={styles.header}>
-          <View style={[styles.avatar, { borderColor: colors.gold }]}>
-            <Text style={styles.avatarText}>AB</Text>
+          <View style={[styles.avatar, { borderColor: isSuperAdmin ? '#FFD700' : colors.gold }]}>
+            {isSuperAdmin ? (
+              <Text style={styles.avatarText}>👑</Text>
+            ) : (
+              <Text style={styles.avatarText}>{user?.avatar || 'AB'}</Text>
+            )}
           </View>
-          <Text style={[styles.name, { color: colors.text }]}>Ahmed Ben Ali</Text>
-          <Text style={[styles.phone, { color: colors.textSecondary }]}>+216 20 123 456</Text>
+          <Text style={[styles.name, { color: colors.text }]}>
+            {user?.firstName} {user?.lastName}
+          </Text>
+          {isSuperAdmin && (
+            <View style={styles.badgeContainer}>
+              <SuperAdminBadge size="medium" showLabel={true} />
+            </View>
+          )}
+          <Text style={[styles.phone, { color: colors.textSecondary }]}>{user?.phone}</Text>
+          {user?.email && (
+            <Text style={[styles.email, { color: colors.textSecondary }]}>{user.email}</Text>
+          )}
+          {user?.isVerified && (
+            <View style={[styles.verifiedBadge, { backgroundColor: colors.success + '20' }]}>
+              <Text style={[styles.verifiedText, { color: colors.success }]}>✓ Verified</Text>
+            </View>
+          )}
         </View>
 
         {/* Trust Score Card */}
@@ -219,9 +242,10 @@ export default function ProfileScreen() {
         {/* Logout Button */}
         <TouchableOpacity
           style={[styles.logoutButton, { borderColor: colors.error }]}
-          onPress={() => {
+          onPress={async () => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-            // Handle logout
+            await logout();
+            router.replace('/');
           }}
         >
           <Text style={[styles.logoutText, { color: colors.error }]}>
@@ -270,6 +294,23 @@ const styles = StyleSheet.create({
   },
   phone: {
     fontSize: FontSizes.md,
+  },
+  email: {
+    fontSize: FontSizes.sm,
+    marginTop: Spacing.xs,
+  },
+  badgeContainer: {
+    marginVertical: Spacing.sm,
+  },
+  verifiedBadge: {
+    paddingVertical: Spacing.xs,
+    paddingHorizontal: Spacing.sm,
+    borderRadius: BorderRadius.sm,
+    marginTop: Spacing.sm,
+  },
+  verifiedText: {
+    fontSize: FontSizes.sm,
+    fontWeight: '600',
   },
   trustCard: {
     borderRadius: BorderRadius.md,

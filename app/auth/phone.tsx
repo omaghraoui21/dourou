@@ -7,6 +7,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  TouchableOpacity,
 } from 'react-native';
 import { useTheme } from '@/contexts/ThemeContext';
 import { router } from 'expo-router';
@@ -99,6 +100,17 @@ export default function PhoneAuthScreen() {
           disabled={phone.replace(/\s/g, '').length < 8}
           style={styles.button}
         />
+
+        {/* Admin Login Link */}
+        <TouchableOpacity
+          style={styles.adminLink}
+          onPress={() => router.push('/auth/admin-login')}
+          disabled={loading}
+        >
+          <Text style={[styles.adminLinkText, { color: colors.textSecondary }]}>
+            👑 Administrator Access
+          </Text>
+        </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
   );
@@ -147,5 +159,14 @@ const styles = StyleSheet.create({
   button: {
     width: '100%',
     marginTop: Spacing.sm,
+  },
+  adminLink: {
+    marginTop: Spacing.xl,
+    alignItems: 'center',
+    padding: Spacing.sm,
+  },
+  adminLinkText: {
+    fontSize: FontSizes.sm,
+    fontWeight: '500',
   },
 });

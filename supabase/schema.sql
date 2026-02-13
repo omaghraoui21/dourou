@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   phone TEXT,
   avatar_url TEXT,
   trust_score NUMERIC DEFAULT 3.0,
+  role TEXT DEFAULT 'user' CHECK (role IN ('user', 'admin')) NOT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -125,9 +126,33 @@ CREATE INDEX IF NOT EXISTS idx_payments_round_id ON payments(round_id);
 CREATE INDEX IF NOT EXISTS idx_invitations_code ON invitations(code);
 CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON notifications(user_id);
 CREATE INDEX IF NOT EXISTS idx_audit_log_tontine_id ON audit_log(tontine_id);
+CREATE INDEX IF NOT EXISTS idx_profiles_role ON profiles(role);
 
 -- =============================================
--- 3. ROW LEVEL SECURITY
+-- 3. ADMIN HELPER FUNCTION
+-- =============================================
+
+-- Helper function to check if user is admin
+CREATE OR REPLACE FUNCTION is_admin(user_id UUID)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  user_role TEXT;
+BEGIN
+  SELECT role INTO user_role
+  FROM profiles
+  WHERE id = user_id;
+
+  RETURN user_role = 'admin' OR user_role = 'super_admin';
+END;
+$$;
+
+COMMENT ON FUNCTION is_admin IS 'Helper function to check if a user has admin or super_admin role';
+
+-- =============================================
+-- 4. ROW LEVEL SECURITY
 -- =============================================
 
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
@@ -147,6 +172,10 @@ CREATE POLICY "profiles_insert" ON profiles
 CREATE POLICY "profiles_update" ON profiles
   FOR UPDATE TO authenticated
   USING (auth.uid() = id) WITH CHECK (auth.uid() = id);
+CREATE POLICY "admins_can_view_all_profiles" ON profiles
+  FOR SELECT TO authenticated USING (is_admin(auth.uid()));
+CREATE POLICY "admins_can_update_all_profiles" ON profiles
+  FOR UPDATE TO authenticated USING (is_admin(auth.uid()));
 
 -- Tontines Policies
 CREATE POLICY "tontines_select" ON tontines
@@ -166,6 +195,12 @@ CREATE POLICY "tontines_update" ON tontines
   USING (creator_id = auth.uid()) WITH CHECK (creator_id = auth.uid());
 CREATE POLICY "tontines_delete" ON tontines
   FOR DELETE TO authenticated USING (creator_id = auth.uid());
+CREATE POLICY "admins_can_view_all_tontines" ON tontines
+  FOR SELECT TO authenticated USING (is_admin(auth.uid()));
+CREATE POLICY "admins_can_update_all_tontines" ON tontines
+  FOR UPDATE TO authenticated USING (is_admin(auth.uid()));
+CREATE POLICY "admins_can_delete_all_tontines" ON tontines
+  FOR DELETE TO authenticated USING (is_admin(auth.uid()));
 
 -- Tontine Members Policies
 CREATE POLICY "tontine_members_select" ON tontine_members
@@ -210,6 +245,14 @@ CREATE POLICY "tontine_members_delete" ON tontine_members
       AND tontines.creator_id = auth.uid()
     )
   );
+CREATE POLICY "admins_can_view_all_members" ON tontine_members
+  FOR SELECT TO authenticated USING (is_admin(auth.uid()));
+CREATE POLICY "admins_can_insert_members" ON tontine_members
+  FOR INSERT TO authenticated WITH CHECK (is_admin(auth.uid()));
+CREATE POLICY "admins_can_update_all_members" ON tontine_members
+  FOR UPDATE TO authenticated USING (is_admin(auth.uid()));
+CREATE POLICY "admins_can_delete_all_members" ON tontine_members
+  FOR DELETE TO authenticated USING (is_admin(auth.uid()));
 
 -- Invitations Policies
 CREATE POLICY "invitations_select" ON invitations
@@ -227,6 +270,10 @@ CREATE POLICY "invitations_update" ON invitations
   FOR UPDATE TO authenticated USING (created_by = auth.uid());
 CREATE POLICY "invitations_delete" ON invitations
   FOR DELETE TO authenticated USING (created_by = auth.uid());
+CREATE POLICY "admins_can_update_invitations" ON invitations
+  FOR UPDATE TO authenticated USING (is_admin(auth.uid()));
+CREATE POLICY "admins_can_delete_invitations" ON invitations
+  FOR DELETE TO authenticated USING (is_admin(auth.uid()));
 
 -- Rounds Policies
 CREATE POLICY "rounds_select" ON rounds
@@ -261,6 +308,12 @@ CREATE POLICY "rounds_update" ON rounds
       AND tontines.creator_id = auth.uid()
     )
   );
+CREATE POLICY "admins_can_view_all_rounds" ON rounds
+  FOR SELECT TO authenticated USING (is_admin(auth.uid()));
+CREATE POLICY "admins_can_insert_rounds" ON rounds
+  FOR INSERT TO authenticated WITH CHECK (is_admin(auth.uid()));
+CREATE POLICY "admins_can_update_all_rounds" ON rounds
+  FOR UPDATE TO authenticated USING (is_admin(auth.uid()));
 
 -- Payments Policies
 CREATE POLICY "payments_select" ON payments
@@ -309,6 +362,12 @@ CREATE POLICY "payments_update" ON payments
       AND tontines.creator_id = auth.uid()
     )
   );
+CREATE POLICY "admins_can_view_all_payments" ON payments
+  FOR SELECT TO authenticated USING (is_admin(auth.uid()));
+CREATE POLICY "admins_can_insert_payments" ON payments
+  FOR INSERT TO authenticated WITH CHECK (is_admin(auth.uid()));
+CREATE POLICY "admins_can_update_all_payments" ON payments
+  FOR UPDATE TO authenticated USING (is_admin(auth.uid()));
 
 -- Notifications Policies
 CREATE POLICY "notifications_select" ON notifications
@@ -318,6 +377,8 @@ CREATE POLICY "notifications_insert" ON notifications
 CREATE POLICY "notifications_update" ON notifications
   FOR UPDATE TO authenticated
   USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
+CREATE POLICY "admins_can_view_all_notifications" ON notifications
+  FOR SELECT TO authenticated USING (is_admin(auth.uid()));
 
 -- Audit Log Policies
 CREATE POLICY "audit_log_select" ON audit_log
@@ -336,9 +397,11 @@ CREATE POLICY "audit_log_select" ON audit_log
   );
 CREATE POLICY "audit_log_insert" ON audit_log
   FOR INSERT TO authenticated WITH CHECK (true);
+CREATE POLICY "admins_can_view_all_audit_logs" ON audit_log
+  FOR SELECT TO authenticated USING (is_admin(auth.uid()));
 
 -- =============================================
--- 4. FUNCTIONS & TRIGGERS
+-- 5. FUNCTIONS & TRIGGERS
 -- =============================================
 
 -- Auto-create profile on user signup
@@ -395,7 +458,7 @@ CREATE TRIGGER set_updated_at_tontines
   EXECUTE FUNCTION public.handle_updated_at();
 
 -- =============================================
--- 5. REALTIME
+-- 6. REALTIME
 -- =============================================
 
 ALTER PUBLICATION supabase_realtime ADD TABLE tontines;

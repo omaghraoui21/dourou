@@ -35,6 +35,7 @@ export default function RootLayout() {
               <Stack.Screen name="auth/otp" />
               <Stack.Screen name="auth/profile" />
               <Stack.Screen name="auth/callback" />
+              <Stack.Screen name="auth/admin-login" />
               <Stack.Screen name="(tabs)" />
               <Stack.Screen name="tontine/[id]" />
               <Stack.Screen name="tontine/create" />

@@ -92,7 +92,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         phone,
         avatar: getInitialsFromName(fullName),
         trustScore: profile.trust_score ?? 3.0,
-        role: 'member',
+        role: (profile.role as 'admin' | 'member' | 'super_admin') || 'member',
         isVerified: true,
         createdAt: profile.created_at ? new Date(profile.created_at) : new Date(),
       };

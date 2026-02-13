@@ -1,0 +1,276 @@
+═══════════════════════════════════════════════════════════════
+DOUROU (دورو) - DATABASE MIGRATION GUIDE
+═══════════════════════════════════════════════════════════════
+
+This guide explains how to migrate the Dourou database from one Supabase
+instance to another using the complete schema and data export/import process.
+
+═══════════════════════════════════════════════════════════════
+PART 1: FRESH SETUP ON NEW SUPABASE INSTANCE
+═══════════════════════════════════════════════════════════════
+
+Step 1: Create a new Supabase project
+  - Go to https://supabase.com/dashboard
+  - Create a new project
+  - Wait for the project to be fully initialized
+
+Step 2: Execute the schema
+  - Navigate to SQL Editor in the Supabase dashboard
+  - Copy the entire contents of 'schema.sql'
+  - Paste and execute the SQL script
+  - Verify all tables, functions, triggers, and policies are created
+
+Step 3: Enable Realtime (if not already enabled)
+  - The schema.sql already adds tables to the realtime publication
+  - Verify in Database > Replication settings
+
+═══════════════════════════════════════════════════════════════
+PART 2: DATA EXPORT FROM SOURCE DATABASE
+═══════════════════════════════════════════════════════════════
+
+Tables to Export (in any order):
+  ✓ profiles
+  ✓ tontines
+  ✓ tontine_members
+  ✓ invitations
+  ✓ rounds
+  ✓ payments
+  ✓ notifications
+  ✓ audit_log
+
+Export Methods:
+
+METHOD A: Using Supabase Dashboard
+  1. Go to Table Editor
+  2. For each table, click "..." menu → Export as CSV
+  3. Save each CSV file
+
+METHOD B: Using SQL (recommended for large datasets)
+  Run this query in SQL Editor for each table:
+
+  COPY profiles TO STDOUT WITH CSV HEADER;
+  COPY tontines TO STDOUT WITH CSV HEADER;
+  COPY tontine_members TO STDOUT WITH CSV HEADER;
+  COPY invitations TO STDOUT WITH CSV HEADER;
+  COPY rounds TO STDOUT WITH CSV HEADER;
+  COPY payments TO STDOUT WITH CSV HEADER;
+  COPY notifications TO STDOUT WITH CSV HEADER;
+  COPY audit_log TO STDOUT WITH CSV HEADER;
+
+METHOD C: Using pg_dump (for complete backup)
+  pg_dump -h <source-db-host> -U postgres \
+    --data-only \
+    --table=public.profiles \
+    --table=public.tontines \
+    --table=public.tontine_members \
+    --table=public.invitations \
+    --table=public.rounds \
+    --table=public.payments \
+    --table=public.notifications \
+    --table=public.audit_log \
+    > dourou_data.sql
+
+═══════════════════════════════════════════════════════════════
+PART 3: DATA IMPORT TO TARGET DATABASE
+═══════════════════════════════════════════════════════════════
+
+⚠️  CRITICAL: Import tables in this EXACT ORDER to respect foreign keys:
+
+1. profiles
+   └─ Depends on: auth.users (managed by Supabase Auth)
+   └─ Note: Users must sign in once to create auth.users entry first
+
+2. tontines
+   └─ Depends on: profiles.id (creator_id)
+
+3. tontine_members
+   └─ Depends on: tontines.id, profiles.id
+
+4. invitations
+   └─ Depends on: tontines.id, profiles.id
+
+5. rounds
+   └─ Depends on: tontines.id, tontine_members.id
+
+6. payments
+   └─ Depends on: rounds.id, tontine_members.id
+
+7. notifications
+   └─ Depends on: profiles.id, tontines.id
+
+8. audit_log
+   └─ Depends on: tontines.id, profiles.id
+
+═══════════════════════════════════════════════════════════════
+Import Commands (CSV Method):
+═══════════════════════════════════════════════════════════════
+
+For each table in order, run:
+
+-- 1. Import profiles
+COPY profiles FROM '/path/to/profiles.csv'
+WITH CSV HEADER;
+
+-- 2. Import tontines
+COPY tontines FROM '/path/to/tontines.csv'
+WITH CSV HEADER;
+
+-- 3. Import tontine_members
+COPY tontine_members FROM '/path/to/tontine_members.csv'
+WITH CSV HEADER;
+
+-- 4. Import invitations
+COPY invitations FROM '/path/to/invitations.csv'
+WITH CSV HEADER;
+
+-- 5. Import rounds
+COPY rounds FROM '/path/to/rounds.csv'
+WITH CSV HEADER;
+
+-- 6. Import payments
+COPY payments FROM '/path/to/payments.csv'
+WITH CSV HEADER;
+
+-- 7. Import notifications
+COPY notifications FROM '/path/to/notifications.csv'
+WITH CSV HEADER;
+
+-- 8. Import audit_log
+COPY audit_log FROM '/path/to/audit_log.csv'
+WITH CSV HEADER;
+
+═══════════════════════════════════════════════════════════════
+Import Using Supabase Dashboard:
+═══════════════════════════════════════════════════════════════
+
+1. Go to Table Editor
+2. Select table (in order listed above)
+3. Click "Insert" → "Import data from CSV"
+4. Upload corresponding CSV file
+5. Map columns correctly
+6. Import and verify
+
+═══════════════════════════════════════════════════════════════
+PART 4: POST-MIGRATION VERIFICATION
+═══════════════════════════════════════════════════════════════
+
+1. Verify row counts match:
+   SELECT 'profiles' as table_name, COUNT(*) FROM profiles
+   UNION ALL
+   SELECT 'tontines', COUNT(*) FROM tontines
+   UNION ALL
+   SELECT 'tontine_members', COUNT(*) FROM tontine_members
+   UNION ALL
+   SELECT 'invitations', COUNT(*) FROM invitations
+   UNION ALL
+   SELECT 'rounds', COUNT(*) FROM rounds
+   UNION ALL
+   SELECT 'payments', COUNT(*) FROM payments
+   UNION ALL
+   SELECT 'notifications', COUNT(*) FROM notifications
+   UNION ALL
+   SELECT 'audit_log', COUNT(*) FROM audit_log;
+
+2. Verify foreign key integrity:
+   -- Check orphaned tontines
+   SELECT COUNT(*) FROM tontines
+   WHERE creator_id NOT IN (SELECT id FROM profiles);
+   -- Should return 0
+
+   -- Check orphaned members
+   SELECT COUNT(*) FROM tontine_members
+   WHERE tontine_id NOT IN (SELECT id FROM tontines);
+   -- Should return 0
+
+3. Test RLS policies:
+   - Log in as a test user
+   - Verify they can only see their own data
+   - Verify tontine creators can manage their tontines
+
+4. Test realtime subscriptions:
+   - Subscribe to a table in your app
+   - Make a change
+   - Verify the change is broadcast in real-time
+
+═══════════════════════════════════════════════════════════════
+PART 5: SPECIAL CONSIDERATIONS
+═══════════════════════════════════════════════════════════════
+
+Authentication Users (auth.users):
+  - The auth.users table is managed by Supabase Auth
+  - You CANNOT directly export/import auth.users
+  - Users must re-authenticate on the new instance
+  - Profiles will be created automatically via the trigger
+  - To preserve user associations:
+    a) Keep the same user IDs (UUID) in profiles table
+    b) Have users sign in with the same email/phone
+    c) The system will link them automatically
+
+Admin Privileges:
+  - After migration, manually set admin roles:
+    UPDATE profiles SET role = 'admin'
+    WHERE id = '<admin-user-uuid>';
+
+Invitation Codes:
+  - Check expiration dates (expires_at)
+  - Regenerate expired codes if needed
+
+Payment References:
+  - Verify payment reference integrity
+  - Check that payment methods are valid
+
+═══════════════════════════════════════════════════════════════
+PART 6: TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════
+
+Issue: Foreign key constraint violations during import
+Solution: Ensure import order is followed exactly as listed above
+
+Issue: RLS policies blocking access
+Solution: Temporarily disable RLS during import:
+  ALTER TABLE <table_name> DISABLE ROW LEVEL SECURITY;
+  -- Import data
+  ALTER TABLE <table_name> ENABLE ROW LEVEL SECURITY;
+
+Issue: Duplicate key violations
+Solution: Truncate tables before re-importing:
+  TRUNCATE TABLE audit_log, notifications, payments, rounds,
+               invitations, tontine_members, tontines, profiles
+  CASCADE;
+
+Issue: Trigger errors during import
+Solution: Disable triggers temporarily:
+  ALTER TABLE profiles DISABLE TRIGGER ALL;
+  -- Import
+  ALTER TABLE profiles ENABLE TRIGGER ALL;
+
+═══════════════════════════════════════════════════════════════
+PHASE 2 UPDATES INCLUDED
+═══════════════════════════════════════════════════════════════
+
+The schema.sql includes all Phase 2 enhancements:
+  ✓ Round management system (rounds table)
+  ✓ Admin privilege system (is_admin function)
+  ✓ Enhanced RLS policies for admin access
+  ✓ Audit logging system
+  ✓ Payment tracking with multiple methods
+  ✓ Notification system
+  ✓ Trust score tracking in profiles
+  ✓ Payout order management with constraints
+  ✓ Realtime subscriptions for all core tables
+
+═══════════════════════════════════════════════════════════════
+SUPPORT & RESOURCES
+═══════════════════════════════════════════════════════════════
+
+Supabase Documentation:
+  - Database: https://supabase.com/docs/guides/database
+  - CLI: https://supabase.com/docs/guides/cli
+  - Migrations: https://supabase.com/docs/guides/cli/local-development
+
+For issues or questions, refer to:
+  - schema.sql (complete database schema)
+  - Supabase dashboard logs
+  - Application logs in .fastshot-logs/
+
+═══════════════════════════════════════════════════════════════

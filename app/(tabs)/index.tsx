@@ -6,7 +6,6 @@ import {
   ScrollView,
   TouchableOpacity,
   SafeAreaView,
-  ActivityIndicator,
   RefreshControl,
 } from 'react-native';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -18,6 +17,8 @@ import * as Haptics from 'expo-haptics';
 import { useUser } from '@/contexts/UserContext';
 import { SuperAdminBadge } from '@/components/SuperAdminBadge';
 import { useTontines } from '@/contexts/TontineContext';
+import { TontineCardSkeleton } from '@/components/SkeletonLoader';
+import { PremiumEmptyState } from '@/components/PremiumEmptyState';
 
 export default function DashboardScreen() {
   const { colors } = useTheme();
@@ -76,12 +77,25 @@ export default function DashboardScreen() {
   if (isLoading && tontines.length === 0) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.gold} />
-          <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
-            {t('common.loading')}
-          </Text>
-        </View>
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={[styles.header, rtl && styles.headerRTL]}>
+            <View style={styles.headerLeft}>
+              <Text style={[styles.greeting, { color: colors.textSecondary }]}>
+                {getGreeting()}
+              </Text>
+              <Text style={[styles.userName, { color: colors.text }]}>
+                {user?.firstName || t('common.member')}
+              </Text>
+            </View>
+          </View>
+          <TontineCardSkeleton />
+          <TontineCardSkeleton />
+          <TontineCardSkeleton />
+        </ScrollView>
       </SafeAreaView>
     );
   }
@@ -145,21 +159,15 @@ export default function DashboardScreen() {
 
         {/* Empty State */}
         {tontines.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyEmoji}>{'\uD83E\uDE99'}</Text>
-            <Text style={[styles.emptyTitle, { color: colors.text }]}>
-              {t('dashboard.create_first_tontine')}
-            </Text>
-            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-              {t('dashboard.no_tontines')}
-            </Text>
-            <TouchableOpacity
-              style={[styles.createButton, { backgroundColor: colors.gold }]}
-              onPress={handleCreateTontine}
-            >
-              <Text style={styles.createButtonText}>{t('tontine.create')}</Text>
-            </TouchableOpacity>
-          </View>
+          <PremiumEmptyState
+            icon="🪙"
+            title={t('dashboard.create_first_tontine')}
+            message={t('dashboard.no_tontines')}
+            actionLabel={t('tontine.create')}
+            onAction={handleCreateTontine}
+            secondaryActionLabel={t('dashboard.join_group')}
+            onSecondaryAction={handleJoinGroup}
+          />
         ) : (
           <>
             {/* Active Tontines */}

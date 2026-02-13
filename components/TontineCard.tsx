@@ -35,17 +35,20 @@ export const TontineCard: React.FC<TontineCardProps> = ({ tontine }) => {
       style={[
         styles.card,
         {
-          backgroundColor: colors.card,
+          backgroundColor: colors.card + 'F5',
           borderColor: isDraft ? colors.gold + '60' : colors.gold,
         },
       ]}
       onPress={handlePress}
       activeOpacity={0.8}
     >
+      {/* Glassmorphism overlay */}
+      <View style={styles.glassOverlay} />
+
       <View style={[styles.header, rtl && { flexDirection: 'row-reverse' }]}>
         <View style={[styles.titleContainer, rtl && { marginRight: 0, marginLeft: Spacing.md }]}>
           <View style={[styles.nameRow, rtl && { flexDirection: 'row-reverse' }]}>
-            <Text style={[styles.title, { color: colors.text }]} numberOfLines={1}>
+            <Text style={[styles.title, { color: colors.text }]} numberOfLines={1} ellipsizeMode="tail">
               {tontine.name}
             </Text>
             {isDraft && (
@@ -125,6 +128,17 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: Spacing.md,
     marginBottom: Spacing.md,
+    shadowColor: '#D4AF37',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 6,
+    overflow: 'hidden',
+  },
+  glassOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(212, 175, 55, 0.03)',
+    borderRadius: BorderRadius.md,
   },
   header: {
     flexDirection: 'row',

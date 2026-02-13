@@ -16,6 +16,7 @@ import { Spacing, FontSizes, BorderRadius } from '@/constants/theme';
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { PremiumEmptyState } from '@/components/PremiumEmptyState';
 
 const NOTIFICATION_ICONS: Record<string, string> = {
   payment_confirmed: '✅',
@@ -136,15 +137,13 @@ export default function NotificationsScreen() {
           <ActivityIndicator size="large" color={colors.gold} />
         </View>
       ) : notifications.length === 0 ? (
-        <View style={styles.centerContainer}>
-          <Text style={[styles.emptyIcon, { color: colors.textSecondary }]}>🔔</Text>
-          <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-            {t('notifications.empty')}
-          </Text>
-          <Text style={[styles.emptySubtext, { color: colors.textSecondary }]}>
-            {t('notifications.empty_subtext')}
-          </Text>
-        </View>
+        <PremiumEmptyState
+          icon="🔔"
+          title={t('notifications.empty')}
+          message={t('notifications.empty_subtext')}
+          actionLabel={t('dashboard.view_tontines')}
+          onAction={() => router.push('/(tabs)/tontines')}
+        />
       ) : (
         <ScrollView
           style={styles.scrollView}
@@ -312,6 +311,11 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
     marginBottom: Spacing.md,
     gap: Spacing.md,
+    shadowColor: '#D4AF37',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
   iconContainer: {
     width: 48,

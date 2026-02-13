@@ -75,16 +75,22 @@
     "upcoming_deadlines": "Upcoming Deadlines",
     "view_all": "View All",
     "no_activity": "No recent activity",
-    "no_tontines": "You haven't joined any tontines yet",
+    "no_tontines": "You haven't joined any tontines yet. Start your savings journey with your first group!",
     "join_group": "Join Group",
-    "create_first_tontine": "Create your first tontine"
+    "create_first_tontine": "Create your first tontine",
+    "view_tontines": "View Tontines",
+    "view_active": "View Active Tontines"
   },
   "tontines": {
     "title": "My Tontines",
     "active_count": "Active ({{count}})",
     "completed_count": "Completed ({{count}})",
     "no_active": "No active tontines",
-    "no_completed": "No completed tontines"
+    "no_completed": "No completed tontines",
+    "no_active_title": "No Active Tontines",
+    "no_active_message": "Create a new tontine or join an existing group to start saving together",
+    "no_completed_title": "No Completed Tontines Yet",
+    "no_completed_message": "Complete your first tontine cycle to see your achievements here"
   },
   "tontine": {
     "create": "Create Tontine",
@@ -240,11 +246,25 @@
   "notifications": {
     "title": "Notifications",
     "empty": "No notifications yet",
-    "empty_subtext": "We'll notify you about important updates",
+    "empty_subtext": "We'll notify you about important updates and activity in your tontines",
     "mark_all_read": "Mark all as read",
     "just_now": "Just now",
     "minutes_ago": "{{count}}m ago",
     "hours_ago": "{{count}}h ago",
     "days_ago": "{{count}}d ago"
+  },
+  "connectivity": {
+    "offline": "You're offline",
+    "trying_reconnect": "Trying to reconnect...",
+    "reconnected": "Back online"
+  },
+  "celebration": {
+    "tontine_completed": "Tontine Completed!",
+    "congratulations_message": "Congratulations on completing this savings cycle together",
+    "tontine_name": "Tontine",
+    "rounds": "Rounds",
+    "members": "Members",
+    "completed_on": "Completed on",
+    "back_to_dashboard": "Back to Dashboard"
   }
 }

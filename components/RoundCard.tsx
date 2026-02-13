@@ -87,12 +87,14 @@ export const RoundCard: React.FC<RoundCardProps> = ({
         style={[
           styles.card,
           {
-            backgroundColor: colors.card,
+            backgroundColor: colors.card + 'F5',
             borderColor: round.status === 'current' ? colors.gold : colors.border,
             borderWidth: round.status === 'current' ? 2 : 1,
           },
         ]}
       >
+        {/* Glassmorphism overlay */}
+        <View style={styles.glassOverlay} />
         {/* Header */}
         <View style={[styles.header, rtl && { flexDirection: 'row-reverse' }]}>
           <View style={[styles.headerLeft, rtl && { alignItems: 'flex-end' }]}>
@@ -190,6 +192,17 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.lg,
     padding: Spacing.md,
     marginBottom: Spacing.md,
+    shadowColor: '#D4AF37',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    elevation: 5,
+    overflow: 'hidden',
+  },
+  glassOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(212, 175, 55, 0.03)',
+    borderRadius: BorderRadius.lg,
   },
   header: {
     flexDirection: 'row',

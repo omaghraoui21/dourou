@@ -1,5 +1,6 @@
 import { Tabs } from 'expo-router';
-import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { Text, View, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useNotifications } from '@/contexts/NotificationContext';
 import { useTranslation } from 'react-i18next';
@@ -45,7 +46,7 @@ export default function TabLayout() {
         name="index"
         options={{
           title: t('dashboard.title'),
-          tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
+          tabBarIcon: ({ color, focused }) => <TabBarIcon name="home" color={color} focused={focused} />,
           headerShown: true,
           headerRight: () => (
             <TouchableOpacity
@@ -69,7 +70,7 @@ export default function TabLayout() {
         name="tontines"
         options={{
           title: t('tontines.title'),
-          tabBarIcon: ({ color }) => <TabBarIcon name="list" color={color} />,
+          tabBarIcon: ({ color, focused }) => <TabBarIcon name="list" color={color} focused={focused} />,
           headerShown: true,
           headerRight: () => (
             <TouchableOpacity
@@ -93,7 +94,7 @@ export default function TabLayout() {
         name="profile"
         options={{
           title: t('profile.title'),
-          tabBarIcon: ({ color }) => <TabBarIcon name="person" color={color} />,
+          tabBarIcon: ({ color, focused }) => <TabBarIcon name="person" color={color} focused={focused} />,
           headerShown: true,
           headerRight: () => (
             <TouchableOpacity
@@ -117,14 +118,29 @@ export default function TabLayout() {
   );
 }
 
-function TabBarIcon({ name, color }: { name: string; color: string }) {
+function TabBarIcon({ name, color, focused }: { name: string; color: string; focused: boolean }) {
+  const scaleAnim = useRef(new Animated.Value(focused ? 1 : 0.9)).current;
+
+  useEffect(() => {
+    Animated.spring(scaleAnim, {
+      toValue: focused ? 1.1 : 1,
+      tension: 100,
+      friction: 5,
+      useNativeDriver: true,
+    }).start();
+  }, [focused, scaleAnim]);
+
   const icons: Record<string, string> = {
     home: '\uD83C\uDFE0',
     list: '\uD83D\uDCCB',
     person: '\uD83D\uDC64',
   };
 
-  return <Text style={{ fontSize: 24, color }}>{icons[name]}</Text>;
+  return (
+    <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+      <Text style={{ fontSize: 24, color }}>{icons[name]}</Text>
+    </Animated.View>
+  );
 }
 
 const styles = StyleSheet.create({

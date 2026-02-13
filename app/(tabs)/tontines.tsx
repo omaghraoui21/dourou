@@ -13,6 +13,8 @@ import { Spacing, FontSizes } from '@/constants/theme';
 import { TontineCard } from '@/components/TontineCard';
 import * as Haptics from 'expo-haptics';
 import { useTontines } from '@/contexts/TontineContext';
+import { PremiumEmptyState } from '@/components/PremiumEmptyState';
+import { router } from 'expo-router';
 
 export default function TontinesScreen() {
   const { colors } = useTheme();
@@ -95,14 +97,24 @@ export default function TontinesScreen() {
           filteredTontines.map((tontine) => (
             <TontineCard key={tontine.id} tontine={tontine} />
           ))
+        ) : filter === 'active' ? (
+          <PremiumEmptyState
+            icon="🪙"
+            title={t('tontines.no_active_title')}
+            message={t('tontines.no_active_message')}
+            actionLabel={t('tontine.create')}
+            onAction={() => router.push('/tontine/create')}
+            secondaryActionLabel={t('dashboard.join_group')}
+            onSecondaryAction={() => router.push('/tontine/join')}
+          />
         ) : (
-          <View style={styles.emptyState}>
-            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-              {filter === 'active'
-                ? t('tontines.no_active')
-                : t('tontines.no_completed')}
-            </Text>
-          </View>
+          <PremiumEmptyState
+            icon="🏆"
+            title={t('tontines.no_completed_title')}
+            message={t('tontines.no_completed_message')}
+            actionLabel={t('dashboard.view_active')}
+            onAction={() => handleFilterChange('active')}
+          />
         )}
       </ScrollView>
     </SafeAreaView>

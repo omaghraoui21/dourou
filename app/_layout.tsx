@@ -30,20 +30,26 @@ export default function RootLayout() {
         <UserProvider>
           <NotificationProvider>
             <TontineProvider>
-              <Stack screenOptions={{ headerShown: false }}>
-                <Stack.Screen name="index" />
-                <Stack.Screen name="onboarding" />
-                <Stack.Screen name="auth/phone" />
-                <Stack.Screen name="auth/otp" />
-                <Stack.Screen name="auth/profile" />
-                <Stack.Screen name="auth/callback" />
-                <Stack.Screen name="auth/admin-login" />
-                <Stack.Screen name="(tabs)" />
-                <Stack.Screen name="tontine/[id]" />
-                <Stack.Screen name="tontine/create" />
-                <Stack.Screen name="tontine/join" />
-                <Stack.Screen name="notifications" />
-                <Stack.Screen name="+not-found" />
+              <Stack
+                screenOptions={{
+                  headerShown: false,
+                  animation: 'fade_from_bottom',
+                  animationDuration: 300,
+                }}
+              >
+                <Stack.Screen name="index" options={{ animation: 'fade' }} />
+                <Stack.Screen name="onboarding" options={{ animation: 'fade' }} />
+                <Stack.Screen name="auth/phone" options={{ animation: 'fade' }} />
+                <Stack.Screen name="auth/otp" options={{ animation: 'slide_from_right' }} />
+                <Stack.Screen name="auth/profile" options={{ animation: 'slide_from_right' }} />
+                <Stack.Screen name="auth/callback" options={{ animation: 'fade' }} />
+                <Stack.Screen name="auth/admin-login" options={{ animation: 'fade' }} />
+                <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
+                <Stack.Screen name="tontine/[id]" options={{ animation: 'slide_from_right' }} />
+                <Stack.Screen name="tontine/create" options={{ animation: 'slide_from_bottom' }} />
+                <Stack.Screen name="tontine/join" options={{ animation: 'slide_from_bottom' }} />
+                <Stack.Screen name="notifications" options={{ animation: 'slide_from_right' }} />
+                <Stack.Screen name="+not-found" options={{ animation: 'fade' }} />
               </Stack>
             </TontineProvider>
           </NotificationProvider>

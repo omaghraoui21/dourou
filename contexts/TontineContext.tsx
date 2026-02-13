@@ -334,7 +334,7 @@ export const TontineProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setTontines((prev) => [...prev, optimisticTontine]);
 
       try {
-        // Insert into tontines table
+        // Insert into tontines table with explicit currency field
         const { data: insertedTontine, error: insertError } = await supabase
           .from('tontines')
           .insert({
@@ -347,14 +347,25 @@ export const TontineProvider: React.FC<{ children: React.ReactNode }> = ({ child
             creator_id: userId,
             status: 'draft',
             current_round: 1,
+            currency: 'TND', // Explicitly set local currency
           })
           .select()
           .single();
 
         if (insertError) {
+          console.error('Tontine insert error:', insertError);
           // Revert optimistic update
           setTontines((prev) => prev.filter((t) => t.id !== optimisticId));
-          throw insertError;
+
+          // Provide more specific error messages
+          let errorMessage = insertError.message;
+          if (insertError.code === '23505') {
+            errorMessage = 'A tontine with this name already exists.';
+          } else if (insertError.code === '42501') {
+            errorMessage = 'You do not have permission to create a tontine.';
+          }
+
+          throw new Error(errorMessage);
         }
 
         // Insert the creator as a member with role=admin, payout_order=1

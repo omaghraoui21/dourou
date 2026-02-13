@@ -16,36 +16,72 @@ const resources = {
   ar: { translation: ar },
 };
 
+let isInitialized = false;
+let initPromise: Promise<void> | null = null;
+
 const initI18n = async () => {
-  let savedLanguage = await AsyncStorage.getItem(LANGUAGE_KEY);
+  if (isInitialized) return;
+  if (initPromise) return initPromise;
 
-  if (!savedLanguage) {
-    const deviceLanguage = Localization.getLocales()[0]?.languageCode || 'fr';
-    savedLanguage = deviceLanguage;
-  }
+  initPromise = (async () => {
+    try {
+      let savedLanguage = await AsyncStorage.getItem(LANGUAGE_KEY);
 
-  // Setup RTL for Arabic
-  const shouldBeRTL = savedLanguage === 'ar';
-  if (I18nManager.isRTL !== shouldBeRTL) {
-    I18nManager.allowRTL(shouldBeRTL);
-    I18nManager.forceRTL(shouldBeRTL);
-  }
+      if (!savedLanguage) {
+        const deviceLanguage = Localization.getLocales()[0]?.languageCode || 'fr';
+        savedLanguage = deviceLanguage;
+      }
 
-  i18n
-    .use(initReactI18next)
-    .init({
-      resources,
-      lng: savedLanguage,
-      fallbackLng: 'fr',
-      interpolation: {
-        escapeValue: false,
-      },
-    });
+      // Setup RTL for Arabic
+      const shouldBeRTL = savedLanguage === 'ar';
+      if (I18nManager.isRTL !== shouldBeRTL) {
+        I18nManager.allowRTL(shouldBeRTL);
+        I18nManager.forceRTL(shouldBeRTL);
+      }
+
+      await i18n
+        .use(initReactI18next)
+        .init({
+          resources,
+          lng: savedLanguage,
+          fallbackLng: 'fr',
+          interpolation: {
+            escapeValue: false,
+          },
+          react: {
+            useSuspense: false,
+          },
+        });
+
+      isInitialized = true;
+    } catch (error) {
+      console.error('i18n initialization error:', error);
+      // Fallback to French if initialization fails
+      await i18n
+        .use(initReactI18next)
+        .init({
+          resources,
+          lng: 'fr',
+          fallbackLng: 'fr',
+          interpolation: {
+            escapeValue: false,
+          },
+          react: {
+            useSuspense: false,
+          },
+        });
+      isInitialized = true;
+    }
+  })();
+
+  return initPromise;
 };
 
+// Start initialization immediately
 initI18n();
 
 export default i18n;
+export { initI18n };
 
 export const changeLanguage = async (language: string) => {
   await AsyncStorage.setItem(LANGUAGE_KEY, language);

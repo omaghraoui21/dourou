@@ -9,7 +9,6 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  Alert,
 } from 'react-native';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTranslation } from 'react-i18next';
@@ -18,6 +17,7 @@ import { Spacing, FontSizes, BorderRadius } from '@/constants/theme';
 import { GoldButton } from '@/components/GoldButton';
 import * as Haptics from 'expo-haptics';
 import { useTontines } from '@/contexts/TontineContext';
+import { useToast } from '@/contexts/ToastContext';
 
 type Step = 1 | 2 | 3 | 4 | 5;
 
@@ -33,6 +33,7 @@ export default function CreateTontineScreen() {
   const { colors } = useTheme();
   const { t, i18n } = useTranslation();
   const { addTontine } = useTontines();
+  const { showToast } = useToast();
   const [currentStep, setCurrentStep] = useState<Step>(1);
   const [loading, setLoading] = useState(false);
   const rtl = i18n.language === 'ar';
@@ -65,6 +66,28 @@ export default function CreateTontineScreen() {
   const handleCreate = async () => {
     setLoading(true);
     try {
+      // Validate input
+      const contributionAmount = parseInt(data.contribution);
+      const memberCount = parseInt(data.members);
+
+      if (isNaN(contributionAmount) || contributionAmount <= 0) {
+        showToast({
+          message: t('tontine.contribution') + ' ' + t('common.error').toLowerCase(),
+          type: 'error',
+        });
+        setLoading(false);
+        return;
+      }
+
+      if (isNaN(memberCount) || memberCount < 3 || memberCount > 50) {
+        showToast({
+          message: t('tontine.members_min_max'),
+          type: 'error',
+        });
+        setLoading(false);
+        return;
+      }
+
       // Calculate next deadline based on frequency
       const now = new Date();
       const nextDeadline = new Date(now);
@@ -77,9 +100,9 @@ export default function CreateTontineScreen() {
       // Create the tontine object
       const newTontine = await addTontine({
         name: data.name,
-        contribution: parseInt(data.contribution),
+        contribution: contributionAmount,
         frequency: data.frequency,
-        totalMembers: parseInt(data.members),
+        totalMembers: memberCount,
         distributionLogic: data.distribution,
         nextDeadline,
       });
@@ -87,16 +110,31 @@ export default function CreateTontineScreen() {
       // Success feedback
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
+      // Show success toast
+      showToast({
+        message: t('tontine.created_message'),
+        type: 'success',
+        duration: 2000,
+      });
+
       // Navigate to the new tontine detail screen to add members
-      router.replace(`/tontine/${newTontine.id}`);
+      // Use a small delay to let the toast show before navigation
+      setTimeout(() => {
+        router.replace(`/tontine/${newTontine.id}`);
+      }, 300);
     } catch (error) {
       console.error('Error creating tontine:', error);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert(
-        t('common.error'),
-        t('tontine.create_error'),
-        [{ text: t('common.ok') }]
-      );
+
+      // Extract error message
+      const errorMessage =
+        error instanceof Error ? error.message : t('tontine.create_error');
+
+      showToast({
+        message: errorMessage,
+        type: 'error',
+        duration: 4000,
+      });
     } finally {
       setLoading(false);
     }

@@ -57,7 +57,7 @@ export interface Payment {
   userId: string;
   amount: number;
   method: 'cash' | 'bank' | 'd17' | 'flouci';
-  status: 'paid' | 'pending' | 'late';
+  status: 'unpaid' | 'declared' | 'paid' | 'late';
   declaredAt?: Date;
   confirmedAt?: Date;
   reference?: string;
@@ -70,7 +70,7 @@ export interface Member {
   user: User;
   joinedAt: Date;
   role: 'admin' | 'member';
-  paymentStatus: 'paid' | 'pending' | 'late';
+  paymentStatus: 'unpaid' | 'declared' | 'paid' | 'late';
 }
 
 export interface Activity {

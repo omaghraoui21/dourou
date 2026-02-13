@@ -109,7 +109,8 @@ export default function CreateTontineScreen() {
       case 2:
         return data.contribution.length > 0 && parseInt(data.contribution) > 0;
       case 3:
-        return data.members.length > 0 && parseInt(data.members) >= 2;
+        const memberCount = parseInt(data.members);
+        return data.members.length > 0 && memberCount >= 3 && memberCount <= 50;
       case 4:
         return true;
       case 5:
@@ -312,7 +313,7 @@ export default function CreateTontineScreen() {
                 keyboardType="numeric"
               />
               <Text style={[styles.helperText, { color: colors.textSecondary, textAlign: rtl ? 'right' : 'left' }]}>
-                {t('tontine.members_min')}
+                {t('tontine.members_min_max', { defaultValue: 'Minimum 3 members, maximum 50 members' })}
               </Text>
             </View>
           )}

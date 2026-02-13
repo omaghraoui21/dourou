@@ -5,6 +5,34 @@
 
 ---
 
+## ⚠️ CRITICAL BUSINESS RULES (Updated Phase 4.5)
+
+**The following rules are MANDATORY and production-critical:**
+
+### 1. Tontine Joining Logic
+- Users can **ONLY** join a tontine while it is in **`draft`** status
+- Once launched (status = `active`), **NO new members can join** via invitation code
+- Attempting to join an active/completed tontine returns clear error message
+
+### 2. Payment States (4 Refined States)
+- **`unpaid`**: Round started, no payment declared yet
+- **`declared`**: User submitted payment proof, awaiting admin confirmation
+- **`paid`**: Administrator verified and confirmed the payment
+- **`late`**: Payment deadline passed without declaration
+- ⚠️ **NO MORE "pending" status** - migrated to appropriate new states
+
+### 3. Member Count Limits
+- **Minimum**: 3 members (strictly enforced in DB and UI)
+- **Maximum**: 50 members (strictly enforced in DB and UI)
+- Launch button only activates when ≥3 members have joined
+
+### 4. Trust Score Calculation
+- Uses refined payment states: `paid`, `late`, `unpaid` (overdue)
+- `declared` status is neutral (awaiting confirmation)
+- Formula: Base 3.0 + (paid×0.1) - (late×0.2) - (overdue_unpaid×0.15)
+
+---
+
 ## 📋 TABLE OF CONTENTS
 
 1. [Project Identity](#project-identity)
@@ -200,7 +228,7 @@ Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
    - Title (e.g., "Family Ben Ali", "Office Tontine")
    - Contribution amount (in TND - Tunisian Dinar)
    - Frequency (weekly or monthly)
-   - Total members count (2-50)
+   - Total members count (3-50, strictly enforced)
    - Currency (TND default)
 
 2. **Distribution Logic**:
@@ -216,6 +244,7 @@ Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
 
 4. **Launch Process**:
    - Review all members and settings
+   - **CRITICAL**: Minimum 3 members required to launch
    - Generate invitation code (6-character alphanumeric)
    - Execute draw (if random distribution)
    - Generate all rounds automatically
@@ -224,8 +253,8 @@ Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
    - **Celebration animation** on successful launch
 
 #### Tontine Statuses
-- **Draft**: Being configured, members can be added/removed
-- **Active**: Launched, rounds in progress
+- **Draft**: Being configured, members can be added/removed, joinable via invitation
+- **Active**: Launched, rounds in progress, **NO NEW MEMBERS CAN JOIN**
 - **Completed**: All rounds finished
 
 #### Invitation System
@@ -238,6 +267,8 @@ Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
 - **Joining Flow**:
   - User enters invitation code
   - System validates code (exists, not expired, not full)
+  - **CRITICAL RULE**: System checks tontine status - **ONLY draft tontines can be joined**
+  - If tontine is "active" or "completed", joining is blocked with clear error message
   - User links their account to an existing member slot
   - Receives welcome notification
 
@@ -265,25 +296,47 @@ Each tontine automatically generates **N rounds** (where N = total members).
 
 ### 4. Payment Tracking
 
+#### Payment Lifecycle - 4 Refined States
+
+**CRITICAL**: The payment system uses FOUR distinct states to improve clarity and Trust Score accuracy:
+
+1. **Unpaid**: Round has started, no payment proof submitted yet
+   - Initial state when round begins
+   - Member has not yet declared their payment
+   - Deadline has not passed
+
+2. **Declared**: Member submitted payment proof, awaiting admin verification
+   - Member selected payment method
+   - Member provided optional reference number
+   - declared_at timestamp recorded
+   - Awaiting admin confirmation
+
+3. **Paid**: Admin verified and confirmed the payment
+   - Admin marked payment as confirmed
+   - confirmed_at timestamp recorded
+   - Counts toward round completion
+   - Trust score automatically updated
+   - Member receives confirmation notification
+
+4. **Late**: Payment deadline passed without declaration
+   - System automatically marks as late after deadline
+   - Negatively impacts Trust Score
+   - Still can be paid, but flagged as late
+
 #### Payment Declaration (Member Action)
-Members can declare their payment:
+Members can declare their payment when status is "unpaid":
 1. Select payment method (cash, bank, d17, flouci)
 2. Optionally add reference number
 3. Declare payment with timestamp
-4. Status: "pending" (awaiting admin confirmation)
+4. Status changes from "unpaid" to "declared"
 
 #### Payment Confirmation (Admin Action)
-Tontine creator/admin reviews and confirms:
+Tontine creator/admin reviews and confirms declared payments:
 1. View all declared payments
 2. Verify payment received
-3. Confirm payment → status changes to "paid"
+3. Confirm payment → status changes from "declared" to "paid"
 4. Member receives confirmation notification
 5. Trust score updated automatically
-
-#### Payment Statuses
-- **Pending**: Declared by member, awaiting confirmation
-- **Paid**: Confirmed by admin, counted toward round completion
-- **Late**: Payment deadline passed, status automatically updated
 
 #### Payment Methods
 - **Cash**: Physical cash payment
@@ -310,15 +363,21 @@ Score Range    | Tier       | Icon | Colors                | Description
 
 **Base Score**: 3.0 (for all new users)
 
-**Formula**:
+**Formula** (Updated for Refined Payment States):
 ```sql
 score = 3.0
-  + (on_time_payments * 0.1)    -- Max +2.0
-  - (late_payments * 0.2)        -- Penalty
-  - (overdue_pending * 0.15)     -- Penalty
+  + (paid_payments * 0.1)       -- Max +2.0 (confirmed payments)
+  - (late_payments * 0.2)        -- Penalty for late payments
+  - (overdue_unpaid * 0.15)      -- Penalty for unpaid past deadline
 
 -- Bounded to [1.0, 5.0]
+-- Note: 'declared' payments are neutral (awaiting confirmation)
 ```
+
+**Key Changes from Previous Version**:
+- Now tracks `paid` (confirmed) payments instead of generic "on-time"
+- Penalizes `unpaid` payments past deadline (previously "overdue pending")
+- `declared` status is neutral - doesn't affect score until confirmed or late
 
 **Triggers**:
 - Recalculated automatically on payment status change
@@ -1570,7 +1629,12 @@ This app is not just a product—it's a **bridge between tradition and innovatio
 ### Version History
 
 - **v1.0** (Phase 4 Complete): Initial comprehensive document
-- **v1.1** (Future): TBD
+- **v1.1** (Phase 4.5 - Logic Consistency): Updated critical business rules:
+  - Tontine joining restricted to `draft` status only
+  - Payment states refined to 4-state system (unpaid, declared, paid, late)
+  - Member limits harmonized to 3-50 across entire app
+  - Trust Score calculation updated for new payment states
+  - Launch button requires minimum 3 members
 
 ---
 
@@ -1586,6 +1650,13 @@ When in doubt, **read this document**. The answer is likely here.
 
 ---
 
-*Last updated: Phase 4 - Polishing & Robustness Complete*
+*Last updated: Phase 4.5 - Logic Consistency & Production Readiness*
 *Document maintained by: Dourou AI Development Team*
 *For questions or clarifications, refer to CLAUDE.md or update this document.*
+
+**Phase 4.5 Changes Summary**:
+- ✅ Fixed tontine joining logic (draft-only)
+- ✅ Refined payment states (4-state system)
+- ✅ Harmonized member limits (3-50)
+- ✅ Updated Trust Score calculation
+- ✅ Database migration created (004_refined_payment_states.sql)

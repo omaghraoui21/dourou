@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Tontines: Core group settings
+-- Tontines: Core group settings (Minimum 3, Maximum 50 members)
 CREATE TABLE IF NOT EXISTS tontines (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   creator_id UUID REFERENCES profiles(id) NOT NULL,
@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS tontines (
   amount INTEGER NOT NULL,
   frequency TEXT NOT NULL CHECK (frequency IN ('weekly', 'monthly')),
   currency TEXT DEFAULT 'TND',
-  total_members INTEGER NOT NULL,
+  total_members INTEGER NOT NULL CHECK (total_members >= 3 AND total_members <= 50),
   current_round INTEGER DEFAULT 1,
   distribution_logic TEXT DEFAULT 'fixed' CHECK (distribution_logic IN ('fixed', 'random', 'trust')),
   status TEXT DEFAULT 'draft' CHECK (status IN ('draft', 'active', 'completed')),
@@ -80,13 +80,15 @@ CREATE TABLE IF NOT EXISTS rounds (
 );
 
 -- Payments: Individual contribution tracking
+-- Payment States: unpaid (round started, no declaration), declared (proof submitted),
+--                 paid (admin confirmed), late (deadline passed)
 CREATE TABLE IF NOT EXISTS payments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   round_id UUID REFERENCES rounds(id) ON DELETE CASCADE NOT NULL,
   member_id UUID REFERENCES tontine_members(id) NOT NULL,
   amount INTEGER NOT NULL,
   method TEXT CHECK (method IN ('cash', 'bank', 'd17', 'flouci')),
-  status TEXT DEFAULT 'pending' CHECK (status IN ('paid', 'pending', 'late')),
+  status TEXT DEFAULT 'unpaid' CHECK (status IN ('unpaid', 'declared', 'paid', 'late')),
   reference TEXT,
   declared_at TIMESTAMPTZ,
   confirmed_at TIMESTAMPTZ,
@@ -456,6 +458,101 @@ CREATE TRIGGER set_updated_at_tontines
   BEFORE UPDATE ON tontines
   FOR EACH ROW
   EXECUTE FUNCTION public.handle_updated_at();
+
+-- Trust score calculation (updated for refined payment states)
+CREATE OR REPLACE FUNCTION calculate_trust_score(p_user_id UUID)
+RETURNS NUMERIC
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_total_payments INTEGER;
+  v_paid_payments INTEGER;
+  v_late_payments INTEGER;
+  v_overdue_unpaid INTEGER;
+  v_score NUMERIC;
+BEGIN
+  -- Get payment statistics for the user across all their tontine memberships
+  SELECT
+    COUNT(*) as total,
+    COUNT(*) FILTER (WHERE status = 'paid') as paid,
+    COUNT(*) FILTER (WHERE status = 'late') as late,
+    COUNT(*) FILTER (
+      WHERE status = 'unpaid'
+      AND EXISTS (
+        SELECT 1 FROM rounds r
+        WHERE r.id = payments.round_id
+        AND r.scheduled_date < NOW()
+      )
+    ) as overdue_unpaid
+  INTO v_total_payments, v_paid_payments, v_late_payments, v_overdue_unpaid
+  FROM payments
+  INNER JOIN tontine_members ON tontine_members.id = payments.member_id
+  WHERE tontine_members.user_id = p_user_id;
+
+  -- If no payment history, return default score
+  IF v_total_payments = 0 THEN
+    RETURN 3.0;
+  END IF;
+
+  -- Calculate score based on payment behavior
+  -- Start with base score of 3.0
+  v_score := 3.0;
+
+  -- Add points for on-time payments (0.1 per payment, max +2.0)
+  v_score := v_score + LEAST(v_paid_payments * 0.1, 2.0);
+
+  -- Deduct points for late payments (0.2 per late payment)
+  v_score := v_score - (v_late_payments * 0.2);
+
+  -- Deduct points for overdue unpaid payments (0.15 per overdue)
+  v_score := v_score - (v_overdue_unpaid * 0.15);
+
+  -- Ensure score is within bounds [1.0, 5.0]
+  v_score := GREATEST(1.0, LEAST(5.0, v_score));
+
+  RETURN ROUND(v_score, 2);
+END;
+$$;
+
+COMMENT ON FUNCTION calculate_trust_score IS 'Calculates user trust score with refined payment states: unpaid, declared, paid, late. Range: 1.0-5.0';
+
+-- Auto-update trust score trigger
+CREATE OR REPLACE FUNCTION update_member_trust_score()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_user_id UUID;
+  v_new_score NUMERIC;
+BEGIN
+  -- Get the user_id from the member
+  SELECT user_id INTO v_user_id
+  FROM tontine_members
+  WHERE id = NEW.member_id;
+
+  -- Only update if member is linked to a user
+  IF v_user_id IS NOT NULL THEN
+    -- Calculate new trust score
+    v_new_score := calculate_trust_score(v_user_id);
+
+    -- Update the profile
+    UPDATE profiles
+    SET trust_score = v_new_score,
+        updated_at = NOW()
+    WHERE id = v_user_id;
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trigger_update_trust_score ON payments;
+CREATE TRIGGER trigger_update_trust_score
+  AFTER INSERT OR UPDATE OF status ON payments
+  FOR EACH ROW
+  EXECUTE FUNCTION update_member_trust_score();
 
 -- =============================================
 -- 6. REALTIME

@@ -125,7 +125,15 @@ export default function JoinGroupScreen() {
         return;
       }
 
-      // 6. Check if the tontine is full
+      // 6. Check if the tontine is still in draft status (can only join draft tontines)
+      if (tontine.status !== 'draft') {
+        setError(t('invitation.tontine_already_active', { defaultValue: 'This tontine has already been launched and is no longer accepting new members' }));
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        setLoading(false);
+        return;
+      }
+
+      // 7. Check if the tontine is full
       const { count: memberCount } = await supabase
         .from('tontine_members')
         .select('id', { count: 'exact', head: true })
@@ -138,7 +146,7 @@ export default function JoinGroupScreen() {
         return;
       }
 
-      // 7. Add the user as a member
+      // 8. Add the user as a member
       const memberName = user.user_metadata?.full_name ?? user.email ?? 'Member';
       const nextPayoutOrder = (memberCount ?? 0) + 1;
 
@@ -161,7 +169,7 @@ export default function JoinGroupScreen() {
         return;
       }
 
-      // 8. Increment used_count on the invitation
+      // 9. Increment used_count on the invitation
       const { error: updateError } = await supabase
         .from('invitations')
         .update({ used_count: usedCount + 1 })
@@ -172,7 +180,7 @@ export default function JoinGroupScreen() {
         // Non-critical: the user has already joined, so don't block on this
       }
 
-      // 9. Success
+      // 10. Success
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setSuccessInfo({ name: tontine.title, id: tontine.id });
 

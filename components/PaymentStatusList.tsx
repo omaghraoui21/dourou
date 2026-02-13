@@ -14,7 +14,7 @@ export interface PaymentWithMember {
   member_name: string;
   member_initials: string;
   amount: number;
-  status: 'paid' | 'pending' | 'late';
+  status: 'unpaid' | 'declared' | 'paid' | 'late';
   method?: 'cash' | 'bank' | 'd17' | 'flouci';
   declared_at?: Date;
   confirmed_at?: Date;
@@ -46,10 +46,13 @@ export const PaymentStatusList: React.FC<PaymentStatusListProps> = ({
     switch (status) {
       case 'paid':
         return colors.success;
+      case 'declared':
+        return colors.warning;
       case 'late':
         return colors.error;
+      case 'unpaid':
       default:
-        return colors.warning;
+        return colors.textSecondary;
     }
   };
 
@@ -57,8 +60,11 @@ export const PaymentStatusList: React.FC<PaymentStatusListProps> = ({
     switch (status) {
       case 'paid':
         return '✓';
+      case 'declared':
+        return '⏳';
       case 'late':
         return '⚠';
+      case 'unpaid':
       default:
         return '○';
     }
@@ -181,8 +187,8 @@ export const PaymentStatusList: React.FC<PaymentStatusListProps> = ({
                   </TouchableOpacity>
                 )}
 
-                {/* Member can declare payment (if it's their payment and status is pending) */}
-                {!isAdmin && isCurrentUser && payment.status === 'pending' && (
+                {/* Member can declare payment (if it's their payment and status is unpaid) */}
+                {!isAdmin && isCurrentUser && payment.status === 'unpaid' && (
                   <TouchableOpacity
                     style={[styles.actionButton, { backgroundColor: colors.gold + '15', borderColor: colors.gold }]}
                     onPress={() => handleDeclarePayment(payment.id)}

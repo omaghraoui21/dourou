@@ -27,7 +27,7 @@ import { supabase } from '@/lib/supabase';
 import * as Haptics from 'expo-haptics';
 import { useTontines } from '@/contexts/TontineContext';
 import { useUser } from '@/contexts/UserContext';
-import { generateToursFromTontine, TontineMember } from '@/types';
+import { TontineMember } from '@/types';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -45,11 +45,10 @@ export default function TontineDetailScreen() {
     launchTontine,
   } = useTontines();
   const rtl = i18n.language === 'ar';
-
-  const tontine = getTontineById(id || '');
-
-  const [activeTab, setActiveTab] = useState<string>('members');
   const { user } = useUser();
+
+  // All state hooks must be at the top
+  const [activeTab, setActiveTab] = useState<string>('members');
   const [showAddMember, setShowAddMember] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
   const [showInvitation, setShowInvitation] = useState(false);
@@ -58,6 +57,9 @@ export default function TontineDetailScreen() {
   const [loadingRounds, setLoadingRounds] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
+  const tontine = getTontineById(id || '');
+
+  // All callbacks must be before conditional returns
   const handleBack = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.back();
@@ -68,73 +70,9 @@ export default function TontineDetailScreen() {
     setActiveTab(tab);
   }, []);
 
-  const getDateLocale = () => {
-    if (i18n.language === 'ar') return 'ar-TN';
-    if (i18n.language === 'en') return 'en-US';
-    return 'fr-FR';
-  };
-
-  // Error state
-  if (!tontine) {
-    return (
-      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-        <View style={[styles.header, rtl && { flexDirection: 'row-reverse' }]}>
-          <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-            <Text style={[styles.backIcon, { color: colors.gold }]}>
-              {rtl ? '\u2192' : '\u2190'}
-            </Text>
-          </TouchableOpacity>
-          <Text style={[styles.title, { color: colors.text }]}>{t('tontine.not_found')}</Text>
-          <View style={{ width: 40 }} />
-        </View>
-        <View style={styles.errorState}>
-          <Text style={{ fontSize: 64, marginBottom: Spacing.md }}>🔍</Text>
-          <Text style={[styles.errorTitle, { color: colors.text }]}>{t('tontine.not_found')}</Text>
-          <Text style={[styles.errorDescription, { color: colors.textSecondary }]}>
-            {t('tontine.not_found_description')}
-          </Text>
-          <GoldButton title={t('common.back')} onPress={handleBack} variant="secondary" style={{ marginTop: Spacing.lg }} />
-        </View>
-      </SafeAreaView>
-    );
-  }
-
-  const isDraft = tontine.status === 'draft';
-  const isActive = tontine.status === 'active';
-  const isCompleted = tontine.status === 'completed';
-  const isFull = tontine.members.length >= tontine.totalMembers;
-  const canLaunch = isDraft && isFull;
-  const membersNeeded = tontine.totalMembers - tontine.members.length;
-
-  // Tabs based on status
-  const tabs: string[] = isDraft
-    ? ['members', 'sequence']
-    : isActive
-    ? ['tours', 'members', 'history']
-    : ['members', 'history'];
-
-  const getTabLabel = (tab: string) => {
-    if (tab === 'members') return t('tontine.members_list');
-    if (tab === 'sequence') return t('tontine.sequence');
-    if (tab === 'tours') return t('tontine.tours');
-    return t('tontine.history');
-  };
-
-  // Status badge colors
-  const getStatusStyle = () => {
-    if (isDraft) return { bg: colors.gold + '20', text: colors.gold };
-    if (isActive) return { bg: colors.success + '20', text: colors.success };
-    return { bg: colors.textSecondary + '20', text: colors.textSecondary };
-  };
-
-  const statusStyle = getStatusStyle();
-
-  // Generate tours for active tontines
-  const tours = isActive || isCompleted ? generateToursFromTontine(tontine) : [];
-
   // Fetch rounds from database
   const fetchRounds = useCallback(async () => {
-    if (!tontine || !isActive) return;
+    if (!tontine || tontine.status !== 'active') return;
 
     try {
       setLoadingRounds(true);
@@ -192,22 +130,23 @@ export default function TontineDetailScreen() {
       setLoadingRounds(false);
       setRefreshing(false);
     }
-  }, [tontine, isActive]);
+  }, [tontine]);
 
+  // useEffect must be before conditional returns
   useEffect(() => {
-    if (isActive) {
+    if (tontine && tontine.status === 'active') {
       fetchRounds();
 
       // Set up real-time subscription for rounds and payments
       const roundsChannel = supabase
-        .channel(`tontine_rounds_${tontine?.id}`)
+        .channel(`tontine_rounds_${tontine.id}`)
         .on(
           'postgres_changes',
           {
             event: '*',
             schema: 'public',
             table: 'rounds',
-            filter: `tontine_id=eq.${tontine?.id}`,
+            filter: `tontine_id=eq.${tontine.id}`,
           },
           () => {
             fetchRounds();
@@ -230,7 +169,64 @@ export default function TontineDetailScreen() {
         supabase.removeChannel(roundsChannel);
       };
     }
-  }, [isActive, tontine?.id, fetchRounds]);
+  }, [tontine, fetchRounds]);
+
+  // NOW handle conditional returns - after all hooks
+  if (!tontine) {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+        <View style={[styles.header, rtl && { flexDirection: 'row-reverse' }]}>
+          <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+            <Text style={[styles.backIcon, { color: colors.gold }]}>
+              {rtl ? '\u2192' : '\u2190'}
+            </Text>
+          </TouchableOpacity>
+          <Text style={[styles.title, { color: colors.text }]}>{t('tontine.not_found')}</Text>
+          <View style={{ width: 40 }} />
+        </View>
+        <View style={styles.errorState}>
+          <Text style={{ fontSize: 64, marginBottom: Spacing.md }}>🔍</Text>
+          <Text style={[styles.errorTitle, { color: colors.text }]}>{t('tontine.not_found')}</Text>
+          <Text style={[styles.errorDescription, { color: colors.textSecondary }]}>
+            {t('tontine.not_found_description')}
+          </Text>
+          <GoldButton title={t('common.back')} onPress={handleBack} variant="secondary" style={{ marginTop: Spacing.lg }} />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // Now tontine exists, compute derived values
+  const isDraft = tontine.status === 'draft';
+  const isActive = tontine.status === 'active';
+  const isCompleted = tontine.status === 'completed';
+  const isFull = tontine.members.length >= tontine.totalMembers;
+  const hasMinimumMembers = tontine.members.length >= 3;
+  const canLaunch = isDraft && isFull && hasMinimumMembers;
+  const membersNeeded = tontine.totalMembers - tontine.members.length;
+
+  // Tabs based on status
+  const tabs: string[] = isDraft
+    ? ['members', 'sequence']
+    : isActive
+    ? ['tours', 'members', 'history']
+    : ['members', 'history'];
+
+  const getTabLabel = (tab: string) => {
+    if (tab === 'members') return t('tontine.members_list');
+    if (tab === 'sequence') return t('tontine.sequence');
+    if (tab === 'tours') return t('tontine.tours');
+    return t('tontine.history');
+  };
+
+  // Status badge colors
+  const getStatusStyle = () => {
+    if (isDraft) return { bg: colors.gold + '20', text: colors.gold };
+    if (isActive) return { bg: colors.success + '20', text: colors.success };
+    return { bg: colors.textSecondary + '20', text: colors.textSecondary };
+  };
+
+  const statusStyle = getStatusStyle();
 
   // Handlers
   const handleAddMember = async (name: string, phone: string) => {

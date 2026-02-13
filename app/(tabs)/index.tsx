@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -6,13 +6,14 @@ import {
   ScrollView,
   TouchableOpacity,
   SafeAreaView,
+  ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { Spacing, FontSizes, BorderRadius } from '@/constants/theme';
 import { TontineCard } from '@/components/TontineCard';
 import { router } from 'expo-router';
-import { Activity } from '@/types';
 import * as Haptics from 'expo-haptics';
 import { useUser } from '@/contexts/UserContext';
 import { SuperAdminBadge } from '@/components/SuperAdminBadge';
@@ -22,19 +23,26 @@ export default function DashboardScreen() {
   const { colors } = useTheme();
   const { t, i18n } = useTranslation();
   const { user, isSuperAdmin } = useUser();
-  const { tontines } = useTontines();
+  const { tontines, isLoading, refreshTontines } = useTontines();
   const rtl = i18n.language === 'ar';
+  const [refreshing, setRefreshing] = useState(false);
 
   // Filter active tontines (include draft for display)
-  const activeTontines = tontines.filter((t) => t.status === 'active' || t.status === 'draft');
+  const activeTontines = tontines.filter((item) => item.status === 'active' || item.status === 'draft');
 
+  // Total savings = sum of all active tontines contribution amounts
   const totalSavings = activeTontines.reduce(
-    (sum, tontine) => sum + tontine.contribution * tontine.currentTour,
+    (sum, tontine) => sum + tontine.contribution,
     0
   );
 
-  // Mock activities for now (will be replaced with real data later)
-  const mockActivities: Activity[] = [];
+  // Upcoming deadlines from active tontines sorted by next deadline
+  const upcomingDeadlines = [...activeTontines]
+    .filter((item) => item.status === 'active')
+    .sort((a, b) => a.nextDeadline.getTime() - b.nextDeadline.getTime());
+
+  // Recent tontines (first 3)
+  const recentTontines = tontines.slice(0, 3);
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -43,20 +51,40 @@ export default function DashboardScreen() {
     return t('dashboard.greeting_evening');
   };
 
-  const getActivityMessage = (activity: Activity) => {
-    if (activity.type === 'payment') {
-      return `Ahmed ${t('tontine.paid').toLowerCase()} 200 ${t('common.tnd')}`;
-    }
-    if (activity.type === 'tour_start') {
-      return `${t('tontine.tour_number', { number: 3 })} - ${t('tontine.current').toLowerCase()}`;
-    }
-    return activity.message;
-  };
-
   const handleCreateTontine = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.push('/tontine/create');
   };
+
+  const handleJoinGroup = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push('/tontine/join');
+  };
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await refreshTontines();
+    } catch (error) {
+      console.error('Pull-to-refresh error:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refreshTontines]);
+
+  // Loading state
+  if (isLoading && tontines.length === 0) {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={colors.gold} />
+          <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
+            {t('common.loading')}
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
@@ -64,6 +92,14 @@ export default function DashboardScreen() {
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.gold}
+            colors={[colors.gold]}
+          />
+        }
       >
         {/* Header */}
         <View style={[styles.header, rtl && styles.headerRTL]}>
@@ -73,11 +109,20 @@ export default function DashboardScreen() {
             </Text>
             <View style={[styles.userNameRow, rtl && styles.rowRTL]}>
               <Text style={[styles.userName, { color: colors.text }]}>
-                {user?.firstName || 'Ahmed'}
+                {user?.firstName || t('common.member')}
               </Text>
               {isSuperAdmin && <SuperAdminBadge size="small" showLabel={false} />}
             </View>
           </View>
+          <TouchableOpacity
+            style={[styles.joinButton, { borderColor: colors.gold }]}
+            onPress={handleJoinGroup}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.joinButtonText, { color: colors.gold }]}>
+              {t('dashboard.join_group')}
+            </Text>
+          </TouchableOpacity>
         </View>
 
         {/* Total Savings Card */}
@@ -98,124 +143,92 @@ export default function DashboardScreen() {
           </Text>
         </View>
 
-        {/* Active Tontines */}
-        <View style={styles.section}>
-          <View style={[styles.sectionHeader, rtl && styles.rowRTL]}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              {t('dashboard.active_tontines')}
+        {/* Empty State */}
+        {tontines.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyEmoji}>{'\uD83E\uDE99'}</Text>
+            <Text style={[styles.emptyTitle, { color: colors.text }]}>
+              {t('dashboard.create_first_tontine')}
             </Text>
-            {activeTontines.length > 0 && (
-              <TouchableOpacity
-                onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  router.push('/(tabs)/tontines');
-                }}
-              >
-                <Text style={[styles.viewAll, { color: colors.gold }]}>
-                  {t('dashboard.view_all')}
-                </Text>
-              </TouchableOpacity>
-            )}
+            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
+              {t('dashboard.no_tontines')}
+            </Text>
+            <TouchableOpacity
+              style={[styles.createButton, { backgroundColor: colors.gold }]}
+              onPress={handleCreateTontine}
+            >
+              <Text style={styles.createButtonText}>{t('tontine.create')}</Text>
+            </TouchableOpacity>
           </View>
-
-          {activeTontines.length > 0 ? (
-            activeTontines.slice(0, 3).map((tontine) => (
-              <TontineCard key={tontine.id} tontine={tontine} />
-            ))
-          ) : (
-            <View style={styles.emptyState}>
-              <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-                {t('dashboard.no_tontines')}
-              </Text>
-              <TouchableOpacity
-                style={[styles.createButton, { backgroundColor: colors.gold }]}
-                onPress={handleCreateTontine}
-              >
-                <Text style={styles.createButtonText}>{t('tontine.create')}</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-        </View>
-
-        {/* Upcoming Deadlines */}
-        {activeTontines.length > 0 && (
-          <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: colors.text, textAlign: rtl ? 'right' : 'left' }]}>
-              {t('dashboard.upcoming_deadlines')}
-            </Text>
-
-            {activeTontines
-              .sort((a, b) => a.nextDeadline.getTime() - b.nextDeadline.getTime())
-              .map((tontine) => {
-                const daysUntil = Math.ceil(
-                  (tontine.nextDeadline.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
-                );
-                return (
-                  <View
-                    key={tontine.id}
-                    style={[
-                      styles.deadlineCard,
-                      { backgroundColor: colors.card, borderColor: colors.border },
-                      rtl && styles.rowRTL,
-                    ]}
+        ) : (
+          <>
+            {/* Active Tontines */}
+            <View style={styles.section}>
+              <View style={[styles.sectionHeader, rtl && styles.rowRTL]}>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                  {t('dashboard.active_tontines')}
+                </Text>
+                {recentTontines.length > 0 && (
+                  <TouchableOpacity
+                    onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      router.push('/(tabs)/tontines');
+                    }}
                   >
-                    <View style={styles.deadlineInfo}>
-                      <Text style={[styles.deadlineName, { color: colors.text, textAlign: rtl ? 'right' : 'left' }]}>
-                        {tontine.name}
-                      </Text>
-                      <Text style={[styles.deadlineAmount, { color: colors.gold, textAlign: rtl ? 'right' : 'left' }]}>
-                        {tontine.contribution} {t('common.tnd')}
-                      </Text>
-                    </View>
-                    <Text
+                    <Text style={[styles.viewAll, { color: colors.gold }]}>
+                      {t('dashboard.view_all')}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+
+              {recentTontines.map((tontine) => (
+                <TontineCard key={tontine.id} tontine={tontine} />
+              ))}
+            </View>
+
+            {/* Upcoming Deadlines */}
+            {upcomingDeadlines.length > 0 && (
+              <View style={styles.section}>
+                <Text style={[styles.sectionTitle, { color: colors.text, textAlign: rtl ? 'right' : 'left' }]}>
+                  {t('dashboard.upcoming_deadlines')}
+                </Text>
+
+                {upcomingDeadlines.map((tontine) => {
+                  const daysUntil = Math.ceil(
+                    (tontine.nextDeadline.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+                  );
+                  return (
+                    <View
+                      key={tontine.id}
                       style={[
-                        styles.deadlineDays,
-                        { color: daysUntil <= 3 ? colors.warning : colors.textSecondary },
+                        styles.deadlineCard,
+                        { backgroundColor: colors.card, borderColor: colors.border },
+                        rtl && styles.rowRTL,
                       ]}
                     >
-                      {t('common.days_short', { count: daysUntil })}
-                    </Text>
-                  </View>
-                );
-              })}
-          </View>
-        )}
-
-        {/* Recent Activity */}
-        {mockActivities.length > 0 && (
-          <View style={[styles.section, { marginBottom: Spacing.xxl }]}>
-            <Text style={[styles.sectionTitle, { color: colors.text, textAlign: rtl ? 'right' : 'left' }]}>
-              {t('dashboard.recent_activity')}
-            </Text>
-
-            {mockActivities.map((activity) => {
-              const hoursAgo = Math.floor(
-                (Date.now() - activity.timestamp.getTime()) / (1000 * 60 * 60)
-              );
-              return (
-                <View
-                  key={activity.id}
-                  style={[
-                    styles.activityCard,
-                    { backgroundColor: colors.card, borderColor: colors.border },
-                    rtl && styles.rowRTL,
-                  ]}
-                >
-                  <View style={[styles.activityDot, rtl && { paddingRight: 0, paddingLeft: Spacing.sm }]}>
-                    <View style={[styles.dot, { backgroundColor: colors.gold }]} />
-                  </View>
-                  <View style={styles.activityContent}>
-                    <Text style={[styles.activityMessage, { color: colors.text, textAlign: rtl ? 'right' : 'left' }]}>
-                      {getActivityMessage(activity)}
-                    </Text>
-                    <Text style={[styles.activityMeta, { color: colors.textSecondary, textAlign: rtl ? 'right' : 'left' }]}>
-                      {activity.tontineName} {'\u2022'} {t('common.hours_ago', { count: hoursAgo })}
-                    </Text>
-                  </View>
-                </View>
-              );
-            })}
-          </View>
+                      <View style={styles.deadlineInfo}>
+                        <Text style={[styles.deadlineName, { color: colors.text, textAlign: rtl ? 'right' : 'left' }]}>
+                          {tontine.name}
+                        </Text>
+                        <Text style={[styles.deadlineAmount, { color: colors.gold, textAlign: rtl ? 'right' : 'left' }]}>
+                          {tontine.contribution} {t('common.tnd')}
+                        </Text>
+                      </View>
+                      <Text
+                        style={[
+                          styles.deadlineDays,
+                          { color: daysUntil <= 3 ? colors.warning : colors.textSecondary },
+                        ]}
+                      >
+                        {t('common.days_short', { count: daysUntil })}
+                      </Text>
+                    </View>
+                  );
+                })}
+              </View>
+            )}
+          </>
         )}
       </ScrollView>
 
@@ -240,6 +253,16 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: Spacing.lg,
+    paddingBottom: Spacing.xxl + 40,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: Spacing.md,
+  },
+  loadingText: {
+    fontSize: FontSizes.md,
   },
   header: {
     paddingTop: Spacing.lg,
@@ -270,6 +293,16 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.xxl,
     fontWeight: '700',
   },
+  joinButton: {
+    borderWidth: 1,
+    borderRadius: BorderRadius.sm,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+  },
+  joinButtonText: {
+    fontSize: FontSizes.sm,
+    fontWeight: '600',
+  },
   totalCard: {
     borderRadius: BorderRadius.md,
     borderWidth: 2,
@@ -289,6 +322,34 @@ const styles = StyleSheet.create({
   totalSubtext: {
     fontSize: FontSizes.sm,
   },
+  emptyState: {
+    paddingVertical: Spacing.xxl,
+    alignItems: 'center',
+  },
+  emptyEmoji: {
+    fontSize: 64,
+    marginBottom: Spacing.md,
+  },
+  emptyTitle: {
+    fontSize: FontSizes.xl,
+    fontWeight: '700',
+    marginBottom: Spacing.sm,
+  },
+  emptyText: {
+    fontSize: FontSizes.md,
+    marginBottom: Spacing.lg,
+    textAlign: 'center',
+  },
+  createButton: {
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    borderRadius: BorderRadius.md,
+  },
+  createButtonText: {
+    color: '#0F172A',
+    fontSize: FontSizes.md,
+    fontWeight: '600',
+  },
   section: {
     marginBottom: Spacing.lg,
   },
@@ -304,24 +365,6 @@ const styles = StyleSheet.create({
   },
   viewAll: {
     fontSize: FontSizes.sm,
-    fontWeight: '600',
-  },
-  emptyState: {
-    paddingVertical: Spacing.xl,
-    alignItems: 'center',
-  },
-  emptyText: {
-    fontSize: FontSizes.md,
-    marginBottom: Spacing.md,
-  },
-  createButton: {
-    paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.lg,
-    borderRadius: BorderRadius.md,
-  },
-  createButtonText: {
-    color: '#0F172A',
-    fontSize: FontSizes.md,
     fontWeight: '600',
   },
   deadlineCard: {
@@ -348,32 +391,6 @@ const styles = StyleSheet.create({
   deadlineDays: {
     fontSize: FontSizes.lg,
     fontWeight: '700',
-  },
-  activityCard: {
-    borderRadius: BorderRadius.md,
-    borderWidth: 1,
-    padding: Spacing.md,
-    marginBottom: Spacing.sm,
-    flexDirection: 'row',
-  },
-  activityDot: {
-    paddingTop: 4,
-    paddingRight: Spacing.sm,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  activityContent: {
-    flex: 1,
-  },
-  activityMessage: {
-    fontSize: FontSizes.md,
-    marginBottom: Spacing.xs,
-  },
-  activityMeta: {
-    fontSize: FontSizes.xs,
   },
   fab: {
     position: 'absolute',

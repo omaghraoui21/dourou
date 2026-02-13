@@ -11,7 +11,7 @@ const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 export default function SplashScreen() {
   const { colors } = useTheme();
   const { t } = useTranslation();
-  const { user, isLoading } = useUser();
+  const { user, isLoading, isAuthenticated } = useUser();
   const animatedValue = useRef(new Animated.Value(0)).current;
   const hasNavigated = useRef(false);
 
@@ -31,7 +31,7 @@ export default function SplashScreen() {
     const timer = setTimeout(() => {
       if (!isLoading && !hasNavigated.current) {
         hasNavigated.current = true;
-        if (user) {
+        if (isAuthenticated && user) {
           router.replace('/(tabs)');
         } else {
           router.replace('/onboarding');
@@ -40,7 +40,7 @@ export default function SplashScreen() {
     }, 2500);
 
     return () => clearTimeout(timer);
-  }, [isLoading, user]);
+  }, [isLoading, user, isAuthenticated]);
 
   const circumference = 2 * Math.PI * 80;
   const strokeDashoffset = animatedValue.interpolate({

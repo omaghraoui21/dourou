@@ -56,7 +56,12 @@
     "last_name": "Last Name",
     "resend_code": "Resend code",
     "invalid_phone": "Please enter a valid phone number",
-    "invalid_otp": "Please enter the 6-digit code"
+    "invalid_otp": "Please enter the 6-digit code",
+    "otp_resend": "Resend Code",
+    "otp_resending": "Resending...",
+    "otp_resent_title": "Code Sent",
+    "otp_resent_message": "A new verification code has been sent",
+    "profile_error": "Failed to update profile. Please try again."
   },
   "dashboard": {
     "title": "Dashboard",
@@ -69,7 +74,9 @@
     "upcoming_deadlines": "Upcoming Deadlines",
     "view_all": "View All",
     "no_activity": "No recent activity",
-    "no_tontines": "You haven't joined any tontines yet"
+    "no_tontines": "You haven't joined any tontines yet",
+    "join_group": "Join Group",
+    "create_first_tontine": "Create your first tontine"
   },
   "tontines": {
     "title": "My Tontines",
@@ -149,7 +156,27 @@
     "not_found": "Tontine not found",
     "not_found_description": "This tontine could not be found",
     "draft_badge": "Draft",
-    "ready_to_launch": "Ready to launch!"
+    "ready_to_launch": "Ready to launch!",
+    "invite": "Invite",
+    "invite_title": "Invite Members",
+    "invite_code_label": "Share this code",
+    "invite_code_generating": "Generating code...",
+    "invite_code_error": "Failed to generate code",
+    "invite_copy": "Copy Code",
+    "invite_copied": "Copied!",
+    "invite_share": "Share Invite",
+    "invite_share_message": "Join my tontine \"{{name}}\"! Use code: {{code}}",
+    "join_title": "Join Group",
+    "join_subtitle": "Enter the 6-character invitation code",
+    "join_code_placeholder": "Enter code",
+    "join_button": "Join Group",
+    "join_success": "You have joined",
+    "join_invalid_code": "Invalid invitation code",
+    "join_expired": "This invitation has expired",
+    "join_used": "This invitation has been fully used",
+    "join_already_member": "You are already a member of this group",
+    "join_group_full": "This group is full",
+    "join_error": "Failed to join group"
   },
   "payment": {
     "declare": "Declare Payment",

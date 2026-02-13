@@ -1,3 +1,5 @@
+export type { Database, DbProfile, DbTontine, DbTontineMember, DbRound, DbPayment, DbInvitation, DbNotification, DbAuditLog } from './database';
+
 export interface User {
   id: string;
   firstName: string;
@@ -18,6 +20,8 @@ export interface TontineMember {
   initials: string;
   payoutOrder: number;
   addedAt: Date;
+  userId?: string | null;
+  role?: string | null;
 }
 
 export interface Tontine {
@@ -33,6 +37,8 @@ export interface Tontine {
   nextDeadline: Date;
   startDate?: Date;
   members: TontineMember[];
+  creatorId?: string;
+  currency?: string;
 }
 
 export interface Tour {
@@ -76,6 +82,18 @@ export interface Activity {
   tontineName: string;
 }
 
+export interface Invitation {
+  id: string;
+  tontineId: string;
+  code: string;
+  createdBy: string;
+  expiresAt: Date;
+  maxUses: number;
+  usedCount: number;
+  createdAt: Date;
+  tontineName?: string;
+}
+
 export type TrustTier = 'novice' | 'reliable' | 'trusted' | 'elite' | 'master';
 
 export const getTrustTier = (score: number): TrustTier => {
@@ -117,4 +135,23 @@ export const generateToursFromTontine = (tontine: Tontine): Tour[] => {
       payments: [],
     };
   });
+};
+
+// Helper to get initials from a name
+export const getInitials = (name: string): string => {
+  const words = name.trim().split(/\s+/);
+  if (words.length >= 2) {
+    return (words[0][0] + words[words.length - 1][0]).toUpperCase();
+  }
+  return name.slice(0, 2).toUpperCase();
+};
+
+// Generate 6-char invitation code
+export const generateInviteCode = (): string => {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for (let i = 0; i < 6; i++) {
+    code += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return code;
 };

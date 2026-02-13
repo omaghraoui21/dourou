@@ -6,12 +6,15 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
+  Alert,
+  TouchableOpacity,
 } from 'react-native';
 import { useTheme } from '@/contexts/ThemeContext';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { GoldButton } from '@/components/GoldButton';
 import { Spacing, FontSizes, BorderRadius } from '@/constants/theme';
+import { supabase } from '@/lib/supabase';
 
 export default function OTPScreen() {
   const { colors } = useTheme();
@@ -19,6 +22,8 @@ export default function OTPScreen() {
   const { phone } = useLocalSearchParams();
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [resending, setResending] = useState(false);
   const inputRefs = useRef<(TextInput | null)[]>([]);
   const rtl = i18n.language === 'ar';
 
@@ -26,6 +31,7 @@ export default function OTPScreen() {
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
+    setError('');
 
     if (value && index < 5) {
       inputRefs.current[index + 1]?.focus();
@@ -45,18 +51,70 @@ export default function OTPScreen() {
     inputRefs.current[index] = ref;
   };
 
-  const handleContinue = async () => {
+  const handleVerify = async () => {
     const otpCode = otp.join('');
-    if (otpCode.length === 6) {
-      setLoading(true);
-      // Simulate API call
-      setTimeout(() => {
-        setLoading(false);
-        router.push({
-          pathname: '/auth/profile',
-          params: { phone: phone as string },
-        });
-      }, 1000);
+    if (otpCode.length !== 6) return;
+
+    setLoading(true);
+    setError('');
+
+    try {
+      const { data, error: verifyError } = await supabase.auth.verifyOtp({
+        phone: phone as string,
+        token: otpCode,
+        type: 'sms',
+      });
+
+      if (verifyError) {
+        console.error('OTP verify error:', verifyError);
+        setError(verifyError.message);
+        Alert.alert(t('common.error'), verifyError.message);
+        return;
+      }
+
+      if (data.session) {
+        // Check if user already has a profile with a name
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('id', data.session.user.id)
+          .single();
+
+        if (profile && profile.full_name && profile.full_name.trim().length > 0) {
+          // Existing user with name - go to dashboard
+          router.replace('/(tabs)');
+        } else {
+          // New user or no name - go to profile setup
+          router.replace({
+            pathname: '/auth/profile',
+            params: { phone: phone as string },
+          });
+        }
+      }
+    } catch (err) {
+      console.error('OTP verification error:', err);
+      setError(t('common.error'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    setResending(true);
+    setError('');
+    try {
+      const { error: resendError } = await supabase.auth.signInWithOtp({
+        phone: phone as string,
+      });
+      if (resendError) {
+        setError(resendError.message);
+      } else {
+        Alert.alert(t('auth.otp_resent_title'), t('auth.otp_resent_message'));
+      }
+    } catch (err) {
+      console.error('Resend error:', err);
+    } finally {
+      setResending(false);
     }
   };
 
@@ -82,7 +140,7 @@ export default function OTPScreen() {
                 styles.otpInput,
                 {
                   backgroundColor: colors.card,
-                  borderColor: digit ? colors.gold : colors.border,
+                  borderColor: error ? colors.error : digit ? colors.gold : colors.border,
                   color: colors.text,
                 },
               ]}
@@ -96,13 +154,27 @@ export default function OTPScreen() {
           ))}
         </View>
 
+        {error ? (
+          <Text style={[styles.errorText, { color: colors.error }]}>{error}</Text>
+        ) : null}
+
         <GoldButton
           title={t('common.continue')}
-          onPress={handleContinue}
+          onPress={handleVerify}
           loading={loading}
           disabled={otp.join('').length < 6}
           style={styles.button}
         />
+
+        <TouchableOpacity
+          style={styles.resendButton}
+          onPress={handleResend}
+          disabled={resending}
+        >
+          <Text style={[styles.resendText, { color: colors.gold, opacity: resending ? 0.5 : 1 }]}>
+            {resending ? t('auth.otp_resending') : t('auth.otp_resend')}
+          </Text>
+        </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
   );
@@ -129,7 +201,7 @@ const styles = StyleSheet.create({
   otpContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.sm,
   },
   otpInput: {
     width: 48,
@@ -139,7 +211,22 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.xl,
     fontWeight: '600',
   },
+  errorText: {
+    fontSize: FontSizes.sm,
+    marginBottom: Spacing.md,
+    textAlign: 'center',
+  },
   button: {
     width: '100%',
+    marginTop: Spacing.sm,
+  },
+  resendButton: {
+    marginTop: Spacing.lg,
+    alignItems: 'center',
+    paddingVertical: Spacing.sm,
+  },
+  resendText: {
+    fontSize: FontSizes.md,
+    fontWeight: '600',
   },
 });

@@ -56,7 +56,12 @@
     "last_name": "اسم العائلة",
     "resend_code": "إعادة إرسال الرمز",
     "invalid_phone": "يرجى إدخال رقم هاتف صحيح",
-    "invalid_otp": "يرجى إدخال الرمز المكون من 6 أرقام"
+    "invalid_otp": "يرجى إدخال الرمز المكون من 6 أرقام",
+    "otp_resend": "إعادة إرسال الرمز",
+    "otp_resending": "جاري الإرسال...",
+    "otp_resent_title": "تم إرسال الرمز",
+    "otp_resent_message": "تم إرسال رمز تحقق جديد",
+    "profile_error": "فشل تحديث الملف الشخصي. يرجى المحاولة مرة أخرى."
   },
   "dashboard": {
     "title": "لوحة التحكم",
@@ -69,7 +74,9 @@
     "upcoming_deadlines": "المواعيد النهائية القادمة",
     "view_all": "عرض الكل",
     "no_activity": "لا يوجد نشاط حديث",
-    "no_tontines": "لم تنضم إلى أي جمعيات بعد"
+    "no_tontines": "لم تنضم إلى أي جمعيات بعد",
+    "join_group": "انضمام",
+    "create_first_tontine": "أنشئ جمعيتك الأولى"
   },
   "tontines": {
     "title": "جمعياتي",
@@ -149,7 +156,27 @@
     "not_found": "الجمعية غير موجودة",
     "not_found_description": "لم يتم العثور على هذه الجمعية",
     "draft_badge": "مسودة",
-    "ready_to_launch": "جاهزة للإطلاق!"
+    "ready_to_launch": "جاهزة للإطلاق!",
+    "invite": "دعوة",
+    "invite_title": "دعوة أعضاء",
+    "invite_code_label": "شارك هذا الرمز",
+    "invite_code_generating": "جاري إنشاء الرمز...",
+    "invite_code_error": "فشل إنشاء الرمز",
+    "invite_copy": "نسخ الرمز",
+    "invite_copied": "تم النسخ!",
+    "invite_share": "مشاركة الدعوة",
+    "invite_share_message": "انضم إلى جمعيتي \"{{name}}\"! استخدم الرمز: {{code}}",
+    "join_title": "الانضمام إلى مجموعة",
+    "join_subtitle": "أدخل رمز الدعوة المكون من 6 أحرف",
+    "join_code_placeholder": "أدخل الرمز",
+    "join_button": "انضمام",
+    "join_success": "لقد انضممت إلى",
+    "join_invalid_code": "رمز دعوة غير صالح",
+    "join_expired": "هذه الدعوة منتهية الصلاحية",
+    "join_used": "تم استخدام هذه الدعوة بالكامل",
+    "join_already_member": "أنت بالفعل عضو في هذه المجموعة",
+    "join_group_full": "هذه المجموعة مكتملة",
+    "join_error": "فشل الانضمام إلى المجموعة"
   },
   "payment": {
     "declare": "الإعلان عن دفع",

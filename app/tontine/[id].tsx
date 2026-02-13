@@ -20,8 +20,10 @@ import { NumismaticAvatar } from '@/components/NumismaticAvatar';
 import { AddMemberModal } from '@/components/AddMemberModal';
 import { PayoutSequenceList } from '@/components/PayoutSequenceList';
 import { LaunchCelebration } from '@/components/LaunchCelebration';
+import { InvitationModal } from '@/components/InvitationModal';
 import * as Haptics from 'expo-haptics';
 import { useTontines } from '@/contexts/TontineContext';
+import { useUser } from '@/contexts/UserContext';
 import { generateToursFromTontine, TontineMember } from '@/types';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -44,8 +46,10 @@ export default function TontineDetailScreen() {
   const tontine = getTontineById(id || '');
 
   const [activeTab, setActiveTab] = useState<string>('members');
+  const { user } = useUser();
   const [showAddMember, setShowAddMember] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
+  const [showInvitation, setShowInvitation] = useState(false);
   const [isLaunching, setIsLaunching] = useState(false);
 
   const handleBack = useCallback(() => {
@@ -225,7 +229,21 @@ export default function TontineDetailScreen() {
             </Text>
           </View>
         </View>
-        <View style={{ width: 40 }} />
+        {isDraft && user?.id === tontine.creatorId ? (
+          <TouchableOpacity
+            style={[styles.inviteButton, { borderColor: colors.gold }]}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setShowInvitation(true);
+            }}
+          >
+            <Text style={[styles.inviteButtonText, { color: colors.gold }]}>
+              {t('tontine.invite')}
+            </Text>
+          </TouchableOpacity>
+        ) : (
+          <View style={{ width: 40 }} />
+        )}
       </View>
 
       {/* Info Card */}
@@ -640,6 +658,14 @@ export default function TontineDetailScreen() {
         title={t('tontine.launched_title')}
         message={t('tontine.launched_message')}
       />
+
+      {/* Invitation Modal */}
+      <InvitationModal
+        visible={showInvitation}
+        onClose={() => setShowInvitation(false)}
+        tontineId={tontine.id}
+        tontineName={tontine.name}
+      />
     </SafeAreaView>
   );
 }
@@ -658,6 +684,16 @@ const styles = StyleSheet.create({
   },
   backButton: {
     padding: Spacing.sm,
+  },
+  inviteButton: {
+    borderWidth: 1,
+    borderRadius: BorderRadius.sm,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+  },
+  inviteButtonText: {
+    fontSize: FontSizes.xs,
+    fontWeight: '700',
   },
   backIcon: {
     fontSize: 28,

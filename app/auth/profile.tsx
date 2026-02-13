@@ -6,6 +6,7 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from 'react-native';
 import { useTheme } from '@/contexts/ThemeContext';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -13,12 +14,11 @@ import { useTranslation } from 'react-i18next';
 import { GoldButton } from '@/components/GoldButton';
 import { Spacing, FontSizes, BorderRadius } from '@/constants/theme';
 import { useUser } from '@/contexts/UserContext';
-import { User } from '@/types';
 
 export default function ProfileSetupScreen() {
   const { colors } = useTheme();
   const { t, i18n } = useTranslation();
-  const { setUser } = useUser();
+  const { updateProfile } = useUser();
   const rtl = i18n.language === 'ar';
   const { phone } = useLocalSearchParams();
   const [firstName, setFirstName] = useState('');
@@ -26,29 +26,27 @@ export default function ProfileSetupScreen() {
   const [loading, setLoading] = useState(false);
 
   const handleContinue = async () => {
-    if (firstName && lastName) {
-      setLoading(true);
+    if (!firstName.trim() || !lastName.trim()) return;
 
-      // Create user object
-      const newUser: User = {
-        id: `user_${Date.now()}`,
-        firstName,
-        lastName,
+    setLoading(true);
+
+    try {
+      await updateProfile({
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
         phone: phone as string,
-        avatar: `${firstName.charAt(0)}${lastName.charAt(0)}`,
-        trustScore: 3.0, // Starting trust score
-        role: 'member',
-        isVerified: true,
-        createdAt: new Date(),
-      };
+      });
 
-      await setUser(newUser);
-
-      // Simulate API call
-      setTimeout(() => {
-        setLoading(false);
-        router.replace('/(tabs)');
-      }, 1000);
+      router.replace('/(tabs)');
+    } catch (error) {
+      console.error('Profile setup error:', error);
+      Alert.alert(
+        t('common.error'),
+        t('auth.profile_error'),
+        [{ text: t('common.ok') }]
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -80,6 +78,7 @@ export default function ProfileSetupScreen() {
             placeholderTextColor={colors.textSecondary}
             value={firstName}
             onChangeText={setFirstName}
+            autoFocus
           />
 
           <TextInput
@@ -103,7 +102,7 @@ export default function ProfileSetupScreen() {
           title={t('common.continue')}
           onPress={handleContinue}
           loading={loading}
-          disabled={!firstName || !lastName}
+          disabled={!firstName.trim() || !lastName.trim()}
           style={styles.button}
         />
       </View>

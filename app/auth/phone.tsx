@@ -6,47 +6,50 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from 'react-native';
 import { useTheme } from '@/contexts/ThemeContext';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { GoldButton } from '@/components/GoldButton';
 import { Spacing, FontSizes, BorderRadius } from '@/constants/theme';
-import { isSuperAdmin, getSuperAdminUser } from '@/config/superAdmin';
-import { useUser } from '@/contexts/UserContext';
+import { supabase } from '@/lib/supabase';
 
 export default function PhoneAuthScreen() {
   const { colors } = useTheme();
   const { t, i18n } = useTranslation();
-  const { setUser } = useUser();
   const rtl = i18n.language === 'ar';
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleContinue = async () => {
-    if (phone.length >= 8) {
-      setLoading(true);
-      const fullPhone = `+216${phone}`;
+    if (phone.length < 8) return;
 
-      // Check if this is the Super Admin
-      if (isSuperAdmin(fullPhone)) {
-        // Bypass OTP and profile setup for Super Admin
-        const superAdminUser = getSuperAdminUser();
-        await setUser(superAdminUser);
-        setTimeout(() => {
-          setLoading(false);
-          router.replace('/(tabs)');
-        }, 1000);
+    setLoading(true);
+    setError('');
+    const fullPhone = `+216${phone.replace(/\s/g, '')}`;
+
+    try {
+      const { error: otpError } = await supabase.auth.signInWithOtp({
+        phone: fullPhone,
+      });
+
+      if (otpError) {
+        console.error('OTP send error:', otpError);
+        setError(otpError.message);
+        Alert.alert(t('common.error'), otpError.message);
       } else {
-        // Normal authentication flow
-        setTimeout(() => {
-          setLoading(false);
-          router.push({
-            pathname: '/auth/otp',
-            params: { phone: fullPhone },
-          });
-        }, 1000);
+        router.push({
+          pathname: '/auth/otp',
+          params: { phone: fullPhone },
+        });
       }
+    } catch (err) {
+      console.error('Phone auth error:', err);
+      setError(t('common.error'));
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -66,7 +69,7 @@ export default function PhoneAuthScreen() {
         <View
           style={[
             styles.inputContainer,
-            { backgroundColor: colors.card, borderColor: colors.border },
+            { backgroundColor: colors.card, borderColor: error ? colors.error : colors.border },
             rtl && { flexDirection: 'row-reverse' },
           ]}
         >
@@ -77,16 +80,23 @@ export default function PhoneAuthScreen() {
             placeholderTextColor={colors.textSecondary}
             keyboardType="phone-pad"
             value={phone}
-            onChangeText={setPhone}
+            onChangeText={(text) => {
+              setPhone(text);
+              setError('');
+            }}
             maxLength={11}
           />
         </View>
+
+        {error ? (
+          <Text style={[styles.errorText, { color: colors.error }]}>{error}</Text>
+        ) : null}
 
         <GoldButton
           title={t('common.continue')}
           onPress={handleContinue}
           loading={loading}
-          disabled={phone.length < 8}
+          disabled={phone.replace(/\s/g, '').length < 8}
           style={styles.button}
         />
       </View>
@@ -118,7 +128,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.md,
     borderWidth: 1,
     paddingHorizontal: Spacing.md,
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.sm,
     height: 56,
   },
   prefix: {
@@ -130,7 +140,12 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: FontSizes.lg,
   },
+  errorText: {
+    fontSize: FontSizes.sm,
+    marginBottom: Spacing.md,
+  },
   button: {
     width: '100%',
+    marginTop: Spacing.sm,
   },
 });

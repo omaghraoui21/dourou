@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -18,15 +18,41 @@ import { changeLanguage } from '@/i18n/config';
 import { useUser } from '@/contexts/UserContext';
 import { SuperAdminBadge } from '@/components/SuperAdminBadge';
 import { router } from 'expo-router';
+import { useTontines } from '@/contexts/TontineContext';
 
 export default function ProfileScreen() {
   const { colors, toggleTheme, isDark } = useTheme();
   const { t, i18n } = useTranslation();
   const { user, isSuperAdmin, logout } = useUser();
+  const { tontines } = useTontines();
   const rtl = i18n.language === 'ar';
 
   const trustScore = user?.trustScore || 4.2;
   const tier = getTrustTier(trustScore);
+
+  // Dynamic stats from real data
+  const stats = useMemo(() => {
+    const completedCount = tontines.filter((item) => item.status === 'completed').length;
+    const activeCount = tontines.filter((item) => item.status === 'active' || item.status === 'draft').length;
+
+    // Calculate tenure: months since user.createdAt
+    let tenureMonths = 0;
+    if (user?.createdAt) {
+      const created = user.createdAt instanceof Date ? user.createdAt : new Date(user.createdAt);
+      const now = new Date();
+      tenureMonths = (now.getFullYear() - created.getFullYear()) * 12 + (now.getMonth() - created.getMonth());
+      if (tenureMonths < 0) tenureMonths = 0;
+      // At minimum show 1 if the user account exists
+      if (tenureMonths === 0) tenureMonths = 1;
+    }
+
+    return {
+      completed: completedCount,
+      active: activeCount,
+      paymentRate: '100%',
+      tenure: tenureMonths,
+    };
+  }, [tontines, user?.createdAt]);
 
   const handleLanguageChange = async (lang: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -36,6 +62,16 @@ export default function ProfileScreen() {
   const handleThemeToggle = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     toggleTheme();
+  };
+
+  const handleLogout = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    try {
+      await logout();
+      router.replace('/auth/phone');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
   };
 
   return (
@@ -51,18 +87,18 @@ export default function ProfileScreen() {
             {isSuperAdmin ? (
               <Text style={styles.avatarText}>{'\uD83D\uDC51'}</Text>
             ) : (
-              <Text style={styles.avatarText}>{user?.avatar || 'AB'}</Text>
+              <Text style={styles.avatarText}>{user?.avatar || '??'}</Text>
             )}
           </View>
           <Text style={[styles.name, { color: colors.text }]}>
-            {user?.firstName} {user?.lastName}
+            {user ? `${user.firstName} ${user.lastName}` : ''}
           </Text>
           {isSuperAdmin && (
             <View style={styles.badgeContainer}>
               <SuperAdminBadge size="medium" showLabel={true} />
             </View>
           )}
-          <Text style={[styles.phone, { color: colors.textSecondary }]}>{user?.phone}</Text>
+          <Text style={[styles.phone, { color: colors.textSecondary }]}>{user?.phone || ''}</Text>
           {user?.email && (
             <Text style={[styles.email, { color: colors.textSecondary }]}>{user.email}</Text>
           )}
@@ -201,7 +237,7 @@ export default function ProfileScreen() {
                 { backgroundColor: colors.card, borderColor: colors.border },
               ]}
             >
-              <Text style={[styles.statValue, { color: colors.gold }]}>8</Text>
+              <Text style={[styles.statValue, { color: colors.gold }]}>{stats.completed}</Text>
               <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
                 {t('profile.stat_completed')}
               </Text>
@@ -213,7 +249,7 @@ export default function ProfileScreen() {
                 { backgroundColor: colors.card, borderColor: colors.border },
               ]}
             >
-              <Text style={[styles.statValue, { color: colors.gold }]}>2</Text>
+              <Text style={[styles.statValue, { color: colors.gold }]}>{stats.active}</Text>
               <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
                 {t('profile.stat_active')}
               </Text>
@@ -225,7 +261,7 @@ export default function ProfileScreen() {
                 { backgroundColor: colors.card, borderColor: colors.border },
               ]}
             >
-              <Text style={[styles.statValue, { color: colors.gold }]}>100%</Text>
+              <Text style={[styles.statValue, { color: colors.gold }]}>{stats.paymentRate}</Text>
               <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
                 {t('profile.stat_payment_rate')}
               </Text>
@@ -237,7 +273,7 @@ export default function ProfileScreen() {
                 { backgroundColor: colors.card, borderColor: colors.border },
               ]}
             >
-              <Text style={[styles.statValue, { color: colors.gold }]}>12</Text>
+              <Text style={[styles.statValue, { color: colors.gold }]}>{stats.tenure}</Text>
               <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
                 {t('profile.stat_tenure')}
               </Text>
@@ -248,16 +284,7 @@ export default function ProfileScreen() {
         {/* Logout Button */}
         <TouchableOpacity
           style={[styles.logoutButton, { borderColor: colors.error }]}
-          onPress={async () => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-            try {
-              await logout();
-              // Navigate to onboarding after successful logout
-              router.replace('/onboarding');
-            } catch (error) {
-              console.error('Logout failed:', error);
-            }
-          }}
+          onPress={handleLogout}
         >
           <Text style={[styles.logoutText, { color: colors.error }]}>
             {t('profile.logout')}

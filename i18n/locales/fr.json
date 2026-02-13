@@ -56,7 +56,12 @@
     "last_name": "Nom",
     "resend_code": "Renvoyer le code",
     "invalid_phone": "Veuillez entrer un numéro de téléphone valide",
-    "invalid_otp": "Veuillez entrer le code à 6 chiffres"
+    "invalid_otp": "Veuillez entrer le code à 6 chiffres",
+    "otp_resend": "Renvoyer le code",
+    "otp_resending": "Envoi en cours...",
+    "otp_resent_title": "Code envoyé",
+    "otp_resent_message": "Un nouveau code de vérification a été envoyé",
+    "profile_error": "Échec de la mise à jour du profil. Veuillez réessayer."
   },
   "dashboard": {
     "title": "Tableau de bord",
@@ -69,7 +74,9 @@
     "upcoming_deadlines": "Échéances à venir",
     "view_all": "Voir tout",
     "no_activity": "Aucune activité récente",
-    "no_tontines": "Vous n'avez pas encore rejoint de tontines"
+    "no_tontines": "Vous n'avez pas encore rejoint de tontines",
+    "join_group": "Rejoindre",
+    "create_first_tontine": "Créez votre première tontine"
   },
   "tontines": {
     "title": "Mes Tontines",
@@ -149,7 +156,27 @@
     "not_found": "Tontine introuvable",
     "not_found_description": "Cette tontine n'a pas été trouvée",
     "draft_badge": "Brouillon",
-    "ready_to_launch": "Prête à lancer !"
+    "ready_to_launch": "Prête à lancer !",
+    "invite": "Inviter",
+    "invite_title": "Inviter des membres",
+    "invite_code_label": "Partagez ce code",
+    "invite_code_generating": "Génération du code...",
+    "invite_code_error": "Échec de la génération du code",
+    "invite_copy": "Copier le code",
+    "invite_copied": "Copié !",
+    "invite_share": "Partager l'invitation",
+    "invite_share_message": "Rejoignez ma tontine \"{{name}}\" ! Utilisez le code : {{code}}",
+    "join_title": "Rejoindre un groupe",
+    "join_subtitle": "Entrez le code d'invitation à 6 caractères",
+    "join_code_placeholder": "Entrez le code",
+    "join_button": "Rejoindre",
+    "join_success": "Vous avez rejoint",
+    "join_invalid_code": "Code d'invitation invalide",
+    "join_expired": "Cette invitation a expiré",
+    "join_used": "Cette invitation a été entièrement utilisée",
+    "join_already_member": "Vous êtes déjà membre de ce groupe",
+    "join_group_full": "Ce groupe est complet",
+    "join_error": "Échec de la connexion au groupe"
   },
   "payment": {
     "declare": "Déclarer un paiement",

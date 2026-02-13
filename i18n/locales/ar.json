@@ -26,7 +26,8 @@
     "close": "إغلاق",
     "launch": "إطلاق",
     "yes": "نعم",
-    "no": "لا"
+    "no": "لا",
+    "you": "أنت"
   },
   "splash": {
     "tagline": "الثقة الرقمية للجمعيات التونسية"
@@ -176,18 +177,39 @@
     "join_used": "تم استخدام هذه الدعوة بالكامل",
     "join_already_member": "أنت بالفعل عضو في هذه المجموعة",
     "join_group_full": "هذه المجموعة مكتملة",
-    "join_error": "فشل الانضمام إلى المجموعة"
+    "join_error": "فشل الانضمام إلى المجموعة",
+    "beneficiary": "المستفيد",
+    "pot_progress": "تقدم الصندوق",
+    "member_payments": "مدفوعات الأعضاء",
+    "active_round": "الجولة النشطة",
+    "no_rounds": "لم يتم إنشاء جولات بعد",
+    "round_not_found": "الجولة غير موجودة",
+    "total_pot": "إجمالي الصندوق",
+    "collected": "المحصل",
+    "load_error": "فشل تحميل البيانات"
   },
   "payment": {
     "declare": "الإعلان عن دفع",
+    "declare_title": "الإعلان عن دفع",
+    "declare_success": "تم الإعلان عن الدفع بنجاح! في انتظار تأكيد المشرف.",
     "method": "طريقة الدفع",
-    "cash": "نقدي",
-    "bank": "تحويل بنكي",
-    "d17": "D17",
-    "flouci": "فلوسي",
+    "select_method": "كيف دفعت؟",
+    "method_cash": "نقدي",
+    "method_bank": "تحويل بنكي",
+    "method_d17": "D17",
+    "method_flouci": "فلوسي",
     "pay_with_flouci": "الدفع بواسطة فلوسي",
     "amount": "المبلغ",
-    "reference": "المرجع"
+    "reference": "المرجع",
+    "status_paid": "مدفوع",
+    "status_pending": "قيد الانتظار",
+    "status_late": "متأخر",
+    "mark_paid": "وضع علامة مدفوع",
+    "confirm_title": "تأكيد الدفع",
+    "confirm_mark_paid": "هل أنت متأكد أن هذا العضو قد دفع مساهمته؟",
+    "update_error": "فشل تحديث حالة الدفع",
+    "success_title": "نجح",
+    "awaiting_confirmation": "في انتظار تأكيد المشرف"
   },
   "trust": {
     "title": "درجة الثقة",

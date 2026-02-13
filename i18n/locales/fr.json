@@ -26,7 +26,8 @@
     "close": "Fermer",
     "launch": "Lancer",
     "yes": "Oui",
-    "no": "Non"
+    "no": "Non",
+    "you": "Vous"
   },
   "splash": {
     "tagline": "La confiance numérisée pour les tontines tunisiennes"
@@ -176,18 +177,39 @@
     "join_used": "Cette invitation a été entièrement utilisée",
     "join_already_member": "Vous êtes déjà membre de ce groupe",
     "join_group_full": "Ce groupe est complet",
-    "join_error": "Échec de la connexion au groupe"
+    "join_error": "Échec de la connexion au groupe",
+    "beneficiary": "Bénéficiaire",
+    "pot_progress": "Progression de la cagnotte",
+    "member_payments": "Paiements des membres",
+    "active_round": "Tour actif",
+    "no_rounds": "Aucun tour créé pour le moment",
+    "round_not_found": "Tour introuvable",
+    "total_pot": "Cagnotte totale",
+    "collected": "Collecté",
+    "load_error": "Échec du chargement des données"
   },
   "payment": {
     "declare": "Déclarer un paiement",
+    "declare_title": "Déclarer un paiement",
+    "declare_success": "Paiement déclaré avec succès ! En attente de confirmation de l'admin.",
     "method": "Méthode de paiement",
-    "cash": "Espèces",
-    "bank": "Virement bancaire",
-    "d17": "D17",
-    "flouci": "Flouci",
+    "select_method": "Comment avez-vous payé ?",
+    "method_cash": "Espèces",
+    "method_bank": "Virement bancaire",
+    "method_d17": "D17",
+    "method_flouci": "Flouci",
     "pay_with_flouci": "Payer avec Flouci",
     "amount": "Montant",
-    "reference": "Référence"
+    "reference": "Référence",
+    "status_paid": "Payé",
+    "status_pending": "En attente",
+    "status_late": "En retard",
+    "mark_paid": "Marquer comme payé",
+    "confirm_title": "Confirmer le paiement",
+    "confirm_mark_paid": "Êtes-vous sûr que ce membre a payé sa contribution ?",
+    "update_error": "Échec de la mise à jour du statut de paiement",
+    "success_title": "Succès",
+    "awaiting_confirmation": "En attente de confirmation de l'admin"
   },
   "trust": {
     "title": "Score de confiance",

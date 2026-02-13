@@ -26,7 +26,8 @@
     "close": "Close",
     "launch": "Launch",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "you": "You"
   },
   "splash": {
     "tagline": "Trust digitized for Tunisian tontines"
@@ -176,18 +177,39 @@
     "join_used": "This invitation has been fully used",
     "join_already_member": "You are already a member of this group",
     "join_group_full": "This group is full",
-    "join_error": "Failed to join group"
+    "join_error": "Failed to join group",
+    "beneficiary": "Beneficiary",
+    "pot_progress": "Pot Progress",
+    "member_payments": "Member Payments",
+    "active_round": "Active Round",
+    "no_rounds": "No rounds created yet",
+    "round_not_found": "Round not found",
+    "total_pot": "Total Pot",
+    "collected": "Collected",
+    "load_error": "Failed to load data"
   },
   "payment": {
     "declare": "Declare Payment",
+    "declare_title": "Declare Payment",
+    "declare_success": "Payment declared successfully! Waiting for admin confirmation.",
     "method": "Payment Method",
-    "cash": "Cash",
-    "bank": "Bank Transfer",
-    "d17": "D17",
-    "flouci": "Flouci",
+    "select_method": "How did you pay?",
+    "method_cash": "Cash",
+    "method_bank": "Bank Transfer",
+    "method_d17": "D17",
+    "method_flouci": "Flouci",
     "pay_with_flouci": "Pay with Flouci",
     "amount": "Amount",
-    "reference": "Reference"
+    "reference": "Reference",
+    "status_paid": "Paid",
+    "status_pending": "Pending",
+    "status_late": "Late",
+    "mark_paid": "Mark as Paid",
+    "confirm_title": "Confirm Payment",
+    "confirm_mark_paid": "Are you sure this member has paid their contribution?",
+    "update_error": "Failed to update payment status",
+    "success_title": "Success",
+    "awaiting_confirmation": "Awaiting admin confirmation"
   },
   "trust": {
     "title": "Trust Score",

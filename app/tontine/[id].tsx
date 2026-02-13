@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   LayoutAnimation,
   Platform,
   UIManager,
+  RefreshControl,
 } from 'react-native';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTranslation } from 'react-i18next';
@@ -21,6 +22,8 @@ import { AddMemberModal } from '@/components/AddMemberModal';
 import { PayoutSequenceList } from '@/components/PayoutSequenceList';
 import { LaunchCelebration } from '@/components/LaunchCelebration';
 import { InvitationModal } from '@/components/InvitationModal';
+import { RoundCard } from '@/components/RoundCard';
+import { supabase } from '@/lib/supabase';
 import * as Haptics from 'expo-haptics';
 import { useTontines } from '@/contexts/TontineContext';
 import { useUser } from '@/contexts/UserContext';
@@ -51,6 +54,9 @@ export default function TontineDetailScreen() {
   const [showCelebration, setShowCelebration] = useState(false);
   const [showInvitation, setShowInvitation] = useState(false);
   const [isLaunching, setIsLaunching] = useState(false);
+  const [rounds, setRounds] = useState<any[]>([]);
+  const [loadingRounds, setLoadingRounds] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const handleBack = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -125,6 +131,106 @@ export default function TontineDetailScreen() {
 
   // Generate tours for active tontines
   const tours = isActive || isCompleted ? generateToursFromTontine(tontine) : [];
+
+  // Fetch rounds from database
+  const fetchRounds = useCallback(async () => {
+    if (!tontine || !isActive) return;
+
+    try {
+      setLoadingRounds(true);
+      const { data, error } = await supabase
+        .from('rounds')
+        .select(`
+          *,
+          beneficiary:tontine_members!beneficiary_id (
+            id,
+            name,
+            phone
+          ),
+          payments (
+            id,
+            status,
+            member_id,
+            amount
+          )
+        `)
+        .eq('tontine_id', tontine.id)
+        .order('round_number', { ascending: true });
+
+      if (error) throw error;
+
+      // Transform data to match RoundCard interface
+      const transformedRounds = data.map((round: any) => {
+        const memberName = round.beneficiary?.name || 'Unknown';
+        const initials = memberName
+          .trim()
+          .split(/\s+/)
+          .map((word: string) => word[0])
+          .join('')
+          .toUpperCase()
+          .slice(0, 2);
+
+        return {
+          id: round.id,
+          round_number: round.round_number,
+          status: round.status,
+          scheduled_date: new Date(round.scheduled_date),
+          beneficiary: {
+            id: round.beneficiary?.id || '',
+            name: memberName,
+            initials,
+          },
+          payments: round.payments || [],
+          total_amount: tontine.contribution * tontine.totalMembers,
+        };
+      });
+
+      setRounds(transformedRounds);
+    } catch (error) {
+      console.error('Error fetching rounds:', error);
+    } finally {
+      setLoadingRounds(false);
+      setRefreshing(false);
+    }
+  }, [tontine, isActive]);
+
+  useEffect(() => {
+    if (isActive) {
+      fetchRounds();
+
+      // Set up real-time subscription for rounds and payments
+      const roundsChannel = supabase
+        .channel(`tontine_rounds_${tontine?.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'rounds',
+            filter: `tontine_id=eq.${tontine?.id}`,
+          },
+          () => {
+            fetchRounds();
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'payments',
+          },
+          () => {
+            fetchRounds();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(roundsChannel);
+      };
+    }
+  }, [isActive, tontine?.id, fetchRounds]);
 
   // Handlers
   const handleAddMember = async (name: string, phone: string) => {
@@ -359,6 +465,18 @@ export default function TontineDetailScreen() {
         style={styles.content}
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          activeTab === 'tours' ? (
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={() => {
+                setRefreshing(true);
+                fetchRounds();
+              }}
+              tintColor={colors.gold}
+            />
+          ) : undefined
+        }
       >
         {/* ===== MEMBERS TAB ===== */}
         {activeTab === 'members' && (
@@ -474,145 +592,30 @@ export default function TontineDetailScreen() {
 
         {/* ===== TOURS TAB ===== */}
         {activeTab === 'tours' && (
-          <View style={[styles.timeline, rtl && { paddingLeft: 0, paddingRight: Spacing.md }]}>
-            {tours.map((tour, index) => {
-              const recipient = sortedMembers.find((m) => m.id === tour.recipientId);
-              const isLast = index === tours.length - 1;
-
-              return (
-                <View key={tour.id} style={styles.timelineItem}>
-                  {/* Timeline line */}
-                  {!isLast && (
-                    <View
-                      style={[
-                        styles.timelineLine,
-                        {
-                          backgroundColor:
-                            tour.status === 'completed' ? colors.gold : colors.border,
-                        },
-                        rtl && { left: undefined, right: 15 },
-                      ]}
-                    />
-                  )}
-
-                  {/* Timeline dot */}
-                  <View
-                    style={[
-                      styles.timelineDot,
-                      {
-                        backgroundColor:
-                          tour.status === 'current'
-                            ? colors.gold
-                            : tour.status === 'completed'
-                            ? colors.gold
-                            : colors.background,
-                        borderColor:
-                          tour.status === 'completed' ? colors.gold : colors.border,
-                      },
-                      rtl && { left: undefined, right: 0 },
-                    ]}
-                  >
-                    {tour.status === 'current' && (
-                      <View style={[styles.pulsingDot, { backgroundColor: '#0F172A' }]} />
-                    )}
-                  </View>
-
-                  {/* Tour card */}
-                  <View
-                    style={[
-                      styles.tourCard,
-                      {
-                        backgroundColor: colors.card,
-                        borderColor:
-                          tour.status === 'current' ? colors.gold : colors.border,
-                        borderWidth: tour.status === 'current' ? 2 : 1,
-                      },
-                      rtl && { marginLeft: 0, marginRight: 48 },
-                    ]}
-                  >
-                    <View style={[styles.tourHeader, rtl && { flexDirection: 'row-reverse' }]}>
-                      <Text style={[styles.tourNumber, { color: colors.text }]}>
-                        {t('tontine.tour_number', { number: tour.tourNumber })}
-                      </Text>
-                      <View
-                        style={[
-                          styles.tourStatusBadge,
-                          {
-                            backgroundColor:
-                              tour.status === 'current'
-                                ? colors.gold + '20'
-                                : tour.status === 'completed'
-                                ? colors.success + '20'
-                                : colors.border,
-                          },
-                        ]}
-                      >
-                        <Text
-                          style={[
-                            styles.tourStatusText,
-                            {
-                              color:
-                                tour.status === 'current'
-                                  ? colors.gold
-                                  : tour.status === 'completed'
-                                  ? colors.success
-                                  : colors.textSecondary,
-                            },
-                          ]}
-                        >
-                          {t(`tontine.${tour.status}`)}
-                        </Text>
-                      </View>
-                    </View>
-
-                    <View style={styles.tourInfo}>
-                      <View style={[styles.tourRecipientRow, rtl && { flexDirection: 'row-reverse' }]}>
-                        {recipient && (
-                          <NumismaticAvatar initials={recipient.initials} size={28} />
-                        )}
-                        <Text
-                          style={[
-                            styles.recipientName,
-                            { color: colors.text, marginLeft: rtl ? 0 : Spacing.sm, marginRight: rtl ? Spacing.sm : 0 },
-                          ]}
-                        >
-                          {recipient?.name || '—'}
-                        </Text>
-                      </View>
-                      <Text
-                        style={[
-                          styles.tourDate,
-                          { color: colors.textSecondary, textAlign: rtl ? 'right' : 'left' },
-                        ]}
-                      >
-                        {tour.deadline.toLocaleDateString(getDateLocale(), {
-                          day: 'numeric',
-                          month: 'long',
-                          year: 'numeric',
-                        })}
-                      </Text>
-                    </View>
-
-                    {tour.status === 'current' && (
-                      <GoldButton
-                        title={t('payment.declare')}
-                        onPress={() => {
-                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                        }}
-                        variant="flouci"
-                        style={styles.payButton}
-                      />
-                    )}
-                  </View>
-                </View>
-              );
-            })}
-
-            {tours.length === 0 && (
+          <View>
+            {loadingRounds && rounds.length === 0 ? (
+              <View style={styles.loadingState}>
+                <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
+                  {t('common.loading')}...
+                </Text>
+              </View>
+            ) : rounds.length > 0 ? (
+              rounds.map((round) => (
+                <RoundCard
+                  key={round.id}
+                  round={round}
+                  totalMembers={tontine.totalMembers}
+                  onPress={() => {
+                    router.push(`/tontine/round/${round.id}`);
+                  }}
+                  rtl={rtl}
+                />
+              ))
+            ) : (
               <View style={styles.emptyMembers}>
                 <Text style={{ fontSize: 48, marginBottom: Spacing.md }}>📋</Text>
                 <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
-                  {t('tontine.history_empty')}
+                  {t('tontine.no_rounds')}
                 </Text>
               </View>
             )}
@@ -979,6 +982,13 @@ const styles = StyleSheet.create({
   },
   payButton: {
     marginTop: Spacing.sm,
+  },
+  loadingState: {
+    paddingVertical: Spacing.xxl,
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: FontSizes.md,
   },
   // Footer
   footer: {

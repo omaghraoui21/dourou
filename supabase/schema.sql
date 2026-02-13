@@ -131,7 +131,7 @@ CREATE INDEX IF NOT EXISTS idx_audit_log_tontine_id ON audit_log(tontine_id);
 CREATE INDEX IF NOT EXISTS idx_profiles_role ON profiles(role);
 
 -- =============================================
--- 3. ADMIN HELPER FUNCTION
+-- 3. SECURITY DEFINER HELPER FUNCTIONS
 -- =============================================
 
 -- Helper function to check if user is admin
@@ -152,6 +152,81 @@ END;
 $$;
 
 COMMENT ON FUNCTION is_admin IS 'Helper function to check if a user has admin or super_admin role';
+
+-- Helper function to check if a user is a member of a tontine
+-- This function bypasses RLS internally to prevent recursion
+CREATE OR REPLACE FUNCTION is_tontine_member(p_user_id UUID, p_tontine_id UUID)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+STABLE
+SET search_path = public
+AS $$
+DECLARE
+  v_is_member BOOLEAN;
+BEGIN
+  SELECT EXISTS (
+    SELECT 1 FROM tontine_members
+    WHERE tontine_id = p_tontine_id
+    AND user_id = p_user_id
+  ) INTO v_is_member;
+
+  RETURN v_is_member;
+END;
+$$;
+
+-- Helper function to check if a user is the creator of a tontine
+-- This function bypasses RLS internally to prevent recursion
+CREATE OR REPLACE FUNCTION is_tontine_creator(p_user_id UUID, p_tontine_id UUID)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+STABLE
+SET search_path = public
+AS $$
+DECLARE
+  v_is_creator BOOLEAN;
+BEGIN
+  SELECT EXISTS (
+    SELECT 1 FROM tontines
+    WHERE id = p_tontine_id
+    AND creator_id = p_user_id
+  ) INTO v_is_creator;
+
+  RETURN v_is_creator;
+END;
+$$;
+
+-- Helper function to check if a user is an admin of a tontine (creator or admin role)
+-- This function bypasses RLS internally to prevent recursion
+CREATE OR REPLACE FUNCTION is_tontine_admin(p_user_id UUID, p_tontine_id UUID)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+STABLE
+SET search_path = public
+AS $$
+DECLARE
+  v_is_admin BOOLEAN;
+BEGIN
+  SELECT EXISTS (
+    SELECT 1 FROM tontines
+    WHERE id = p_tontine_id
+    AND creator_id = p_user_id
+  ) OR EXISTS (
+    SELECT 1 FROM tontine_members
+    WHERE tontine_id = p_tontine_id
+    AND user_id = p_user_id
+    AND role = 'admin'
+  ) INTO v_is_admin;
+
+  RETURN v_is_admin;
+END;
+$$;
+
+COMMENT ON FUNCTION is_tontine_member IS 'SECURITY DEFINER: Check if user is a member of a tontine (bypasses RLS to prevent recursion)';
+COMMENT ON FUNCTION is_tontine_creator IS 'SECURITY DEFINER: Check if user is the creator of a tontine (bypasses RLS to prevent recursion)';
+COMMENT ON FUNCTION is_tontine_admin IS 'SECURITY DEFINER: Check if user is an admin of a tontine (bypasses RLS to prevent recursion)';
 
 -- =============================================
 -- 4. ROW LEVEL SECURITY
@@ -179,82 +254,64 @@ CREATE POLICY "admins_can_view_all_profiles" ON profiles
 CREATE POLICY "admins_can_update_all_profiles" ON profiles
   FOR UPDATE TO authenticated USING (is_admin(auth.uid()));
 
--- Tontines Policies
-CREATE POLICY "tontines_select" ON tontines
+-- Tontines Policies (V2: Fixed RLS recursion)
+CREATE POLICY "tontines_select_v2" ON tontines
   FOR SELECT TO authenticated
   USING (
-    EXISTS (
-      SELECT 1 FROM tontine_members
-      WHERE tontine_members.tontine_id = tontines.id
-      AND tontine_members.user_id = auth.uid()
-    )
-    OR creator_id = auth.uid()
+    creator_id = auth.uid()
+    OR is_tontine_member(auth.uid(), id)
+    OR is_admin(auth.uid())
   );
-CREATE POLICY "tontines_insert" ON tontines
-  FOR INSERT TO authenticated WITH CHECK (auth.uid() = creator_id);
-CREATE POLICY "tontines_update" ON tontines
-  FOR UPDATE TO authenticated
-  USING (creator_id = auth.uid()) WITH CHECK (creator_id = auth.uid());
-CREATE POLICY "tontines_delete" ON tontines
-  FOR DELETE TO authenticated USING (creator_id = auth.uid());
-CREATE POLICY "admins_can_view_all_tontines" ON tontines
-  FOR SELECT TO authenticated USING (is_admin(auth.uid()));
-CREATE POLICY "admins_can_update_all_tontines" ON tontines
-  FOR UPDATE TO authenticated USING (is_admin(auth.uid()));
-CREATE POLICY "admins_can_delete_all_tontines" ON tontines
-  FOR DELETE TO authenticated USING (is_admin(auth.uid()));
 
--- Tontine Members Policies
-CREATE POLICY "tontine_members_select" ON tontine_members
-  FOR SELECT TO authenticated
-  USING (
-    EXISTS (
-      SELECT 1 FROM tontine_members AS tm
-      WHERE tm.tontine_id = tontine_members.tontine_id
-      AND tm.user_id = auth.uid()
-    )
-    OR EXISTS (
-      SELECT 1 FROM tontines
-      WHERE tontines.id = tontine_members.tontine_id
-      AND tontines.creator_id = auth.uid()
-    )
-  );
-CREATE POLICY "tontine_members_insert" ON tontine_members
+CREATE POLICY "tontines_insert_v2" ON tontines
   FOR INSERT TO authenticated
-  WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM tontines
-      WHERE tontines.id = tontine_id
-      AND tontines.creator_id = auth.uid()
-    )
-  );
-CREATE POLICY "tontine_members_update" ON tontine_members
+  WITH CHECK (auth.uid() = creator_id);
+
+CREATE POLICY "tontines_update_v2" ON tontines
   FOR UPDATE TO authenticated
   USING (
-    EXISTS (
-      SELECT 1 FROM tontines
-      WHERE tontines.id = tontine_members.tontine_id
-      AND tontines.creator_id = auth.uid()
-    )
-    OR user_id = auth.uid()
+    creator_id = auth.uid()
+    OR is_admin(auth.uid())
   );
-CREATE POLICY "tontine_members_delete" ON tontine_members
+
+CREATE POLICY "tontines_delete_v2" ON tontines
   FOR DELETE TO authenticated
   USING (
-    EXISTS (
-      SELECT 1 FROM tontines
-      WHERE tontines.id = tontine_members.tontine_id
-      AND tontines.creator_id = auth.uid()
-    )
+    creator_id = auth.uid()
+    OR is_admin(auth.uid())
   );
-CREATE POLICY "admins_can_view_all_members" ON tontine_members
-  FOR SELECT TO authenticated USING (is_admin(auth.uid()));
-CREATE POLICY "admins_can_insert_members" ON tontine_members
-  FOR INSERT TO authenticated WITH CHECK (is_admin(auth.uid()));
-CREATE POLICY "admins_can_update_all_members" ON tontine_members
-  FOR UPDATE TO authenticated USING (is_admin(auth.uid()));
-CREATE POLICY "admins_can_delete_all_members" ON tontine_members
-  FOR DELETE TO authenticated USING (is_admin(auth.uid()));
+
+-- Tontine Members Policies (V2: Fixed RLS recursion)
+CREATE POLICY "tontine_members_select_v2" ON tontine_members
+  FOR SELECT TO authenticated
+  USING (
+    user_id = auth.uid()
+    OR is_tontine_member(auth.uid(), tontine_id)
+    OR is_tontine_creator(auth.uid(), tontine_id)
+    OR is_admin(auth.uid())
+  );
+
+CREATE POLICY "tontine_members_insert_v2" ON tontine_members
+  FOR INSERT TO authenticated
+  WITH CHECK (
+    is_tontine_creator(auth.uid(), tontine_id)
+    OR is_admin(auth.uid())
+  );
+
+CREATE POLICY "tontine_members_update_v2" ON tontine_members
+  FOR UPDATE TO authenticated
+  USING (
+    user_id = auth.uid()
+    OR is_tontine_creator(auth.uid(), tontine_id)
+    OR is_admin(auth.uid())
+  );
+
+CREATE POLICY "tontine_members_delete_v2" ON tontine_members
+  FOR DELETE TO authenticated
+  USING (
+    is_tontine_creator(auth.uid(), tontine_id)
+    OR is_admin(auth.uid())
+  );
 
 -- Invitations Policies
 CREATE POLICY "invitations_select" ON invitations
@@ -277,79 +334,61 @@ CREATE POLICY "admins_can_update_invitations" ON invitations
 CREATE POLICY "admins_can_delete_invitations" ON invitations
   FOR DELETE TO authenticated USING (is_admin(auth.uid()));
 
--- Rounds Policies
-CREATE POLICY "rounds_select" ON rounds
+-- Rounds Policies (V2: Fixed RLS recursion)
+CREATE POLICY "rounds_select_v2" ON rounds
   FOR SELECT TO authenticated
   USING (
-    EXISTS (
-      SELECT 1 FROM tontine_members
-      WHERE tontine_members.tontine_id = rounds.tontine_id
-      AND tontine_members.user_id = auth.uid()
-    )
-    OR EXISTS (
-      SELECT 1 FROM tontines
-      WHERE tontines.id = rounds.tontine_id
-      AND tontines.creator_id = auth.uid()
-    )
+    is_tontine_member(auth.uid(), tontine_id)
+    OR is_tontine_creator(auth.uid(), tontine_id)
+    OR is_admin(auth.uid())
   );
-CREATE POLICY "rounds_insert" ON rounds
+
+CREATE POLICY "rounds_insert_v2" ON rounds
   FOR INSERT TO authenticated
   WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM tontines
-      WHERE tontines.id = tontine_id
-      AND tontines.creator_id = auth.uid()
-    )
+    is_tontine_creator(auth.uid(), tontine_id)
+    OR is_admin(auth.uid())
   );
-CREATE POLICY "rounds_update" ON rounds
+
+CREATE POLICY "rounds_update_v2" ON rounds
   FOR UPDATE TO authenticated
   USING (
-    EXISTS (
-      SELECT 1 FROM tontines
-      WHERE tontines.id = rounds.tontine_id
-      AND tontines.creator_id = auth.uid()
-    )
+    is_tontine_creator(auth.uid(), tontine_id)
+    OR is_admin(auth.uid())
   );
-CREATE POLICY "admins_can_view_all_rounds" ON rounds
-  FOR SELECT TO authenticated USING (is_admin(auth.uid()));
-CREATE POLICY "admins_can_insert_rounds" ON rounds
-  FOR INSERT TO authenticated WITH CHECK (is_admin(auth.uid()));
-CREATE POLICY "admins_can_update_all_rounds" ON rounds
-  FOR UPDATE TO authenticated USING (is_admin(auth.uid()));
 
--- Payments Policies
-CREATE POLICY "payments_select" ON payments
+-- Payments Policies (V2: Fixed RLS recursion)
+CREATE POLICY "payments_select_v2" ON payments
   FOR SELECT TO authenticated
   USING (
     EXISTS (
       SELECT 1 FROM rounds
-      JOIN tontine_members ON tontine_members.tontine_id = rounds.tontine_id
       WHERE rounds.id = payments.round_id
-      AND tontine_members.user_id = auth.uid()
+      AND (
+        is_tontine_member(auth.uid(), rounds.tontine_id)
+        OR is_tontine_creator(auth.uid(), rounds.tontine_id)
+      )
     )
-    OR EXISTS (
-      SELECT 1 FROM rounds
-      JOIN tontines ON tontines.id = rounds.tontine_id
-      WHERE rounds.id = payments.round_id
-      AND tontines.creator_id = auth.uid()
-    )
+    OR is_admin(auth.uid())
   );
-CREATE POLICY "payments_insert" ON payments
+
+CREATE POLICY "payments_insert_v2" ON payments
   FOR INSERT TO authenticated
   WITH CHECK (
     EXISTS (
       SELECT 1 FROM tontine_members
-      WHERE tontine_members.id = member_id
+      WHERE tontine_members.id = payments.member_id
       AND tontine_members.user_id = auth.uid()
     )
     OR EXISTS (
       SELECT 1 FROM rounds
-      JOIN tontines ON tontines.id = rounds.tontine_id
-      WHERE rounds.id = round_id
-      AND tontines.creator_id = auth.uid()
+      WHERE rounds.id = payments.round_id
+      AND is_tontine_creator(auth.uid(), rounds.tontine_id)
     )
+    OR is_admin(auth.uid())
   );
-CREATE POLICY "payments_update" ON payments
+
+CREATE POLICY "payments_update_v2" ON payments
   FOR UPDATE TO authenticated
   USING (
     EXISTS (
@@ -359,17 +398,11 @@ CREATE POLICY "payments_update" ON payments
     )
     OR EXISTS (
       SELECT 1 FROM rounds
-      JOIN tontines ON tontines.id = rounds.tontine_id
       WHERE rounds.id = payments.round_id
-      AND tontines.creator_id = auth.uid()
+      AND is_tontine_creator(auth.uid(), rounds.tontine_id)
     )
+    OR is_admin(auth.uid())
   );
-CREATE POLICY "admins_can_view_all_payments" ON payments
-  FOR SELECT TO authenticated USING (is_admin(auth.uid()));
-CREATE POLICY "admins_can_insert_payments" ON payments
-  FOR INSERT TO authenticated WITH CHECK (is_admin(auth.uid()));
-CREATE POLICY "admins_can_update_all_payments" ON payments
-  FOR UPDATE TO authenticated USING (is_admin(auth.uid()));
 
 -- Notifications Policies
 CREATE POLICY "notifications_select" ON notifications
@@ -382,25 +415,23 @@ CREATE POLICY "notifications_update" ON notifications
 CREATE POLICY "admins_can_view_all_notifications" ON notifications
   FOR SELECT TO authenticated USING (is_admin(auth.uid()));
 
--- Audit Log Policies
-CREATE POLICY "audit_log_select" ON audit_log
+-- Audit Log Policies (V2: Fixed RLS recursion)
+CREATE POLICY "audit_log_select_v2" ON audit_log
   FOR SELECT TO authenticated
   USING (
-    EXISTS (
-      SELECT 1 FROM tontine_members
-      WHERE tontine_members.tontine_id = audit_log.tontine_id
-      AND tontine_members.user_id = auth.uid()
+    user_id = auth.uid()
+    OR (
+      tontine_id IS NOT NULL
+      AND (
+        is_tontine_member(auth.uid(), tontine_id)
+        OR is_tontine_creator(auth.uid(), tontine_id)
+      )
     )
-    OR EXISTS (
-      SELECT 1 FROM tontines
-      WHERE tontines.id = audit_log.tontine_id
-      AND tontines.creator_id = auth.uid()
-    )
+    OR is_admin(auth.uid())
   );
+
 CREATE POLICY "audit_log_insert" ON audit_log
   FOR INSERT TO authenticated WITH CHECK (true);
-CREATE POLICY "admins_can_view_all_audit_logs" ON audit_log
-  FOR SELECT TO authenticated USING (is_admin(auth.uid()));
 
 -- Immutable Audit Log: Explicitly deny UPDATE and DELETE for all users (including admins)
 CREATE POLICY "audit_log_immutable_no_update" ON audit_log

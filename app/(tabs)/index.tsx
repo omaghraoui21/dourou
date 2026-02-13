@@ -33,7 +33,7 @@ const mockTontines: Tontine[] = [
   },
   {
     id: '2',
-    name: 'Collègues Bureau',
+    name: 'Coll\u00e8gues Bureau',
     contribution: 150,
     frequency: 'weekly',
     totalMembers: 4,
@@ -49,7 +49,7 @@ const mockActivities: Activity[] = [
   {
     id: '1',
     type: 'payment',
-    message: 'Ahmed a payé 200 TND',
+    message: 'activity_payment',
     timestamp: new Date(),
     tontineId: '1',
     tontineName: 'Famille Ben Ali',
@@ -57,7 +57,7 @@ const mockActivities: Activity[] = [
   {
     id: '2',
     type: 'tour_start',
-    message: 'Tour 3 a commencé',
+    message: 'activity_tour_start',
     timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
     tontineId: '1',
     tontineName: 'Famille Ben Ali',
@@ -66,13 +66,31 @@ const mockActivities: Activity[] = [
 
 export default function DashboardScreen() {
   const { colors } = useTheme();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user, isSuperAdmin } = useUser();
+  const rtl = i18n.language === 'ar';
 
   const totalSavings = mockTontines.reduce(
-    (sum, t) => sum + t.contribution * t.currentTour,
+    (sum, tontine) => sum + tontine.contribution * tontine.currentTour,
     0
   );
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return t('dashboard.greeting_morning');
+    if (hour < 18) return t('dashboard.greeting_afternoon');
+    return t('dashboard.greeting_evening');
+  };
+
+  const getActivityMessage = (activity: Activity) => {
+    if (activity.type === 'payment') {
+      return `Ahmed ${t('tontine.paid').toLowerCase()} 200 ${t('common.tnd')}`;
+    }
+    if (activity.type === 'tour_start') {
+      return `${t('tontine.tour_number', { number: 3 })} - ${t('tontine.current').toLowerCase()}`;
+    }
+    return activity.message;
+  };
 
   const handleCreateTontine = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -87,16 +105,12 @@ export default function DashboardScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
-        <View style={styles.header}>
+        <View style={[styles.header, rtl && styles.headerRTL]}>
           <View style={styles.headerLeft}>
-            <Text style={[styles.greeting, { color: colors.textSecondary }]}>
-              {new Date().getHours() < 12
-                ? 'Bonjour'
-                : new Date().getHours() < 18
-                ? 'Bon après-midi'
-                : 'Bonsoir'}
+            <Text style={[styles.greeting, { color: colors.textSecondary, textAlign: rtl ? 'right' : 'left' }]}>
+              {getGreeting()}
             </Text>
-            <View style={styles.userNameRow}>
+            <View style={[styles.userNameRow, rtl && styles.rowRTL]}>
               <Text style={[styles.userName, { color: colors.text }]}>
                 {user?.firstName || 'Ahmed'}
               </Text>
@@ -125,7 +139,7 @@ export default function DashboardScreen() {
 
         {/* Active Tontines */}
         <View style={styles.section}>
-          <View style={styles.sectionHeader}>
+          <View style={[styles.sectionHeader, rtl && styles.rowRTL]}>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>
               {t('dashboard.active_tontines')}
             </Text>
@@ -148,7 +162,7 @@ export default function DashboardScreen() {
 
         {/* Upcoming Deadlines */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>
+          <Text style={[styles.sectionTitle, { color: colors.text, textAlign: rtl ? 'right' : 'left' }]}>
             {t('dashboard.upcoming_deadlines')}
           </Text>
 
@@ -164,13 +178,14 @@ export default function DashboardScreen() {
                   style={[
                     styles.deadlineCard,
                     { backgroundColor: colors.card, borderColor: colors.border },
+                    rtl && styles.rowRTL,
                   ]}
                 >
                   <View style={styles.deadlineInfo}>
-                    <Text style={[styles.deadlineName, { color: colors.text }]}>
+                    <Text style={[styles.deadlineName, { color: colors.text, textAlign: rtl ? 'right' : 'left' }]}>
                       {tontine.name}
                     </Text>
-                    <Text style={[styles.deadlineAmount, { color: colors.gold }]}>
+                    <Text style={[styles.deadlineAmount, { color: colors.gold, textAlign: rtl ? 'right' : 'left' }]}>
                       {tontine.contribution} {t('common.tnd')}
                     </Text>
                   </View>
@@ -180,7 +195,7 @@ export default function DashboardScreen() {
                       { color: daysUntil <= 3 ? colors.warning : colors.textSecondary },
                     ]}
                   >
-                    {daysUntil}j
+                    {t('common.days_short', { count: daysUntil })}
                   </Text>
                 </View>
               );
@@ -189,38 +204,43 @@ export default function DashboardScreen() {
 
         {/* Recent Activity */}
         <View style={[styles.section, { marginBottom: Spacing.xxl }]}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>
+          <Text style={[styles.sectionTitle, { color: colors.text, textAlign: rtl ? 'right' : 'left' }]}>
             {t('dashboard.recent_activity')}
           </Text>
 
-          {mockActivities.map((activity) => (
-            <View
-              key={activity.id}
-              style={[
-                styles.activityCard,
-                { backgroundColor: colors.card, borderColor: colors.border },
-              ]}
-            >
-              <View style={styles.activityDot}>
-                <View style={[styles.dot, { backgroundColor: colors.gold }]} />
+          {mockActivities.map((activity) => {
+            const hoursAgo = Math.floor(
+              (Date.now() - activity.timestamp.getTime()) / (1000 * 60 * 60)
+            );
+            return (
+              <View
+                key={activity.id}
+                style={[
+                  styles.activityCard,
+                  { backgroundColor: colors.card, borderColor: colors.border },
+                  rtl && styles.rowRTL,
+                ]}
+              >
+                <View style={[styles.activityDot, rtl && { paddingRight: 0, paddingLeft: Spacing.sm }]}>
+                  <View style={[styles.dot, { backgroundColor: colors.gold }]} />
+                </View>
+                <View style={styles.activityContent}>
+                  <Text style={[styles.activityMessage, { color: colors.text, textAlign: rtl ? 'right' : 'left' }]}>
+                    {getActivityMessage(activity)}
+                  </Text>
+                  <Text style={[styles.activityMeta, { color: colors.textSecondary, textAlign: rtl ? 'right' : 'left' }]}>
+                    {activity.tontineName} {'\u2022'} {t('common.hours_ago', { count: hoursAgo })}
+                  </Text>
+                </View>
               </View>
-              <View style={styles.activityContent}>
-                <Text style={[styles.activityMessage, { color: colors.text }]}>
-                  {activity.message}
-                </Text>
-                <Text style={[styles.activityMeta, { color: colors.textSecondary }]}>
-                  {activity.tontineName} • Il y a{' '}
-                  {Math.floor((Date.now() - activity.timestamp.getTime()) / (1000 * 60 * 60))}h
-                </Text>
-              </View>
-            </View>
-          ))}
+            );
+          })}
         </View>
       </ScrollView>
 
       {/* Floating Action Button */}
       <TouchableOpacity
-        style={[styles.fab, { backgroundColor: colors.gold }]}
+        style={[styles.fab, { backgroundColor: colors.gold }, rtl && styles.fabRTL]}
         onPress={handleCreateTontine}
         activeOpacity={0.8}
       >
@@ -247,6 +267,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  headerRTL: {
+    flexDirection: 'row-reverse',
+  },
   headerLeft: {
     flex: 1,
   },
@@ -254,6 +277,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.xs,
+  },
+  rowRTL: {
+    flexDirection: 'row-reverse',
   },
   greeting: {
     fontSize: FontSizes.sm,
@@ -364,6 +390,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 8,
+  },
+  fabRTL: {
+    right: undefined,
+    left: 24,
   },
   fabIcon: {
     fontSize: 32,

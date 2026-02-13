@@ -15,11 +15,12 @@ import { Spacing, FontSizes, BorderRadius } from '@/constants/theme';
 
 export default function OTPScreen() {
   const { colors } = useTheme();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { phone } = useLocalSearchParams();
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
   const inputRefs = useRef<(TextInput | null)[]>([]);
+  const rtl = i18n.language === 'ar';
 
   const handleOtpChange = (value: string, index: number) => {
     const newOtp = [...otp];
@@ -28,6 +29,15 @@ export default function OTPScreen() {
 
     if (value && index < 5) {
       inputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleKeyPress = (key: string, index: number) => {
+    if (key === 'Backspace' && !otp[index] && index > 0) {
+      const newOtp = [...otp];
+      newOtp[index - 1] = '';
+      setOtp(newOtp);
+      inputRefs.current[index - 1]?.focus();
     }
   };
 
@@ -56,10 +66,10 @@ export default function OTPScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <View style={styles.content}>
-        <Text style={[styles.title, { color: colors.text }]}>
+        <Text style={[styles.title, { color: colors.text, textAlign: rtl ? 'right' : 'left' }]}>
           {t('auth.otp_title')}
         </Text>
-        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+        <Text style={[styles.subtitle, { color: colors.textSecondary, textAlign: rtl ? 'right' : 'left' }]}>
           {t('auth.otp_subtitle', { phone })}
         </Text>
 
@@ -78,6 +88,7 @@ export default function OTPScreen() {
               ]}
               value={digit}
               onChangeText={(value) => handleOtpChange(value, index)}
+              onKeyPress={({ nativeEvent }) => handleKeyPress(nativeEvent.key, index)}
               keyboardType="number-pad"
               maxLength={1}
               textAlign="center"

@@ -33,7 +33,8 @@ const onboardingData = [
 
 export default function OnboardingScreen() {
   const { colors } = useTheme();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const rtl = i18n.language === 'ar';
   const [currentIndex, setCurrentIndex] = useState(0);
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -54,7 +55,7 @@ export default function OnboardingScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <TouchableOpacity style={styles.skipButton} onPress={handleSkip}>
+      <TouchableOpacity style={[styles.skipButton, rtl && styles.skipButtonRTL]} onPress={handleSkip}>
         <Text style={[styles.skipText, { color: colors.gold }]}>{t('common.skip')}</Text>
       </TouchableOpacity>
 
@@ -122,6 +123,10 @@ const styles = StyleSheet.create({
     right: Spacing.lg,
     zIndex: 10,
     padding: Spacing.sm,
+  },
+  skipButtonRTL: {
+    right: undefined,
+    left: Spacing.lg,
   },
   skipText: {
     fontSize: FontSizes.md,

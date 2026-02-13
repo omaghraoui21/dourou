@@ -9,7 +9,18 @@
     "edit": "Edit",
     "back": "Back",
     "next": "Next",
-    "tnd": "TND"
+    "tnd": "TND",
+    "loading": "Loading...",
+    "error": "Error",
+    "retry": "Retry",
+    "days_short": "{{count}}d",
+    "hours_ago": "{{count}}h ago",
+    "verified": "Verified",
+    "admin": "Admin",
+    "member": "Member",
+    "not_found_title": "Page Not Found",
+    "not_found_description": "This page does not exist.",
+    "go_home": "Go Home"
   },
   "splash": {
     "tagline": "Trust digitized for Tunisian tontines"
@@ -36,29 +47,53 @@
     "profile_title": "Complete your profile",
     "profile_subtitle": "Tell us about yourself",
     "first_name": "First Name",
-    "last_name": "Last Name"
+    "last_name": "Last Name",
+    "resend_code": "Resend code",
+    "invalid_phone": "Please enter a valid phone number",
+    "invalid_otp": "Please enter the 6-digit code"
   },
   "dashboard": {
     "title": "Dashboard",
+    "greeting_morning": "Good morning",
+    "greeting_afternoon": "Good afternoon",
+    "greeting_evening": "Good evening",
     "total_savings": "Total Active Savings",
     "active_tontines": "Active Tontines",
     "recent_activity": "Recent Activity",
     "upcoming_deadlines": "Upcoming Deadlines",
-    "view_all": "View All"
+    "view_all": "View All",
+    "no_activity": "No recent activity"
+  },
+  "tontines": {
+    "title": "My Tontines",
+    "active_count": "Active ({{count}})",
+    "completed_count": "Completed ({{count}})",
+    "no_active": "No active tontines",
+    "no_completed": "No completed tontines"
   },
   "tontine": {
     "create": "Create Tontine",
     "name": "Tontine Name",
+    "name_placeholder": "e.g. Family Ben Ali",
+    "name_description": "Give your tontine a name",
     "contribution": "Contribution Amount",
+    "contribution_description": "Amount and frequency of contribution",
     "frequency": "Frequency",
     "members": "Number of Members",
+    "members_description": "Total number of participants",
+    "members_min": "Minimum 2 members required",
     "distribution": "Distribution Logic",
+    "distribution_description": "How turns will be assigned",
     "fixed": "Fixed Order",
+    "fixed_description": "Order is defined in advance",
     "random": "Random Draw",
+    "random_description": "Random draw each turn",
     "trust": "Trust-Based",
+    "trust_description": "Based on trust score",
     "tours": "Tours",
     "members_list": "Members",
     "history": "History",
+    "history_empty": "Transaction history coming soon",
     "current": "Current",
     "upcoming": "Upcoming",
     "completed": "Completed",
@@ -66,7 +101,10 @@
     "pending": "Pending",
     "late": "Late",
     "weekly": "Weekly",
-    "monthly": "Monthly"
+    "monthly": "Monthly",
+    "summary": "Summary",
+    "summary_description": "Review the information",
+    "tour_number": "Tour {{number}}"
   },
   "payment": {
     "declare": "Declare Payment",
@@ -87,7 +125,8 @@
     "reliable": "Reliable",
     "trusted": "Trusted",
     "elite": "Elite",
-    "master": "Master"
+    "master": "Master",
+    "description": "Based on your punctuality and payment history"
   },
   "profile": {
     "title": "Profile",
@@ -96,6 +135,12 @@
     "theme": "Theme",
     "dark": "Dark Mode",
     "light": "Light Mode",
-    "logout": "Logout"
+    "logout": "Logout",
+    "statistics": "Statistics",
+    "stat_completed": "Completed Tontines",
+    "stat_active": "Active Tontines",
+    "stat_payment_rate": "Payment Rate",
+    "stat_tenure": "Months of Tenure",
+    "master_admin": "Master Admin"
   }
 }

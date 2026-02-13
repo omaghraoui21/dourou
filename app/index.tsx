@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Animated } from 'react-native';
 import { useTheme } from '@/contexts/ThemeContext';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { useUser } from '@/contexts/UserContext';
 import Svg, { Circle } from 'react-native-svg';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
@@ -10,22 +11,36 @@ const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 export default function SplashScreen() {
   const { colors } = useTheme();
   const { t } = useTranslation();
+  const { user, isLoading } = useUser();
   const animatedValue = useRef(new Animated.Value(0)).current;
+  const hasNavigated = useRef(false);
 
   useEffect(() => {
-    // Animate the circle drawing
     Animated.timing(animatedValue, {
       toValue: 1,
       duration: 2000,
       useNativeDriver: false,
-    }).start(() => {
-      // Navigate to onboarding after animation
-      setTimeout(() => {
-        router.replace('/onboarding');
-      }, 500);
-    });
+    }).start();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (hasNavigated.current) return;
+
+    // Wait for both animation completion (2s) and user loading
+    const timer = setTimeout(() => {
+      if (!isLoading && !hasNavigated.current) {
+        hasNavigated.current = true;
+        if (user) {
+          router.replace('/(tabs)');
+        } else {
+          router.replace('/onboarding');
+        }
+      }
+    }, 2500);
+
+    return () => clearTimeout(timer);
+  }, [isLoading, user]);
 
   const circumference = 2 * Math.PI * 80;
   const strokeDashoffset = animatedValue.interpolate({
@@ -37,7 +52,6 @@ export default function SplashScreen() {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.logoContainer}>
         <Svg width={200} height={200} viewBox="0 0 200 200">
-          {/* Outer gold circle */}
           <AnimatedCircle
             cx="100"
             cy="100"
@@ -49,7 +63,6 @@ export default function SplashScreen() {
             strokeDashoffset={strokeDashoffset}
             strokeLinecap="round"
           />
-          {/* Inner tree motif - simplified */}
           <Circle cx="100" cy="70" r="8" fill={colors.gold} opacity={0.6} />
           <Circle cx="90" cy="85" r="6" fill={colors.gold} opacity={0.6} />
           <Circle cx="110" cy="85" r="6" fill={colors.gold} opacity={0.6} />
@@ -59,7 +72,7 @@ export default function SplashScreen() {
         </Svg>
 
         <Text style={[styles.title, { color: colors.gold }]}>Dourou</Text>
-        <Text style={[styles.subtitle, { color: colors.text }]}>دورو</Text>
+        <Text style={[styles.subtitle, { color: colors.text }]}>{'\u062F\u0648\u0631\u0648'}</Text>
       </View>
 
       <Text style={[styles.tagline, { color: colors.textSecondary }]}>

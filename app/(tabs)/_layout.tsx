@@ -1,4 +1,5 @@
 import { Tabs } from 'expo-router';
+import { Text } from 'react-native';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -37,7 +38,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="tontines"
         options={{
-          title: 'Tontines',
+          title: t('tontines.title'),
           tabBarIcon: ({ color }) => <TabBarIcon name="list" color={color} />,
         }}
       />
@@ -53,12 +54,11 @@ export default function TabLayout() {
 }
 
 function TabBarIcon({ name, color }: { name: string; color: string }) {
-  // Simple icon placeholders
   const icons: Record<string, string> = {
-    home: '🏠',
-    list: '📋',
-    person: '👤',
+    home: '\uD83C\uDFE0',
+    list: '\uD83D\uDCCB',
+    person: '\uD83D\uDC64',
   };
 
-  return <span style={{ fontSize: 24 }}>{icons[name]}</span>;
+  return <Text style={{ fontSize: 24, color }}>{icons[name]}</Text>;
 }

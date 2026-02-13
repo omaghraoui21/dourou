@@ -9,7 +9,18 @@
     "edit": "تعديل",
     "back": "رجوع",
     "next": "التالي",
-    "tnd": "د.ت"
+    "tnd": "د.ت",
+    "loading": "جاري التحميل...",
+    "error": "خطأ",
+    "retry": "إعادة المحاولة",
+    "days_short": "{{count}}ي",
+    "hours_ago": "منذ {{count}}س",
+    "verified": "موثّق",
+    "admin": "مشرف",
+    "member": "عضو",
+    "not_found_title": "الصفحة غير موجودة",
+    "not_found_description": "هذه الصفحة غير موجودة.",
+    "go_home": "العودة للرئيسية"
   },
   "splash": {
     "tagline": "الثقة الرقمية للجمعيات التونسية"
@@ -36,29 +47,53 @@
     "profile_title": "أكمل ملفك الشخصي",
     "profile_subtitle": "أخبرنا عن نفسك",
     "first_name": "الاسم الأول",
-    "last_name": "اسم العائلة"
+    "last_name": "اسم العائلة",
+    "resend_code": "إعادة إرسال الرمز",
+    "invalid_phone": "يرجى إدخال رقم هاتف صحيح",
+    "invalid_otp": "يرجى إدخال الرمز المكون من 6 أرقام"
   },
   "dashboard": {
     "title": "لوحة التحكم",
+    "greeting_morning": "صباح الخير",
+    "greeting_afternoon": "مساء الخير",
+    "greeting_evening": "مساء الخير",
     "total_savings": "إجمالي المدخرات النشطة",
     "active_tontines": "الجمعيات النشطة",
     "recent_activity": "النشاط الأخير",
     "upcoming_deadlines": "المواعيد النهائية القادمة",
-    "view_all": "عرض الكل"
+    "view_all": "عرض الكل",
+    "no_activity": "لا يوجد نشاط حديث"
+  },
+  "tontines": {
+    "title": "جمعياتي",
+    "active_count": "نشطة ({{count}})",
+    "completed_count": "مكتملة ({{count}})",
+    "no_active": "لا توجد جمعيات نشطة",
+    "no_completed": "لا توجد جمعيات مكتملة"
   },
   "tontine": {
     "create": "إنشاء جمعية",
     "name": "اسم الجمعية",
+    "name_placeholder": "مثال: عائلة بن علي",
+    "name_description": "أعط اسمًا لجمعيتك",
     "contribution": "مبلغ المساهمة",
+    "contribution_description": "المبلغ وتكرار المساهمة",
     "frequency": "التكرار",
     "members": "عدد الأعضاء",
+    "members_description": "العدد الإجمالي للمشاركين",
+    "members_min": "مطلوب عضوان كحد أدنى",
     "distribution": "منطق التوزيع",
+    "distribution_description": "كيف سيتم تعيين الأدوار",
     "fixed": "ترتيب ثابت",
+    "fixed_description": "يتم تحديد الترتيب مسبقًا",
     "random": "سحب عشوائي",
+    "random_description": "سحب عشوائي في كل دور",
     "trust": "على أساس الثقة",
+    "trust_description": "بناءً على درجة الثقة",
     "tours": "الجولات",
     "members_list": "الأعضاء",
     "history": "التاريخ",
+    "history_empty": "سجل المعاملات قريبًا",
     "current": "الحالي",
     "upcoming": "القادم",
     "completed": "مكتمل",
@@ -66,7 +101,10 @@
     "pending": "قيد الانتظار",
     "late": "متأخر",
     "weekly": "أسبوعي",
-    "monthly": "شهري"
+    "monthly": "شهري",
+    "summary": "ملخص",
+    "summary_description": "راجع المعلومات",
+    "tour_number": "الجولة {{number}}"
   },
   "payment": {
     "declare": "الإعلان عن دفع",
@@ -85,9 +123,10 @@
     "tier": "المستوى",
     "novice": "مبتدئ",
     "reliable": "موثوق",
-    "trusted": "موثوق",
+    "trusted": "جدير بالثقة",
     "elite": "نخبة",
-    "master": "خبير"
+    "master": "خبير",
+    "description": "بناءً على التزامك بالمواعيد وسجل الدفع الخاص بك"
   },
   "profile": {
     "title": "الملف الشخصي",
@@ -96,6 +135,12 @@
     "theme": "السمة",
     "dark": "الوضع الداكن",
     "light": "الوضع الفاتح",
-    "logout": "تسجيل الخروج"
+    "logout": "تسجيل الخروج",
+    "statistics": "الإحصائيات",
+    "stat_completed": "الجمعيات المكتملة",
+    "stat_active": "الجمعيات النشطة",
+    "stat_payment_rate": "معدل الدفع",
+    "stat_tenure": "أشهر العضوية",
+    "master_admin": "المشرف الرئيسي"
   }
 }

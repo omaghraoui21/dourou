@@ -30,7 +30,7 @@ const mockTontines: Tontine[] = [
   },
   {
     id: '2',
-    name: 'Collègues Bureau',
+    name: 'Coll\u00e8gues Bureau',
     contribution: 150,
     frequency: 'weekly',
     totalMembers: 4,
@@ -56,9 +56,13 @@ const mockTontines: Tontine[] = [
 
 export default function TontinesScreen() {
   const { colors } = useTheme();
+  const { t, i18n } = useTranslation();
   const [filter, setFilter] = useState<'active' | 'completed'>('active');
+  const rtl = i18n.language === 'ar';
 
-  const filteredTontines = mockTontines.filter((t) => t.status === filter);
+  const filteredTontines = mockTontines.filter((tontine) => tontine.status === filter);
+  const activeCount = mockTontines.filter((tontine) => tontine.status === 'active').length;
+  const completedCount = mockTontines.filter((tontine) => tontine.status === 'completed').length;
 
   const handleFilterChange = (newFilter: 'active' | 'completed') => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -69,11 +73,13 @@ export default function TontinesScreen() {
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={[styles.title, { color: colors.text }]}>Mes Tontines</Text>
+        <Text style={[styles.title, { color: colors.text, textAlign: rtl ? 'right' : 'left' }]}>
+          {t('tontines.title')}
+        </Text>
       </View>
 
       {/* Filter Tabs */}
-      <View style={styles.filterContainer}>
+      <View style={[styles.filterContainer, rtl && { flexDirection: 'row-reverse' }]}>
         <TouchableOpacity
           style={[
             styles.filterTab,
@@ -90,7 +96,7 @@ export default function TontinesScreen() {
               },
             ]}
           >
-            Active ({mockTontines.filter((t) => t.status === 'active').length})
+            {t('tontines.active_count', { count: activeCount })}
           </Text>
         </TouchableOpacity>
 
@@ -110,7 +116,7 @@ export default function TontinesScreen() {
               },
             ]}
           >
-            Terminées ({mockTontines.filter((t) => t.status === 'completed').length})
+            {t('tontines.completed_count', { count: completedCount })}
           </Text>
         </TouchableOpacity>
       </View>
@@ -129,8 +135,8 @@ export default function TontinesScreen() {
           <View style={styles.emptyState}>
             <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
               {filter === 'active'
-                ? 'Aucune tontine active'
-                : 'Aucune tontine terminée'}
+                ? t('tontines.no_active')
+                : t('tontines.no_completed')}
             </Text>
           </View>
         )}

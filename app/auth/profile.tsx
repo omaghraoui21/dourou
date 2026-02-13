@@ -17,8 +17,9 @@ import { User } from '@/types';
 
 export default function ProfileSetupScreen() {
   const { colors } = useTheme();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { setUser } = useUser();
+  const rtl = i18n.language === 'ar';
   const { phone } = useLocalSearchParams();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -57,10 +58,10 @@ export default function ProfileSetupScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <View style={styles.content}>
-        <Text style={[styles.title, { color: colors.text }]}>
+        <Text style={[styles.title, { color: colors.text, textAlign: rtl ? 'right' : 'left' }]}>
           {t('auth.profile_title')}
         </Text>
-        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+        <Text style={[styles.subtitle, { color: colors.textSecondary, textAlign: rtl ? 'right' : 'left' }]}>
           {t('auth.profile_subtitle')}
         </Text>
 
@@ -72,6 +73,7 @@ export default function ProfileSetupScreen() {
                 backgroundColor: colors.card,
                 borderColor: colors.border,
                 color: colors.text,
+                textAlign: rtl ? 'right' : 'left',
               },
             ]}
             placeholder={t('auth.first_name')}
@@ -87,6 +89,7 @@ export default function ProfileSetupScreen() {
                 backgroundColor: colors.card,
                 borderColor: colors.border,
                 color: colors.text,
+                textAlign: rtl ? 'right' : 'left',
               },
             ]}
             placeholder={t('auth.last_name')}

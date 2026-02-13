@@ -23,6 +23,7 @@ export default function ProfileScreen() {
   const { colors, toggleTheme, isDark } = useTheme();
   const { t, i18n } = useTranslation();
   const { user, isSuperAdmin, logout } = useUser();
+  const rtl = i18n.language === 'ar';
 
   const trustScore = user?.trustScore || 4.2;
   const tier = getTrustTier(trustScore);
@@ -48,7 +49,7 @@ export default function ProfileScreen() {
         <View style={styles.header}>
           <View style={[styles.avatar, { borderColor: isSuperAdmin ? '#FFD700' : colors.gold }]}>
             {isSuperAdmin ? (
-              <Text style={styles.avatarText}>👑</Text>
+              <Text style={styles.avatarText}>{'\uD83D\uDC51'}</Text>
             ) : (
               <Text style={styles.avatarText}>{user?.avatar || 'AB'}</Text>
             )}
@@ -67,7 +68,9 @@ export default function ProfileScreen() {
           )}
           {user?.isVerified && (
             <View style={[styles.verifiedBadge, { backgroundColor: colors.success + '20' }]}>
-              <Text style={[styles.verifiedText, { color: colors.success }]}>✓ Verified</Text>
+              <Text style={[styles.verifiedText, { color: colors.success }]}>
+                {'\u2713'} {t('common.verified')}
+              </Text>
             </View>
           )}
         </View>
@@ -79,11 +82,11 @@ export default function ProfileScreen() {
             { backgroundColor: colors.card, borderColor: colors.gold },
           ]}
         >
-          <Text style={[styles.trustTitle, { color: colors.text }]}>
+          <Text style={[styles.trustTitle, { color: colors.text, textAlign: rtl ? 'right' : 'left' }]}>
             {t('trust.title')}
           </Text>
 
-          <View style={styles.trustContent}>
+          <View style={[styles.trustContent, rtl && { flexDirection: 'row-reverse' }]}>
             <View style={styles.trustLeft}>
               <ProgressRing progress={trustScore / 5} size={100} strokeWidth={8} />
               <View style={styles.trustScoreOverlay}>
@@ -99,15 +102,16 @@ export default function ProfileScreen() {
                 style={[
                   styles.tierBadge,
                   { backgroundColor: colors.gold + '20', borderColor: colors.gold },
+                  rtl && { alignSelf: 'flex-end' },
                 ]}
               >
                 <Text style={[styles.tierText, { color: colors.gold }]}>
-                  ⭐ {t(`trust.${tier}`)}
+                  {'\u2B50'} {t(`trust.${tier}`)}
                 </Text>
               </View>
 
-              <Text style={[styles.trustDescription, { color: colors.textSecondary }]}>
-                Basé sur votre ponctualité et historique de paiement
+              <Text style={[styles.trustDescription, { color: colors.textSecondary, textAlign: rtl ? 'right' : 'left' }]}>
+                {t('trust.description')}
               </Text>
             </View>
           </View>
@@ -115,7 +119,7 @@ export default function ProfileScreen() {
 
         {/* Settings Section */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>
+          <Text style={[styles.sectionTitle, { color: colors.text, textAlign: rtl ? 'right' : 'left' }]}>
             {t('profile.settings')}
           </Text>
 
@@ -126,10 +130,10 @@ export default function ProfileScreen() {
               { backgroundColor: colors.card, borderColor: colors.border },
             ]}
           >
-            <Text style={[styles.settingLabel, { color: colors.text }]}>
+            <Text style={[styles.settingLabel, { color: colors.text, textAlign: rtl ? 'right' : 'left' }]}>
               {t('profile.language')}
             </Text>
-            <View style={styles.languageButtons}>
+            <View style={[styles.languageButtons, rtl && { flexDirection: 'row-reverse' }]}>
               {['fr', 'ar', 'en'].map((lang) => (
                 <TouchableOpacity
                   key={lang}
@@ -165,12 +169,12 @@ export default function ProfileScreen() {
               { backgroundColor: colors.card, borderColor: colors.border },
             ]}
           >
-            <View style={styles.settingRow}>
+            <View style={[styles.settingRow, rtl && { flexDirection: 'row-reverse' }]}>
               <View>
-                <Text style={[styles.settingLabel, { color: colors.text }]}>
+                <Text style={[styles.settingLabel, { color: colors.text, textAlign: rtl ? 'right' : 'left' }]}>
                   {t('profile.theme')}
                 </Text>
-                <Text style={[styles.settingSubtext, { color: colors.textSecondary }]}>
+                <Text style={[styles.settingSubtext, { color: colors.textSecondary, textAlign: rtl ? 'right' : 'left' }]}>
                   {isDark ? t('profile.dark') : t('profile.light')}
                 </Text>
               </View>
@@ -186,7 +190,9 @@ export default function ProfileScreen() {
 
         {/* Stats Section */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Statistiques</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text, textAlign: rtl ? 'right' : 'left' }]}>
+            {t('profile.statistics')}
+          </Text>
 
           <View style={styles.statsGrid}>
             <View
@@ -197,7 +203,7 @@ export default function ProfileScreen() {
             >
               <Text style={[styles.statValue, { color: colors.gold }]}>8</Text>
               <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
-                Tontines complétées
+                {t('profile.stat_completed')}
               </Text>
             </View>
 
@@ -209,7 +215,7 @@ export default function ProfileScreen() {
             >
               <Text style={[styles.statValue, { color: colors.gold }]}>2</Text>
               <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
-                Tontines actives
+                {t('profile.stat_active')}
               </Text>
             </View>
 
@@ -221,7 +227,7 @@ export default function ProfileScreen() {
             >
               <Text style={[styles.statValue, { color: colors.gold }]}>100%</Text>
               <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
-                Taux de paiement
+                {t('profile.stat_payment_rate')}
               </Text>
             </View>
 
@@ -233,7 +239,7 @@ export default function ProfileScreen() {
             >
               <Text style={[styles.statValue, { color: colors.gold }]}>12</Text>
               <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
-                Mois d&apos;ancienneté
+                {t('profile.stat_tenure')}
               </Text>
             </View>
           </View>

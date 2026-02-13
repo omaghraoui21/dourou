@@ -119,8 +119,9 @@ const mockMembers: Member[] = [
 
 export default function TontineDetailScreen() {
   const { colors } = useTheme();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [activeTab, setActiveTab] = useState<'tours' | 'members' | 'history'>('tours');
+  const rtl = i18n.language === 'ar';
 
   const handleTabChange = (tab: 'tours' | 'members' | 'history') => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -132,12 +133,18 @@ export default function TontineDetailScreen() {
     router.back();
   };
 
+  const getDateLocale = () => {
+    if (i18n.language === 'ar') return 'ar-TN';
+    if (i18n.language === 'en') return 'en-US';
+    return 'fr-FR';
+  };
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, rtl && { flexDirection: 'row-reverse' }]}>
         <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-          <Text style={[styles.backIcon, { color: colors.gold }]}>←</Text>
+          <Text style={[styles.backIcon, { color: colors.gold }]}>{rtl ? '\u2192' : '\u2190'}</Text>
         </TouchableOpacity>
         <Text style={[styles.title, { color: colors.text }]}>Famille Ben Ali</Text>
         <View style={{ width: 40 }} />
@@ -150,7 +157,7 @@ export default function TontineDetailScreen() {
           { backgroundColor: colors.card, borderColor: colors.gold },
         ]}
       >
-        <View style={styles.infoRow}>
+        <View style={[styles.infoRow, rtl && { flexDirection: 'row-reverse' }]}>
           <View style={styles.infoItem}>
             <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>
               {t('tontine.contribution')}
@@ -177,7 +184,7 @@ export default function TontineDetailScreen() {
       </View>
 
       {/* Tabs */}
-      <View style={styles.tabs}>
+      <View style={[styles.tabs, rtl && { flexDirection: 'row-reverse' }]}>
         {(['tours', 'members', 'history'] as const).map((tab) => (
           <TouchableOpacity
             key={tab}
@@ -199,7 +206,7 @@ export default function TontineDetailScreen() {
                 },
               ]}
             >
-              {t(`tontine.${tab}`)}
+              {tab === 'members' ? t('tontine.members_list') : t(`tontine.${tab}`)}
             </Text>
           </TouchableOpacity>
         ))}
@@ -212,7 +219,7 @@ export default function TontineDetailScreen() {
         showsVerticalScrollIndicator={false}
       >
         {activeTab === 'tours' && (
-          <View style={styles.timeline}>
+          <View style={[styles.timeline, rtl && { paddingLeft: 0, paddingRight: Spacing.md }]}>
             {mockTours.map((tour, index) => {
               const recipient = mockMembers.find((m) => m.userId === tour.recipientId)?.user;
               const isLast = index === mockTours.length - 1;
@@ -228,6 +235,7 @@ export default function TontineDetailScreen() {
                           backgroundColor:
                             tour.status === 'completed' ? colors.gold : colors.border,
                         },
+                        rtl && { left: undefined, right: 15 },
                       ]}
                     />
                   )}
@@ -246,6 +254,7 @@ export default function TontineDetailScreen() {
                         borderColor:
                           tour.status === 'completed' ? colors.gold : colors.border,
                       },
+                      rtl && { left: undefined, right: 0 },
                     ]}
                   >
                     {tour.status === 'current' && (
@@ -265,11 +274,12 @@ export default function TontineDetailScreen() {
                           tour.status === 'current' ? colors.gold : colors.border,
                         borderWidth: tour.status === 'current' ? 2 : 1,
                       },
+                      rtl && { marginLeft: 0, marginRight: 48 },
                     ]}
                   >
-                    <View style={styles.tourHeader}>
+                    <View style={[styles.tourHeader, rtl && { flexDirection: 'row-reverse' }]}>
                       <Text style={[styles.tourNumber, { color: colors.text }]}>
-                        Tour {tour.tourNumber}
+                        {t('tontine.tour_number', { number: tour.tourNumber })}
                       </Text>
                       <View
                         style={[
@@ -303,11 +313,11 @@ export default function TontineDetailScreen() {
                     </View>
 
                     <View style={styles.tourInfo}>
-                      <Text style={[styles.recipientName, { color: colors.text }]}>
+                      <Text style={[styles.recipientName, { color: colors.text, textAlign: rtl ? 'right' : 'left' }]}>
                         {recipient?.firstName} {recipient?.lastName}
                       </Text>
-                      <Text style={[styles.tourDate, { color: colors.textSecondary }]}>
-                        {tour.deadline.toLocaleDateString('fr-FR', {
+                      <Text style={[styles.tourDate, { color: colors.textSecondary, textAlign: rtl ? 'right' : 'left' }]}>
+                        {tour.deadline.toLocaleDateString(getDateLocale(), {
                           day: 'numeric',
                           month: 'long',
                           year: 'numeric',
@@ -320,7 +330,6 @@ export default function TontineDetailScreen() {
                         title={t('payment.declare')}
                         onPress={() => {
                           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                          // Open payment modal
                         }}
                         variant="flouci"
                         style={styles.payButton}
@@ -347,21 +356,23 @@ export default function TontineDetailScreen() {
                       borderColor: isMemberSuperAdmin ? '#FFD700' : colors.border,
                       borderWidth: isMemberSuperAdmin ? 2 : 1,
                     },
+                    rtl && { flexDirection: 'row-reverse' },
                   ]}
                 >
                   <View
                     style={[
                       styles.memberAvatar,
                       { borderColor: isMemberSuperAdmin ? '#FFD700' : colors.gold },
+                      rtl && { marginRight: 0, marginLeft: Spacing.md },
                     ]}
                   >
                     <Text style={styles.memberAvatarText}>
-                      {isMemberSuperAdmin ? '👑' : member.user.avatar}
+                      {isMemberSuperAdmin ? '\uD83D\uDC51' : member.user.avatar}
                     </Text>
                   </View>
 
                   <View style={styles.memberInfo}>
-                    <View style={styles.memberNameRow}>
+                    <View style={[styles.memberNameRow, rtl && { flexDirection: 'row-reverse' }]}>
                       <Text style={[styles.memberName, { color: colors.text }]}>
                         {member.user.firstName} {member.user.lastName}
                       </Text>
@@ -369,12 +380,12 @@ export default function TontineDetailScreen() {
                         <SuperAdminBadge size="small" showLabel={false} />
                       )}
                     </View>
-                    <Text style={[styles.memberRole, { color: colors.textSecondary }]}>
+                    <Text style={[styles.memberRole, { color: colors.textSecondary, textAlign: rtl ? 'right' : 'left' }]}>
                       {isMemberSuperAdmin
-                        ? '👑 Master Admin'
+                        ? `\uD83D\uDC51 ${t('profile.master_admin')}`
                         : member.role === 'admin'
-                        ? '👑 Admin'
-                        : 'Membre'}
+                        ? `\uD83D\uDC51 ${t('common.admin')}`
+                        : t('common.member')}
                     </Text>
                   </View>
 
@@ -416,7 +427,7 @@ export default function TontineDetailScreen() {
         {activeTab === 'history' && (
           <View style={styles.emptyState}>
             <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-              Historique des transactions à venir
+              {t('tontine.history_empty')}
             </Text>
           </View>
         )}

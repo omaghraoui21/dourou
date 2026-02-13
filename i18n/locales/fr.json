@@ -9,7 +9,18 @@
     "edit": "Modifier",
     "back": "Retour",
     "next": "Suivant",
-    "tnd": "DT"
+    "tnd": "DT",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "retry": "Réessayer",
+    "days_short": "{{count}}j",
+    "hours_ago": "Il y a {{count}}h",
+    "verified": "Vérifié",
+    "admin": "Admin",
+    "member": "Membre",
+    "not_found_title": "Page introuvable",
+    "not_found_description": "Cette page n'existe pas.",
+    "go_home": "Retour à l'accueil"
   },
   "splash": {
     "tagline": "La confiance numérisée pour les tontines tunisiennes"
@@ -36,29 +47,53 @@
     "profile_title": "Complétez votre profil",
     "profile_subtitle": "Parlez-nous de vous",
     "first_name": "Prénom",
-    "last_name": "Nom"
+    "last_name": "Nom",
+    "resend_code": "Renvoyer le code",
+    "invalid_phone": "Veuillez entrer un numéro de téléphone valide",
+    "invalid_otp": "Veuillez entrer le code à 6 chiffres"
   },
   "dashboard": {
     "title": "Tableau de bord",
+    "greeting_morning": "Bonjour",
+    "greeting_afternoon": "Bon après-midi",
+    "greeting_evening": "Bonsoir",
     "total_savings": "Épargne active totale",
     "active_tontines": "Tontines actives",
     "recent_activity": "Activité récente",
     "upcoming_deadlines": "Échéances à venir",
-    "view_all": "Voir tout"
+    "view_all": "Voir tout",
+    "no_activity": "Aucune activité récente"
+  },
+  "tontines": {
+    "title": "Mes Tontines",
+    "active_count": "Active ({{count}})",
+    "completed_count": "Terminées ({{count}})",
+    "no_active": "Aucune tontine active",
+    "no_completed": "Aucune tontine terminée"
   },
   "tontine": {
     "create": "Créer une tontine",
     "name": "Nom de la tontine",
+    "name_placeholder": "Ex: Famille Ben Ali",
+    "name_description": "Donnez un nom à votre tontine",
     "contribution": "Montant de la cotisation",
+    "contribution_description": "Montant et fréquence de cotisation",
     "frequency": "Fréquence",
     "members": "Nombre de membres",
+    "members_description": "Nombre total de participants",
+    "members_min": "Minimum 2 membres requis",
     "distribution": "Logique de distribution",
+    "distribution_description": "Comment les tours seront attribués",
     "fixed": "Ordre fixe",
+    "fixed_description": "L'ordre est défini à l'avance",
     "random": "Tirage aléatoire",
+    "random_description": "Tirage au sort à chaque tour",
     "trust": "Basé sur la confiance",
+    "trust_description": "Basé sur le score de confiance",
     "tours": "Tours",
     "members_list": "Membres",
     "history": "Historique",
+    "history_empty": "Historique des transactions à venir",
     "current": "En cours",
     "upcoming": "À venir",
     "completed": "Terminé",
@@ -66,7 +101,10 @@
     "pending": "En attente",
     "late": "En retard",
     "weekly": "Hebdomadaire",
-    "monthly": "Mensuel"
+    "monthly": "Mensuel",
+    "summary": "Récapitulatif",
+    "summary_description": "Vérifiez les informations",
+    "tour_number": "Tour {{number}}"
   },
   "payment": {
     "declare": "Déclarer un paiement",
@@ -85,9 +123,10 @@
     "tier": "Niveau",
     "novice": "Novice",
     "reliable": "Fiable",
-    "trusted": "Fiable",
+    "trusted": "De confiance",
     "elite": "Élite",
-    "master": "Maître"
+    "master": "Maître",
+    "description": "Basé sur votre ponctualité et historique de paiement"
   },
   "profile": {
     "title": "Profil",
@@ -96,6 +135,12 @@
     "theme": "Thème",
     "dark": "Mode sombre",
     "light": "Mode clair",
-    "logout": "Déconnexion"
+    "logout": "Déconnexion",
+    "statistics": "Statistiques",
+    "stat_completed": "Tontines complétées",
+    "stat_active": "Tontines actives",
+    "stat_payment_rate": "Taux de paiement",
+    "stat_tenure": "Mois d'ancienneté",
+    "master_admin": "Master Admin"
   }
 }

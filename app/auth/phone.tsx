@@ -17,8 +17,9 @@ import { useUser } from '@/contexts/UserContext';
 
 export default function PhoneAuthScreen() {
   const { colors } = useTheme();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { setUser } = useUser();
+  const rtl = i18n.language === 'ar';
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -55,10 +56,10 @@ export default function PhoneAuthScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <View style={styles.content}>
-        <Text style={[styles.title, { color: colors.text }]}>
+        <Text style={[styles.title, { color: colors.text, textAlign: rtl ? 'right' : 'left' }]}>
           {t('auth.phone_title')}
         </Text>
-        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+        <Text style={[styles.subtitle, { color: colors.textSecondary, textAlign: rtl ? 'right' : 'left' }]}>
           {t('auth.phone_subtitle')}
         </Text>
 
@@ -66,6 +67,7 @@ export default function PhoneAuthScreen() {
           style={[
             styles.inputContainer,
             { backgroundColor: colors.card, borderColor: colors.border },
+            rtl && { flexDirection: 'row-reverse' },
           ]}
         >
           <Text style={[styles.prefix, { color: colors.text }]}>+216</Text>

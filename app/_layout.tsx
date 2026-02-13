@@ -27,6 +27,7 @@ export default function RootLayout() {
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="tontine/[id]" />
           <Stack.Screen name="tontine/create" />
+          <Stack.Screen name="+not-found" />
         </Stack>
       </UserProvider>
     </ThemeProvider>

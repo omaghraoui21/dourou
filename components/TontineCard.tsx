@@ -71,7 +71,7 @@ export const TontineCard: React.FC<TontineCardProps> = ({ tontine }) => {
               { color: daysUntilDeadline <= 3 ? colors.warning : colors.text },
             ]}
           >
-            {daysUntilDeadline}j
+            {t('common.days_short', { count: daysUntilDeadline })}
           </Text>
         </View>
       </View>

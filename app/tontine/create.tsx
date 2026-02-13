@@ -29,9 +29,10 @@ interface TontineData {
 
 export default function CreateTontineScreen() {
   const { colors } = useTheme();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [currentStep, setCurrentStep] = useState<Step>(1);
   const [loading, setLoading] = useState(false);
+  const rtl = i18n.language === 'ar';
   const [data, setData] = useState<TontineData>({
     name: '',
     contribution: '',
@@ -60,7 +61,6 @@ export default function CreateTontineScreen() {
 
   const handleCreate = async () => {
     setLoading(true);
-    // Simulate API call
     setTimeout(() => {
       setLoading(false);
       router.back();
@@ -88,9 +88,9 @@ export default function CreateTontineScreen() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, rtl && { flexDirection: 'row-reverse' }]}>
         <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-          <Text style={[styles.backIcon, { color: colors.gold }]}>←</Text>
+          <Text style={[styles.backIcon, { color: colors.gold }]}>{rtl ? '\u2192' : '\u2190'}</Text>
         </TouchableOpacity>
         <Text style={[styles.title, { color: colors.text }]}>
           {t('tontine.create')}
@@ -99,9 +99,9 @@ export default function CreateTontineScreen() {
       </View>
 
       {/* Progress indicator */}
-      <View style={styles.progressContainer}>
+      <View style={[styles.progressContainer, rtl && { flexDirection: 'row-reverse' }]}>
         {[1, 2, 3, 4, 5].map((step) => (
-          <View key={step} style={styles.progressItem}>
+          <View key={step} style={[styles.progressItem, rtl && { flexDirection: 'row-reverse' }]}>
             <View
               style={[
                 styles.progressDot,
@@ -137,11 +137,11 @@ export default function CreateTontineScreen() {
           {/* Step 1: Name */}
           {currentStep === 1 && (
             <View style={styles.step}>
-              <Text style={[styles.stepTitle, { color: colors.text }]}>
+              <Text style={[styles.stepTitle, { color: colors.text, textAlign: rtl ? 'right' : 'left' }]}>
                 {t('tontine.name')}
               </Text>
-              <Text style={[styles.stepDescription, { color: colors.textSecondary }]}>
-                Donnez un nom à votre tontine
+              <Text style={[styles.stepDescription, { color: colors.textSecondary, textAlign: rtl ? 'right' : 'left' }]}>
+                {t('tontine.name_description')}
               </Text>
               <TextInput
                 style={[
@@ -150,9 +150,10 @@ export default function CreateTontineScreen() {
                     backgroundColor: colors.card,
                     borderColor: colors.border,
                     color: colors.text,
+                    textAlign: rtl ? 'right' : 'left',
                   },
                 ]}
-                placeholder="Ex: Famille Ben Ali"
+                placeholder={t('tontine.name_placeholder')}
                 placeholderTextColor={colors.textSecondary}
                 value={data.name}
                 onChangeText={(text) => setData({ ...data, name: text })}
@@ -164,11 +165,11 @@ export default function CreateTontineScreen() {
           {/* Step 2: Contribution & Frequency */}
           {currentStep === 2 && (
             <View style={styles.step}>
-              <Text style={[styles.stepTitle, { color: colors.text }]}>
+              <Text style={[styles.stepTitle, { color: colors.text, textAlign: rtl ? 'right' : 'left' }]}>
                 {t('tontine.contribution')}
               </Text>
-              <Text style={[styles.stepDescription, { color: colors.textSecondary }]}>
-                Montant et fréquence de cotisation
+              <Text style={[styles.stepDescription, { color: colors.textSecondary, textAlign: rtl ? 'right' : 'left' }]}>
+                {t('tontine.contribution_description')}
               </Text>
 
               <View style={styles.inputGroup}>
@@ -179,6 +180,7 @@ export default function CreateTontineScreen() {
                       backgroundColor: colors.card,
                       borderColor: colors.border,
                       color: colors.text,
+                      textAlign: rtl ? 'right' : 'left',
                     },
                   ]}
                   placeholder="200"
@@ -187,12 +189,12 @@ export default function CreateTontineScreen() {
                   onChangeText={(text) => setData({ ...data, contribution: text })}
                   keyboardType="numeric"
                 />
-                <Text style={[styles.inputSuffix, { color: colors.textSecondary }]}>
+                <Text style={[styles.inputSuffix, { color: colors.textSecondary }, rtl && { right: undefined, left: Spacing.md }]}>
                   {t('common.tnd')}
                 </Text>
               </View>
 
-              <View style={styles.frequencyButtons}>
+              <View style={[styles.frequencyButtons, rtl && { flexDirection: 'row-reverse' }]}>
                 <TouchableOpacity
                   style={[
                     styles.frequencyButton,
@@ -253,11 +255,11 @@ export default function CreateTontineScreen() {
           {/* Step 3: Members */}
           {currentStep === 3 && (
             <View style={styles.step}>
-              <Text style={[styles.stepTitle, { color: colors.text }]}>
+              <Text style={[styles.stepTitle, { color: colors.text, textAlign: rtl ? 'right' : 'left' }]}>
                 {t('tontine.members')}
               </Text>
-              <Text style={[styles.stepDescription, { color: colors.textSecondary }]}>
-                Nombre total de participants
+              <Text style={[styles.stepDescription, { color: colors.textSecondary, textAlign: rtl ? 'right' : 'left' }]}>
+                {t('tontine.members_description')}
               </Text>
               <TextInput
                 style={[
@@ -266,6 +268,7 @@ export default function CreateTontineScreen() {
                     backgroundColor: colors.card,
                     borderColor: colors.border,
                     color: colors.text,
+                    textAlign: rtl ? 'right' : 'left',
                   },
                 ]}
                 placeholder="6"
@@ -274,8 +277,8 @@ export default function CreateTontineScreen() {
                 onChangeText={(text) => setData({ ...data, members: text })}
                 keyboardType="numeric"
               />
-              <Text style={[styles.helperText, { color: colors.textSecondary }]}>
-                Minimum 2 membres requis
+              <Text style={[styles.helperText, { color: colors.textSecondary, textAlign: rtl ? 'right' : 'left' }]}>
+                {t('tontine.members_min')}
               </Text>
             </View>
           )}
@@ -283,98 +286,51 @@ export default function CreateTontineScreen() {
           {/* Step 4: Distribution Logic */}
           {currentStep === 4 && (
             <View style={styles.step}>
-              <Text style={[styles.stepTitle, { color: colors.text }]}>
+              <Text style={[styles.stepTitle, { color: colors.text, textAlign: rtl ? 'right' : 'left' }]}>
                 {t('tontine.distribution')}
               </Text>
-              <Text style={[styles.stepDescription, { color: colors.textSecondary }]}>
-                Comment les tours seront attribués
+              <Text style={[styles.stepDescription, { color: colors.textSecondary, textAlign: rtl ? 'right' : 'left' }]}>
+                {t('tontine.distribution_description')}
               </Text>
 
-              <TouchableOpacity
-                style={[
-                  styles.distributionCard,
-                  {
-                    backgroundColor: colors.card,
-                    borderColor:
-                      data.distribution === 'fixed' ? colors.gold : colors.border,
-                    borderWidth: data.distribution === 'fixed' ? 2 : 1,
-                  },
-                ]}
-                onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  setData({ ...data, distribution: 'fixed' });
-                }}
-              >
-                <Text style={[styles.distributionTitle, { color: colors.text }]}>
-                  📋 {t('tontine.fixed')}
-                </Text>
-                <Text
-                  style={[styles.distributionDescription, { color: colors.textSecondary }]}
-                >
-                  L&apos;ordre est défini à l&apos;avance
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[
-                  styles.distributionCard,
-                  {
-                    backgroundColor: colors.card,
-                    borderColor:
-                      data.distribution === 'random' ? colors.gold : colors.border,
-                    borderWidth: data.distribution === 'random' ? 2 : 1,
-                  },
-                ]}
-                onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  setData({ ...data, distribution: 'random' });
-                }}
-              >
-                <Text style={[styles.distributionTitle, { color: colors.text }]}>
-                  🎲 {t('tontine.random')}
-                </Text>
-                <Text
-                  style={[styles.distributionDescription, { color: colors.textSecondary }]}
-                >
-                  Tirage au sort à chaque tour
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[
-                  styles.distributionCard,
-                  {
-                    backgroundColor: colors.card,
-                    borderColor:
-                      data.distribution === 'trust' ? colors.gold : colors.border,
-                    borderWidth: data.distribution === 'trust' ? 2 : 1,
-                  },
-                ]}
-                onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  setData({ ...data, distribution: 'trust' });
-                }}
-              >
-                <Text style={[styles.distributionTitle, { color: colors.text }]}>
-                  ⭐ {t('tontine.trust')}
-                </Text>
-                <Text
-                  style={[styles.distributionDescription, { color: colors.textSecondary }]}
-                >
-                  Basé sur le score de confiance
-                </Text>
-              </TouchableOpacity>
+              {(['fixed', 'random', 'trust'] as const).map((dist) => {
+                const icons = { fixed: '\uD83D\uDCCB', random: '\uD83C\uDFB2', trust: '\u2B50' };
+                return (
+                  <TouchableOpacity
+                    key={dist}
+                    style={[
+                      styles.distributionCard,
+                      {
+                        backgroundColor: colors.card,
+                        borderColor: data.distribution === dist ? colors.gold : colors.border,
+                        borderWidth: data.distribution === dist ? 2 : 1,
+                      },
+                    ]}
+                    onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      setData({ ...data, distribution: dist });
+                    }}
+                  >
+                    <Text style={[styles.distributionTitle, { color: colors.text, textAlign: rtl ? 'right' : 'left' }]}>
+                      {icons[dist]} {t(`tontine.${dist}`)}
+                    </Text>
+                    <Text style={[styles.distributionDescription, { color: colors.textSecondary, textAlign: rtl ? 'right' : 'left' }]}>
+                      {t(`tontine.${dist}_description`)}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
           )}
 
           {/* Step 5: Summary */}
           {currentStep === 5 && (
             <View style={styles.step}>
-              <Text style={[styles.stepTitle, { color: colors.text }]}>
-                Récapitulatif
+              <Text style={[styles.stepTitle, { color: colors.text, textAlign: rtl ? 'right' : 'left' }]}>
+                {t('tontine.summary')}
               </Text>
-              <Text style={[styles.stepDescription, { color: colors.textSecondary }]}>
-                Vérifiez les informations
+              <Text style={[styles.stepDescription, { color: colors.textSecondary, textAlign: rtl ? 'right' : 'left' }]}>
+                {t('tontine.summary_description')}
               </Text>
 
               <View
@@ -383,50 +339,22 @@ export default function CreateTontineScreen() {
                   { backgroundColor: colors.card, borderColor: colors.border },
                 ]}
               >
-                <View style={styles.summaryRow}>
-                  <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>
-                    {t('tontine.name')}
-                  </Text>
-                  <Text style={[styles.summaryValue, { color: colors.text }]}>
-                    {data.name}
-                  </Text>
-                </View>
-
-                <View style={styles.summaryRow}>
-                  <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>
-                    {t('tontine.contribution')}
-                  </Text>
-                  <Text style={[styles.summaryValue, { color: colors.gold }]}>
-                    {data.contribution} {t('common.tnd')}
-                  </Text>
-                </View>
-
-                <View style={styles.summaryRow}>
-                  <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>
-                    {t('tontine.frequency')}
-                  </Text>
-                  <Text style={[styles.summaryValue, { color: colors.text }]}>
-                    {t(`tontine.${data.frequency}`)}
-                  </Text>
-                </View>
-
-                <View style={styles.summaryRow}>
-                  <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>
-                    {t('tontine.members')}
-                  </Text>
-                  <Text style={[styles.summaryValue, { color: colors.text }]}>
-                    {data.members}
-                  </Text>
-                </View>
-
-                <View style={styles.summaryRow}>
-                  <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>
-                    {t('tontine.distribution')}
-                  </Text>
-                  <Text style={[styles.summaryValue, { color: colors.text }]}>
-                    {t(`tontine.${data.distribution}`)}
-                  </Text>
-                </View>
+                {[
+                  { label: t('tontine.name'), value: data.name, isGold: false },
+                  { label: t('tontine.contribution'), value: `${data.contribution} ${t('common.tnd')}`, isGold: true },
+                  { label: t('tontine.frequency'), value: t(`tontine.${data.frequency}`), isGold: false },
+                  { label: t('tontine.members'), value: data.members, isGold: false },
+                  { label: t('tontine.distribution'), value: t(`tontine.${data.distribution}`), isGold: false },
+                ].map((item, idx) => (
+                  <View key={idx} style={[styles.summaryRow, rtl && { flexDirection: 'row-reverse' }, { borderBottomColor: colors.border }]}>
+                    <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>
+                      {item.label}
+                    </Text>
+                    <Text style={[styles.summaryValue, { color: item.isGold ? colors.gold : colors.text }]}>
+                      {item.value}
+                    </Text>
+                  </View>
+                ))}
               </View>
             </View>
           )}
@@ -569,7 +497,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: Spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.1)',
   },
   summaryLabel: {
     fontSize: FontSizes.md,

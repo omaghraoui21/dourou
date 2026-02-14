@@ -21,7 +21,7 @@ interface TontineContextType {
   addTontine: (tontine: CreateTontineData) => Promise<Tontine>;
   getTontineById: (id: string) => Tontine | undefined;
   updateTontine: (id: string, updates: Partial<Tontine>) => Promise<void>;
-  addMemberToTontine: (tontineId: string, name: string, phone: string) => Promise<void>;
+  addMemberToTontine: (tontineId: string, name: string, phone: string, invitedUserId?: string) => Promise<void>;
   removeMemberFromTontine: (tontineId: string, memberId: string) => Promise<void>;
   reorderMembers: (tontineId: string, members: TontineMember[]) => Promise<void>;
   launchTontine: (tontineId: string) => Promise<void>;
@@ -464,16 +464,61 @@ export const TontineProvider: React.FC<{ children: React.ReactNode }> = ({ child
   );
 
   // -------------------------------------------------------------------------
-  // addMemberToTontine
+  // addMemberToTontine - with Ghost Member Prevention
   // -------------------------------------------------------------------------
 
   const addMemberToTontine = useCallback(
-    async (tontineId: string, name: string, phone: string): Promise<void> => {
+    async (tontineId: string, name: string, phone: string, invitedUserId?: string): Promise<void> => {
       if (!userId) throw new Error('Not authenticated');
 
       const tontine = tontines.find((t) => t.id === tontineId);
       if (!tontine) throw new Error('Tontine not found');
       if (tontine.members.length >= tontine.totalMembers) throw new Error('Group is full');
+
+      // SECURITY: Ghost Member Prevention - check if invited user meets eligibility criteria
+      if (invitedUserId) {
+        try {
+          const { data: eligibilityData, error: eligibilityError } = await supabase.rpc(
+            'check_user_eligibility_for_invite',
+            { p_user_id: invitedUserId }
+          );
+
+          if (eligibilityError) {
+            console.error('Eligibility check error:', eligibilityError);
+            throw new Error('Failed to verify user eligibility');
+          }
+
+          if (!eligibilityData?.eligible) {
+            const reason = eligibilityData?.reason;
+            if (reason === 'user_not_active') {
+              throw new Error(`Cannot invite user: account is ${eligibilityData.status}`);
+            } else if (reason === 'insufficient_trust_score') {
+              throw new Error(
+                `Cannot invite user: trust score ${eligibilityData.current_trust_score} is below minimum ${eligibilityData.required_trust_score}`
+              );
+            } else {
+              throw new Error('User is not eligible to be invited');
+            }
+          }
+
+          // SECURITY: Velocity check - ensure user hasn't joined too many tontines recently
+          const { data: velocityData, error: velocityError } = await supabase.rpc(
+            'check_join_velocity_limit',
+            { p_user_id: invitedUserId }
+          );
+
+          if (velocityError) {
+            console.error('Velocity check error:', velocityError);
+          } else if (!velocityData?.allowed) {
+            throw new Error(
+              `Cannot join: user has joined ${velocityData.current_count} tontines in the last 24 hours (limit: ${velocityData.limit})`
+            );
+          }
+        } catch (securityError) {
+          console.error('Security check failed:', securityError);
+          throw securityError;
+        }
+      }
 
       const trimmedName = name.trim();
       const trimmedPhone = phone.trim();
@@ -487,6 +532,7 @@ export const TontineProvider: React.FC<{ children: React.ReactNode }> = ({ child
         initials: getInitials(trimmedName),
         payoutOrder: newPayoutOrder,
         addedAt: new Date(),
+        userId: invitedUserId,
       };
 
       // Optimistic update
@@ -503,6 +549,7 @@ export const TontineProvider: React.FC<{ children: React.ReactNode }> = ({ child
           .from('tontine_members')
           .insert({
             tontine_id: tontineId,
+            user_id: invitedUserId || null,
             name: trimmedName,
             phone: trimmedPhone || null,
             payout_order: newPayoutOrder,

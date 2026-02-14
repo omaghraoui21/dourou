@@ -235,6 +235,7 @@
     "title": "Profile",
     "settings": "Settings",
     "language": "Language",
+    "language_switched_tounsi": "🇹🇳 Language switched to Tunisian Darija!",
     "theme": "Theme",
     "dark": "Dark Mode",
     "light": "Light Mode",

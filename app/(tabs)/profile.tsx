@@ -19,13 +19,16 @@ import { useUser } from '@/contexts/UserContext';
 import { SuperAdminBadge } from '@/components/SuperAdminBadge';
 import { router } from 'expo-router';
 import { useTontines } from '@/contexts/TontineContext';
+import { useToast } from '@/contexts/ToastContext';
+import Constants from 'expo-constants';
 
 export default function ProfileScreen() {
   const { colors, toggleTheme, isDark } = useTheme();
   const { t, i18n } = useTranslation();
   const { user, isSuperAdmin, logout } = useUser();
   const { tontines } = useTontines();
-  const rtl = i18n.language === 'ar';
+  const { showToast } = useToast();
+  const rtl = i18n.language === 'ar' || i18n.language === 'ar-TN';
 
   const trustScore = user?.trustScore || 4.2;
   const tier = getTrustTier(trustScore);
@@ -57,6 +60,15 @@ export default function ProfileScreen() {
   const handleLanguageChange = async (lang: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     await changeLanguage(lang);
+
+    // Show toast for Tunisian Darija
+    if (lang === 'ar-TN') {
+      showToast({
+        message: t('profile.language_switched_tounsi'),
+        type: 'success',
+        duration: 2500
+      });
+    }
   };
 
   const handleThemeToggle = () => {
@@ -72,6 +84,11 @@ export default function ProfileScreen() {
     } catch (error) {
       console.error('Logout failed:', error);
     }
+  };
+
+  const handleVersionLongPress = () => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    router.push('/translation-lab');
   };
 
   return (
@@ -170,28 +187,34 @@ export default function ProfileScreen() {
               {t('profile.language')}
             </Text>
             <View style={[styles.languageButtons, rtl && { flexDirection: 'row-reverse' }]}>
-              {['fr', 'ar', 'en'].map((lang) => (
+              {[
+                { code: 'fr', label: 'FR', flag: '🇫🇷' },
+                { code: 'ar', label: 'AR', flag: '🇸🇦' },
+                { code: 'ar-TN', label: 'تونسي', flag: '🇹🇳' },
+                { code: 'en', label: 'EN', flag: '🇬🇧' }
+              ].map((lang) => (
                 <TouchableOpacity
-                  key={lang}
+                  key={lang.code}
                   style={[
                     styles.languageButton,
                     {
                       backgroundColor:
-                        i18n.language === lang ? colors.gold : 'transparent',
+                        i18n.language === lang.code ? colors.gold : 'transparent',
                       borderColor: colors.gold,
                     },
                   ]}
-                  onPress={() => handleLanguageChange(lang)}
+                  onPress={() => handleLanguageChange(lang.code)}
                 >
+                  <Text style={styles.languageFlag}>{lang.flag}</Text>
                   <Text
                     style={[
                       styles.languageText,
                       {
-                        color: i18n.language === lang ? '#0F172A' : colors.text,
+                        color: i18n.language === lang.code ? '#0F172A' : colors.text,
                       },
                     ]}
                   >
-                    {lang.toUpperCase()}
+                    {lang.label}
                   </Text>
                 </TouchableOpacity>
               ))}
@@ -280,6 +303,17 @@ export default function ProfileScreen() {
             </View>
           </View>
         </View>
+
+        {/* Version - Long press for Translation Lab */}
+        <TouchableOpacity
+          onLongPress={handleVersionLongPress}
+          delayLongPress={2000}
+          style={styles.versionContainer}
+        >
+          <Text style={[styles.versionText, { color: colors.textSecondary }]}>
+            v{Constants.expoConfig?.version || '1.0.0'}
+          </Text>
+        </TouchableOpacity>
 
         {/* Logout Button */}
         <TouchableOpacity
@@ -435,12 +469,20 @@ const styles = StyleSheet.create({
   languageButtons: {
     flexDirection: 'row',
     gap: Spacing.sm,
+    flexWrap: 'wrap',
   },
   languageButton: {
     borderWidth: 1,
     borderRadius: BorderRadius.sm,
     paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    minWidth: 70,
+  },
+  languageFlag: {
+    fontSize: 20,
   },
   languageText: {
     fontSize: FontSizes.sm,
@@ -467,6 +509,14 @@ const styles = StyleSheet.create({
   statLabel: {
     fontSize: FontSizes.xs,
     textAlign: 'center',
+  },
+  versionContainer: {
+    alignItems: 'center',
+    paddingVertical: Spacing.lg,
+  },
+  versionText: {
+    fontSize: FontSizes.xs,
+    fontWeight: '500',
   },
   logoutButton: {
     borderRadius: BorderRadius.md,

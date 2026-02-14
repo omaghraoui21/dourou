@@ -7,6 +7,7 @@ import { I18nManager } from 'react-native';
 import en from './locales/en.json';
 import fr from './locales/fr.json';
 import ar from './locales/ar.json';
+import arTN from './locales/ar-TN.json';
 
 const LANGUAGE_KEY = 'user-language';
 
@@ -14,6 +15,7 @@ const resources = {
   en: { translation: en },
   fr: { translation: fr },
   ar: { translation: ar },
+  'ar-TN': { translation: arTN },
 };
 
 let isInitialized = false;
@@ -32,8 +34,8 @@ const initI18n = async () => {
         savedLanguage = deviceLanguage;
       }
 
-      // Setup RTL for Arabic
-      const shouldBeRTL = savedLanguage === 'ar';
+      // Setup RTL for Arabic (includes ar-TN Tunisian Darija)
+      const shouldBeRTL = savedLanguage === 'ar' || savedLanguage === 'ar-TN';
       if (I18nManager.isRTL !== shouldBeRTL) {
         I18nManager.allowRTL(shouldBeRTL);
         I18nManager.forceRTL(shouldBeRTL);
@@ -44,7 +46,12 @@ const initI18n = async () => {
         .init({
           resources,
           lng: savedLanguage,
-          fallbackLng: 'fr',
+          fallbackLng: {
+            'ar-TN': ['ar', 'fr', 'en'], // Tunisian Darija fallback chain
+            'ar': ['fr', 'en'],
+            'en': ['fr'],
+            'default': ['fr', 'en']
+          },
           interpolation: {
             escapeValue: false,
           },
@@ -87,8 +94,8 @@ export const changeLanguage = async (language: string) => {
   await AsyncStorage.setItem(LANGUAGE_KEY, language);
   i18n.changeLanguage(language);
 
-  // Update RTL direction
-  const shouldBeRTL = language === 'ar';
+  // Update RTL direction (includes ar-TN Tunisian Darija)
+  const shouldBeRTL = language === 'ar' || language === 'ar-TN';
   if (I18nManager.isRTL !== shouldBeRTL) {
     I18nManager.allowRTL(shouldBeRTL);
     I18nManager.forceRTL(shouldBeRTL);

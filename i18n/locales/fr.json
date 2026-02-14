@@ -77,14 +77,20 @@
     "no_activity": "Aucune activité récente",
     "no_tontines": "Vous n'avez pas encore rejoint de tontines",
     "join_group": "Rejoindre",
-    "create_first_tontine": "Créez votre première tontine"
+    "create_first_tontine": "Créez votre première tontine",
+    "view_tontines": "Voir les tontines",
+    "view_active": "Voir les tontines actives"
   },
   "tontines": {
     "title": "Mes Tontines",
     "active_count": "Active ({{count}})",
     "completed_count": "Terminées ({{count}})",
     "no_active": "Aucune tontine active",
-    "no_completed": "Aucune tontine terminée"
+    "no_completed": "Aucune tontine terminée",
+    "no_active_title": "Aucune tontine active",
+    "no_active_message": "Créez une nouvelle tontine ou rejoignez un groupe existant pour commencer à épargner ensemble",
+    "no_completed_title": "Aucune tontine terminée",
+    "no_completed_message": "Terminez votre premier cycle de tontine pour voir vos réalisations ici"
   },
   "tontine": {
     "create": "Créer une tontine",

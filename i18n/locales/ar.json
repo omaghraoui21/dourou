@@ -77,14 +77,20 @@
     "no_activity": "لا يوجد نشاط حديث",
     "no_tontines": "لم تنضم إلى أي جمعيات بعد",
     "join_group": "انضمام",
-    "create_first_tontine": "أنشئ جمعيتك الأولى"
+    "create_first_tontine": "أنشئ جمعيتك الأولى",
+    "view_tontines": "عرض الجمعيات",
+    "view_active": "عرض الجمعيات النشطة"
   },
   "tontines": {
     "title": "جمعياتي",
     "active_count": "نشطة ({{count}})",
     "completed_count": "مكتملة ({{count}})",
     "no_active": "لا توجد جمعيات نشطة",
-    "no_completed": "لا توجد جمعيات مكتملة"
+    "no_completed": "لا توجد جمعيات مكتملة",
+    "no_active_title": "لا توجد جمعيات نشطة",
+    "no_active_message": "أنشئ جمعية جديدة أو انضم إلى مجموعة موجودة للبدء في الادخار معاً",
+    "no_completed_title": "لا توجد جمعيات مكتملة بعد",
+    "no_completed_message": "أكمل دورة جمعيتك الأولى لترى إنجازاتك هنا"
   },
   "tontine": {
     "create": "إنشاء جمعية",

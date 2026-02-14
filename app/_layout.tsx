@@ -6,6 +6,7 @@ import { TontineProvider } from '@/contexts/TontineContext';
 import { NotificationProvider } from '@/contexts/NotificationContext';
 import { ToastProvider } from '@/contexts/ToastContext';
 import { ConnectivityProvider } from '@/contexts/ConnectivityContext';
+import { GovernanceProvider } from '@/contexts/GovernanceContext';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { supabase } from '@/lib/supabase';
 import { initI18n } from '@/i18n/config';
@@ -67,35 +68,37 @@ export default function RootLayout() {
               afterLogin: '/(tabs)',
             }}
           >
-            <UserProvider>
-              <ToastProvider>
-                <NotificationProvider>
-                  <TontineProvider>
-                    <Stack
-                      screenOptions={{
-                        headerShown: false,
-                        animation: 'fade_from_bottom',
-                        animationDuration: 300,
-                      }}
-                    >
-                      <Stack.Screen name="index" options={{ animation: 'fade' }} />
-                      <Stack.Screen name="onboarding" options={{ animation: 'fade' }} />
-                      <Stack.Screen name="auth/phone" options={{ animation: 'fade' }} />
-                      <Stack.Screen name="auth/otp" options={{ animation: 'slide_from_right' }} />
-                      <Stack.Screen name="auth/profile" options={{ animation: 'slide_from_right' }} />
-                      <Stack.Screen name="auth/callback" options={{ animation: 'fade' }} />
-                      <Stack.Screen name="auth/admin-login" options={{ animation: 'fade' }} />
-                      <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
-                      <Stack.Screen name="tontine/[id]" options={{ animation: 'slide_from_right' }} />
-                      <Stack.Screen name="tontine/create" options={{ animation: 'slide_from_bottom' }} />
-                      <Stack.Screen name="tontine/join" options={{ animation: 'slide_from_bottom' }} />
-                      <Stack.Screen name="notifications" options={{ animation: 'slide_from_right' }} />
-                      <Stack.Screen name="+not-found" options={{ animation: 'fade' }} />
-                    </Stack>
-                  </TontineProvider>
-                </NotificationProvider>
-              </ToastProvider>
-            </UserProvider>
+            <GovernanceProvider>
+              <UserProvider>
+                <ToastProvider>
+                  <NotificationProvider>
+                    <TontineProvider>
+                      <Stack
+                        screenOptions={{
+                          headerShown: false,
+                          animation: 'fade_from_bottom',
+                          animationDuration: 300,
+                        }}
+                      >
+                        <Stack.Screen name="index" options={{ animation: 'fade' }} />
+                        <Stack.Screen name="onboarding" options={{ animation: 'fade' }} />
+                        <Stack.Screen name="auth/phone" options={{ animation: 'fade' }} />
+                        <Stack.Screen name="auth/otp" options={{ animation: 'slide_from_right' }} />
+                        <Stack.Screen name="auth/profile" options={{ animation: 'slide_from_right' }} />
+                        <Stack.Screen name="auth/callback" options={{ animation: 'fade' }} />
+                        <Stack.Screen name="auth/admin-login" options={{ animation: 'fade' }} />
+                        <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
+                        <Stack.Screen name="tontine/[id]" options={{ animation: 'slide_from_right' }} />
+                        <Stack.Screen name="tontine/create" options={{ animation: 'slide_from_bottom' }} />
+                        <Stack.Screen name="tontine/join" options={{ animation: 'slide_from_bottom' }} />
+                        <Stack.Screen name="notifications" options={{ animation: 'slide_from_right' }} />
+                        <Stack.Screen name="+not-found" options={{ animation: 'fade' }} />
+                      </Stack>
+                    </TontineProvider>
+                  </NotificationProvider>
+                </ToastProvider>
+              </UserProvider>
+            </GovernanceProvider>
           </AuthProvider>
         </ThemeProvider>
       </ConnectivityProvider>

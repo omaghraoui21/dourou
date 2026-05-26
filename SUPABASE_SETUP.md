@@ -67,7 +67,7 @@ cp .env.example .env
 EXPO_PUBLIC_SUPABASE_URL=https://xxxxxxxxxxxxx.supabase.co
 EXPO_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.xxxxxxxxxxxxx
 
-# Fastshot Platform (Optional - only needed for Fastshot AI features)
+# Dourou Platform (Optional - advanced features)
 EXPO_PUBLIC_PROJECT_ID=your-project-id
 EXPO_PUBLIC_NEWELL_API_URL=https://api.example.com
 EXPO_PUBLIC_AUTH_BROKER_URL=https://auth.example.com

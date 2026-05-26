@@ -43,6 +43,6 @@ app-example
 .expo/
 
 # project-specific excludes
-.fastshot-logs/
+.build-logs/
 examples/
 CLAUDE.md

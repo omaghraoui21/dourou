@@ -85,7 +85,7 @@ Ecrans implementes :
 - Node.js 18+
 - npm
 - Expo CLI (`npx expo`)
-- Un projet Supabase configure (voir [SUPABASE_SETUP.md](./supabase/SUPABASE_SETUP.md))
+- Un projet Supabase configure (voir [SUPABASE_SETUP.md](./SUPABASE_SETUP.md))
 
 ### Installation
 
@@ -120,7 +120,7 @@ Pour une demonstration guidee de l'application, consultez le guide de demo :
 
 ## Liens utiles
 
-- [Guide de configuration Supabase](./supabase/SUPABASE_SETUP.md)
+- [Guide de configuration Supabase](./SUPABASE_SETUP.md)
 - [Demo Startup Act](./STARTUP_ACT_DEMO.md)
 - [Schema de la base de donnees](./supabase/schema.sql)
 - [Guide de deploiement](./DEPLOYMENT_GUIDE.md)

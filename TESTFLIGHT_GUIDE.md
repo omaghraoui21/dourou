@@ -78,7 +78,13 @@ Ouvrez `eas.json` et remplacez les valeurs placeholder dans la section `submit` 
 
 ### 3. Configurer `.env.production`
 
-Remplissez le fichier `.env.production` a la racine du projet avec vos vraies valeurs Supabase :
+Copiez le fichier template puis remplissez-le avec vos vraies valeurs Supabase :
+
+```bash
+cp .env.production.example .env.production
+```
+
+Editez `.env.production` avec vos valeurs reelles :
 
 ```bash
 EXPO_PUBLIC_SUPABASE_URL=https://votre-projet.supabase.co
@@ -86,13 +92,33 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=votre-cle-anon-reelle
 EXPO_PUBLIC_ENVIRONMENT=production
 ```
 
-> **Important** : Ne commitez jamais ce fichier avec des valeurs reelles. Le fichier `.env.production` est deja dans `.gitignore`.
+> **Important** : Ne commitez jamais ce fichier avec des valeurs reelles. Le fichier `.env.production` est dans `.gitignore` et ne sera pas suivi par git. Seul le fichier `.env.production.example` (avec des valeurs placeholder) est commite.
+
+### 4. Configurer les variables d'environnement pour EAS Build (remote)
+
+Les builds EAS s'executent sur des serveurs distants qui n'ont pas acces a vos fichiers `.env` locaux. Pour que les variables de production soient disponibles lors du build, vous devez les configurer via **EAS Secrets** :
+
+```bash
+eas secret:create --name EXPO_PUBLIC_SUPABASE_URL --value "https://your-project.supabase.co" --scope project
+eas secret:create --name EXPO_PUBLIC_SUPABASE_ANON_KEY --value "your-key" --scope project
+eas secret:create --name EXPO_PUBLIC_ENVIRONMENT --value "production" --scope project
+```
+
+Les secrets EAS sont injectes automatiquement comme variables d'environnement lors du build. C'est la methode recommandee car les valeurs restent securisees et ne sont jamais commitees dans le code source.
+
+> **Alternative** : Vous pouvez aussi ajouter un bloc `env` dans le profil `production` de `eas.json`, mais cette approche necessite de commiter les valeurs dans le fichier de configuration, ce qui est deconseille pour les cles d'API.
+
+Pour verifier que vos secrets sont bien configures :
+
+```bash
+eas secret:list
+```
 
 ---
 
 ## Deployer sur TestFlight
 
-Le deploiement sur TestFlight se fait en 5 etapes simples. Nous utilisons le profil `preview` defini dans `eas.json` qui est configure pour la distribution interne.
+Le deploiement sur TestFlight se fait en 5 etapes simples. Nous utilisons le profil `preview` defini dans `eas.json` qui est configure pour la distribution store (compatible TestFlight).
 
 ### Etape 1 : Se connecter a EAS
 
@@ -109,7 +135,7 @@ npm run build:preview:ios
 ```
 
 Cette commande execute `eas build --profile preview --platform ios`. Le profil `preview` dans `eas.json` est configure avec :
-- `distribution: "internal"` - pour distribution via TestFlight
+- `distribution: "store"` - pour soumission a App Store Connect / TestFlight
 - `ios.simulator: false` - build pour appareil reel
 - `ios.bundleIdentifier: "tn.dourou.app"`
 
@@ -312,15 +338,19 @@ Selectionnez iOS, puis laissez EAS regenerer automatiquement les provisioning pr
 **Cause** : Les variables d'environnement de production sont manquantes ou incorrectes.
 
 **Solution** :
-1. Verifiez que `.env.production` contient les bonnes valeurs :
+1. Verifiez que vos EAS Secrets sont correctement configures :
+   ```bash
+   eas secret:list
+   ```
+2. Si vous testez en local, verifiez que `.env.production` contient les bonnes valeurs :
    ```bash
    EXPO_PUBLIC_SUPABASE_URL=https://votre-projet.supabase.co
    EXPO_PUBLIC_SUPABASE_ANON_KEY=votre-cle-anon-reelle
    EXPO_PUBLIC_ENVIRONMENT=production
    ```
-2. Assurez-vous que l'URL Supabase est accessible
-3. Verifiez que la cle anon est valide et correspond au bon projet
-4. Refaites un build apres correction :
+3. Assurez-vous que l'URL Supabase est accessible
+4. Verifiez que la cle anon est valide et correspond au bon projet
+5. Refaites un build apres correction :
    ```bash
    npm run build:preview:ios
    ```

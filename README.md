@@ -1,8 +1,14 @@
 # Dourou
 
-**L'application mobile tunisienne qui digitalise les tontines.**
+**La plateforme tunisienne qui digitalise les tontines.**
 
-**التطبيق التونسي إلي يرقمن الجمعيات.**
+**المنصة التونسية إلي ترقمن الجمعيات.**
+
+> Ce repo contient **deux projets** :
+> - **`/`** (racine) - Application mobile React Native / Expo
+> - **`/web`** - Application web Next.js (recommandee pour la demo Startup Act)
+>
+> **Pour tester rapidement** : voir le dossier [`web/`](./web/) et son [README](./web/README.md).
 
 ---
 

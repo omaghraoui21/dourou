@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #0F172A;
+  --card: #1E293B;
+  --gold: #D4AF37;
+  --gold-light: #F5D061;
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --border: rgba(255, 255, 255, 0.05);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--text-primary);
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+}

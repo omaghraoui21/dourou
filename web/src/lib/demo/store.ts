@@ -53,13 +53,11 @@ export function getProfile(userId: string): Profile | null {
 export function getTontinesForUser(userId: string): (Tontine & { role?: string })[] {
   const snap = read()
   const memberships = snap.members.filter((m) => m.user_id === userId)
-  return memberships
-    .map((m) => {
-      const tontine = snap.tontines.find((t) => t.id === m.tontine_id)
-      if (!tontine) return null
-      return { ...tontine, role: m.role ?? undefined }
-    })
-    .filter((t): t is Tontine & { role?: string } => t !== null)
+  // flatMap evite tout element null dans le tableau retourne (typage strict).
+  return memberships.flatMap((m) => {
+    const tontine = snap.tontines.find((t) => t.id === m.tontine_id)
+    return tontine ? [{ ...tontine, role: m.role ?? undefined }] : []
+  })
 }
 
 export function getTontine(tontineId: string): Tontine | null {

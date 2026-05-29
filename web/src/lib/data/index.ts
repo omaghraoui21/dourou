@@ -5,8 +5,8 @@
  *  - le store de demonstration (localStorage) si le mode demo est actif ;
  *  - Supabase (backend reel) sinon.
  *
- * Cela permet aux pages d'etre identiques quel que soit le mode, et au jury
- * Startup Act de tester l'integralite du produit sans configurer Supabase.
+ * Cela permet aux pages d'etre identiques quel que soit le mode, et de tester
+ * l'integralite du produit sans configurer Supabase.
  *
  * Client uniquement.
  */

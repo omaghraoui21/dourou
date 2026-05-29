@@ -4,8 +4,8 @@
  * Ce module est PUR (aucune dependance navigateur) afin de pouvoir etre importe
  * cote serveur (layout, middleware) comme cote client (store, pages).
  *
- * Le mode demo permet au jury Startup Act de tester l'integralite du parcours
- * sans configurer Supabase. Aucune donnee reelle, aucun fonds, aucun paiement.
+ * Le mode demo permet de tester l'integralite du parcours sans configurer
+ * Supabase. Aucune donnee reelle, aucun fonds, aucun paiement.
  */
 
 import type {

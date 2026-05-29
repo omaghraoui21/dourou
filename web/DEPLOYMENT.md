@@ -35,7 +35,7 @@ Dans les parametres du projet Vercel, ajoutez :
 
 ### Deploiement en mode demo uniquement (sans Supabase)
 
-Pour une demonstration rapide au jury, vous pouvez deployer **sans configurer
+Pour une demonstration rapide, vous pouvez deployer **sans configurer
 Supabase**. Le **mode demo** fonctionne entierement cote client (donnees fictives
 dans le navigateur).
 

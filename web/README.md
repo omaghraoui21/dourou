@@ -17,8 +17,8 @@ Dourou (دورو) digitalise la gestion des tontines (جمعية) en Tunisie. Ce
 
 ## Mode Demo (test instantane, sans configuration)
 
-L'application embarque un **mode demo** concu pour le jury Startup Act et toute
-personne souhaitant tester le produit immediatement, **sans compte ni Supabase**.
+L'application embarque un **mode demo** qui permet de tester le produit
+immediatement, **sans compte ni Supabase**.
 
 - Sur la page d'accueil ou la page de connexion, cliquez sur **"Essayer la demo"**.
 - L'application charge des donnees fictives realistes (une tontine active

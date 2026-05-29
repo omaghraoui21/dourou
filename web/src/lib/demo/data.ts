@@ -87,9 +87,9 @@ export const seedProfiles: Profile[] = [
 // ============================================================
 export const seedTontines: Tontine[] = [
   {
-    id: 't-startup',
+    id: 't-sfax',
     creator_id: 'u-ahmed',
-    title: 'Collegues Startup',
+    title: 'Famille Sfax',
     amount: 200,
     frequency: 'monthly',
     currency: 'TND',
@@ -110,7 +110,7 @@ export const seedTontines: Tontine[] = [
 export const seedMembers: TontineMember[] = [
   {
     id: 'm-ahmed',
-    tontine_id: 't-startup',
+    tontine_id: 't-sfax',
     user_id: 'u-ahmed',
     name: 'Ahmed Trabelsi',
     phone: '+21698000001',
@@ -120,7 +120,7 @@ export const seedMembers: TontineMember[] = [
   },
   {
     id: 'm-fatma',
-    tontine_id: 't-startup',
+    tontine_id: 't-sfax',
     user_id: 'u-fatma',
     name: 'Fatma Ben Youssef',
     phone: '+21698000002',
@@ -130,7 +130,7 @@ export const seedMembers: TontineMember[] = [
   },
   {
     id: 'm-yassine',
-    tontine_id: 't-startup',
+    tontine_id: 't-sfax',
     user_id: 'u-yassine',
     name: 'Yassine Khelifi',
     phone: '+21698000003',
@@ -140,7 +140,7 @@ export const seedMembers: TontineMember[] = [
   },
   {
     id: 'm-nour',
-    tontine_id: 't-startup',
+    tontine_id: 't-sfax',
     user_id: 'u-nour',
     name: 'Nour Chaabane',
     phone: '+21698000004',
@@ -156,7 +156,7 @@ export const seedMembers: TontineMember[] = [
 export const seedRounds: Round[] = [
   {
     id: 'r1',
-    tontine_id: 't-startup',
+    tontine_id: 't-sfax',
     round_number: 1,
     beneficiary_id: 'm-ahmed',
     status: 'current',
@@ -166,7 +166,7 @@ export const seedRounds: Round[] = [
   },
   {
     id: 'r2',
-    tontine_id: 't-startup',
+    tontine_id: 't-sfax',
     round_number: 2,
     beneficiary_id: 'm-fatma',
     status: 'upcoming',
@@ -176,7 +176,7 @@ export const seedRounds: Round[] = [
   },
   {
     id: 'r3',
-    tontine_id: 't-startup',
+    tontine_id: 't-sfax',
     round_number: 3,
     beneficiary_id: 'm-yassine',
     status: 'upcoming',
@@ -186,7 +186,7 @@ export const seedRounds: Round[] = [
   },
   {
     id: 'r4',
-    tontine_id: 't-startup',
+    tontine_id: 't-sfax',
     round_number: 4,
     beneficiary_id: 'm-nour',
     status: 'upcoming',
@@ -246,7 +246,7 @@ export const seedNotifications: Notification[] = [
   {
     id: 'n1',
     user_id: 'u-ahmed',
-    tontine_id: 't-startup',
+    tontine_id: 't-sfax',
     type: 'payment_declared',
     title: 'Yassine a declare un paiement',
     body: 'Yassine Khelifi a declare un paiement de 200 DT pour le Tour 1. En attente de votre confirmation.',
@@ -256,7 +256,7 @@ export const seedNotifications: Notification[] = [
   {
     id: 'n2',
     user_id: 'u-ahmed',
-    tontine_id: 't-startup',
+    tontine_id: 't-sfax',
     type: 'payment_received',
     title: 'Paiement confirme',
     body: 'Fatma Ben Youssef a paye 200 DT pour le Tour 1.',
@@ -266,17 +266,17 @@ export const seedNotifications: Notification[] = [
   {
     id: 'n3',
     user_id: 'u-ahmed',
-    tontine_id: 't-startup',
+    tontine_id: 't-sfax',
     type: 'round_started',
     title: 'Tour 1 demarre',
-    body: 'Le Tour 1 de la tontine "Collegues Startup" a commence. Vous etes le beneficiaire.',
+    body: 'Le Tour 1 de la tontine "Famille Sfax" a commence. Vous etes le beneficiaire.',
     read: true,
     created_at: daysAgo(20),
   },
   {
     id: 'n4',
     user_id: 'u-nour',
-    tontine_id: 't-startup',
+    tontine_id: 't-sfax',
     type: 'reminder',
     title: 'Rappel de paiement',
     body: 'Votre contribution de 200 DT pour le Tour 1 est attendue avant l\'echeance.',
@@ -286,10 +286,10 @@ export const seedNotifications: Notification[] = [
   {
     id: 'n5',
     user_id: 'u-nour',
-    tontine_id: 't-startup',
+    tontine_id: 't-sfax',
     type: 'round_started',
     title: 'Tour 1 demarre',
-    body: 'Le Tour 1 de la tontine "Collegues Startup" a commence. Beneficiaire : Ahmed Trabelsi.',
+    body: 'Le Tour 1 de la tontine "Famille Sfax" a commence. Beneficiaire : Ahmed Trabelsi.',
     read: true,
     created_at: daysAgo(20),
   },

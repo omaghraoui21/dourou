@@ -19,7 +19,7 @@ export function DemoButton({
 
   const handleClick = () => {
     enableDemoMode()
-    router.push('/dashboard')
+    router.push('/dashboard?demo=1')
   }
 
   const base =
@@ -30,7 +30,7 @@ export function DemoButton({
       : 'bg-transparent text-gold border border-gold/40 hover:bg-gold/10'
 
   return (
-    <button onClick={handleClick} className={`${base} ${styles} ${className}`}>
+    <button type="button" onClick={handleClick} className={`${base} ${styles} ${className}`}>
       <FlaskConical className="w-4 h-4" />
       {label}
     </button>

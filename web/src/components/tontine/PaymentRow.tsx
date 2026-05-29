@@ -39,13 +39,18 @@ export function PaymentRow({ payment, memberName, action }: PaymentRowProps) {
           <p className="text-sm font-medium text-white truncate">
             {memberName}
           </p>
-          <div className="flex items-center gap-2 mt-0.5">
+          <div className="flex items-center gap-2 mt-0.5 flex-wrap">
             <span className="text-xs text-slate-400">
               {formatCurrency(payment.amount)}
             </span>
             {payment.method && (
               <span className="text-xs text-slate-500">
                 {methodLabels[payment.method] || payment.method}
+              </span>
+            )}
+            {payment.reference && (
+              <span className="text-xs text-slate-600 font-mono truncate max-w-[120px]">
+                {payment.reference}
               </span>
             )}
           </div>

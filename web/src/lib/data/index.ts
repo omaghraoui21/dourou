@@ -367,12 +367,15 @@ export async function getProfileStats(userId: string): Promise<{
   const active = tontines.filter((t) => t.status === 'active').length
   const completed = tontines.filter((t) => t.status === 'completed').length
 
+  // Le taux de paiement ne compte que les contributions DECIDEES
+  // (payees ou en retard). Les paiements encore en attente (unpaid/declared,
+  // non echus) ne penalisent pas le membre. Sans historique decide : 100%.
   const payments = await getPaymentsForUser(userId)
-  let paymentRate = 100
-  if (payments.length > 0) {
-    const paid = payments.filter((p) => p.status === 'paid').length
-    paymentRate = Math.round((paid / payments.length) * 100)
-  }
+  const resolved = payments.filter(
+    (p) => p.status === 'paid' || p.status === 'late'
+  ).length
+  const paid = payments.filter((p) => p.status === 'paid').length
+  const paymentRate = resolved > 0 ? Math.round((paid / resolved) * 100) : 100
 
   return { active, completed, paymentRate }
 }

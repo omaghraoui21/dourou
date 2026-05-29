@@ -1,12 +1,13 @@
 import Link from 'next/link'
 import { Eye, BarChart3, Shield, Users, Send, CreditCard, Trophy } from 'lucide-react'
 import { DemoButton } from '@/components/demo/DemoButton'
+import { LegalDisclaimer } from '@/components/layout/LegalDisclaimer'
 
 const features = [
   {
     icon: Eye,
     title: 'Transparence totale',
-    description: 'Chaque membre voit tous les paiements et statuts en temps reel',
+    description: 'Chaque membre voit tous les paiements et statuts en temps réel',
   },
   {
     icon: BarChart3,
@@ -16,15 +17,15 @@ const features = [
   {
     icon: Shield,
     title: 'Score de confiance',
-    description: 'Gagnez en reputation grace a votre ponctualite',
+    description: 'Gagnez en réputation grâce à votre ponctualité',
   },
 ]
 
 const steps = [
   {
     number: 1,
-    title: 'Creez votre tontine',
-    description: 'Definissez le nom, le montant et la frequence des cotisations',
+    title: 'Créez votre tontine',
+    description: 'Définissez le nom, le montant et la fréquence des cotisations',
     icon: Users,
   },
   {
@@ -36,13 +37,13 @@ const steps = [
   {
     number: 3,
     title: 'Suivez les paiements',
-    description: 'Declarez et confirmez les contributions en toute transparence',
+    description: 'Déclarez et confirmez les contributions en toute transparence',
     icon: CreditCard,
   },
   {
     number: 4,
     title: 'Recevez votre tour',
-    description: 'Rotation automatique des beneficiaires selon votre logique choisie',
+    description: 'Rotation automatique des bénéficiaires selon votre logique choisie',
     icon: Trophy,
   },
 ]
@@ -73,12 +74,12 @@ export default function LandingPage() {
             Dourou <span className="text-gold">دورو</span>
           </h1>
           <p className="text-xl md:text-2xl text-gold-light mb-6">
-            La confiance numerisee pour les tontines tunisiennes
+            La confiance numérisée pour les tontines tunisiennes
           </p>
           <p className="text-slate-400 text-lg max-w-2xl mx-auto mb-10">
             Digitalisez la gestion de vos tontines (جمعية) en Tunisie. Suivez les
-            contributions, gerez les tours et renforcez la confiance entre membres
-            grace a une plateforme transparente et moderne.
+            contributions, gérez les tours et renforcez la confiance entre membres
+            grâce à une plateforme transparente et professionnelle.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
@@ -87,10 +88,10 @@ export default function LandingPage() {
             >
               Commencer
             </Link>
-            <DemoButton label="Essayer la demo (sans compte)" />
+            <DemoButton label="Essayer la démo (sans compte)" />
           </div>
           <p className="text-slate-500 text-sm mt-4">
-            Testez l&apos;application immediatement, sans inscription ni configuration.
+            Testez l&apos;application immédiatement, sans inscription ni configuration.
           </p>
         </div>
       </section>
@@ -126,7 +127,7 @@ export default function LandingPage() {
       <section className="py-20 px-4 border-t border-white/5">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-white text-center mb-12">
-            Comment ca marche
+            Comment ça marche
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {steps.map((step) => (
@@ -148,11 +149,11 @@ export default function LandingPage() {
       <section className="py-20 px-4 border-t border-white/5">
         <div className="max-w-2xl mx-auto text-center">
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-6">
-            Pret a digitaliser votre tontine ?
+            Prêt à digitaliser votre tontine ?
           </h2>
           <p className="text-slate-400 mb-8">
-            Rejoignez des centaines de Tunisiens qui gerent deja leurs tontines
-            avec Dourou.
+            Rejoignez les groupes qui gèrent déjà leurs tontines
+            avec transparence et sérénité.
           </p>
           <Link
             href="/auth"
@@ -161,8 +162,15 @@ export default function LandingPage() {
             Commencer gratuitement
           </Link>
           <div className="mt-4">
-            <DemoButton label="Ou explorer la demo" />
+            <DemoButton label="Ou explorer la démo" />
           </div>
+        </div>
+      </section>
+
+      {/* Legal disclaimer */}
+      <section className="py-8 px-4 border-t border-white/5 bg-card/30">
+        <div className="max-w-3xl mx-auto">
+          <LegalDisclaimer className="text-center" />
         </div>
       </section>
 
@@ -171,16 +179,16 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <span className="text-gold font-bold">Dourou</span>
-            <span className="text-slate-500 text-sm">2024 - Fabrique en Tunisie 🇹🇳</span>
+            <span className="text-slate-500 text-sm">© 2026 — Fabriqué en Tunisie 🇹🇳</span>
           </div>
           <div className="flex items-center gap-6 text-sm text-slate-400">
-            <a href="#" className="hover:text-white transition-colors">
-              Mentions legales
-            </a>
-            <a href="#" className="hover:text-white transition-colors">
-              Confidentialite
-            </a>
-            <a href="#" className="hover:text-white transition-colors">
+            <span className="hover:text-white transition-colors cursor-default">
+              Mentions légales
+            </span>
+            <span className="hover:text-white transition-colors cursor-default">
+              Confidentialité
+            </span>
+            <a href="mailto:contact@dourou.tn" className="hover:text-white transition-colors">
               Contact
             </a>
           </div>

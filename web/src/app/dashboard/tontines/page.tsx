@@ -36,7 +36,7 @@ export default function TontinesPage() {
     }
 
     fetchTontines()
-  }, [])
+  }, [router])
 
   if (loading) {
     return (

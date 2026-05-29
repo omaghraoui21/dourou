@@ -57,7 +57,7 @@ export default function NotificationsPage() {
     }
 
     fetchData()
-  }, [])
+  }, [router])
 
   const handleMarkAsRead = async (id: string) => {
     await markNotificationRead(id)

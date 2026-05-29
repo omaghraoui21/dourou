@@ -61,7 +61,7 @@ export default function ProfilePage() {
     }
 
     fetchData()
-  }, [])
+  }, [router])
 
   const handleLogout = async () => {
     await signOut()

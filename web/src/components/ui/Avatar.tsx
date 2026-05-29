@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { cn } from '@/lib/utils'
 
 interface AvatarProps {
@@ -31,10 +32,13 @@ export function Avatar({ name, size = 'md', isAdmin = false, imageUrl }: AvatarP
       )}
     >
       {imageUrl ? (
-        <img
+        <Image
           src={imageUrl}
           alt={name}
+          width={56}
+          height={56}
           className="w-full h-full rounded-full object-cover"
+          unoptimized
         />
       ) : (
         initials

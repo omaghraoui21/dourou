@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Card } from '@/components/ui/Card'
 import { DemoButton } from '@/components/demo/DemoButton'
+import { LegalDisclaimer } from '@/components/layout/LegalDisclaimer'
 
 export default function AuthPage() {
   const router = useRouter()
@@ -201,13 +202,14 @@ export default function AuthPage() {
 
               <DemoButton
                 variant="outline"
-                label="Essayer la demo (sans compte)"
+                label="Essayer la démo (sans compte)"
                 className="w-full"
               />
               <p className="text-slate-500 text-xs text-center mt-3">
-                Explorez l&apos;application avec des donnees de demonstration,
+                Explorez l&apos;application avec des données de démonstration,
                 sans inscription.
               </p>
+              <LegalDisclaimer className="mt-6 text-center" />
             </>
           ) : (
             <>

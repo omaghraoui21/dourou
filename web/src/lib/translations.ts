@@ -19,13 +19,12 @@ export const t = {
     ok: 'OK',
   },
   auth: {
-    phone_title: 'Entrez votre numero de telephone',
-    phone_subtitle: 'Nous vous enverrons un code de verification',
-    otp_title: 'Entrez le code de verification',
-    otp_subtitle: 'Envoye au',
+    email_title: 'Entrez votre adresse e-mail',
+    email_subtitle: 'Nous vous enverrons un lien de connexion securise',
+    email_sent_title: 'Consultez votre boite mail',
+    email_sent_subtitle: 'Lien envoye a',
     resend_code: 'Renvoyer le code',
-    invalid_phone: 'Veuillez entrer un numero de telephone valide',
-    invalid_otp: 'Veuillez entrer le code a 6 chiffres',
+    invalid_email: 'Veuillez entrer une adresse e-mail valide',
   },
   dashboard: {
     title: 'Tableau de bord',

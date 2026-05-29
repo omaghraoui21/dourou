@@ -28,6 +28,23 @@ export function formatPhone(phone: string): string {
   return phone
 }
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+export function normalizeEmail(value: string): string {
+  return value.trim().toLowerCase()
+}
+
+export function isValidEmail(value: string): boolean {
+  return EMAIL_RE.test(value)
+}
+
+export function formatMaskedEmail(email: string, maxStars = 6): string {
+  return email.replace(/(.{2})(.*)(@.*)/, (_, a, mid, domain) => {
+    const hidden = mid.length > 0 ? '*'.repeat(Math.min(mid.length, maxStars)) : ''
+    return `${a}${hidden}${domain}`
+  })
+}
+
 export function getGreeting(): string {
   const hour = new Date().getHours()
   if (hour < 12) return t.dashboard.greeting_morning

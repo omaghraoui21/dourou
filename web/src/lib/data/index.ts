@@ -31,6 +31,7 @@ export type PaymentWithMember = Payment & { member?: TontineMember | null }
 
 export interface CurrentUser {
   id: string
+  email?: string | null
   phone?: string | null
 }
 
@@ -41,14 +42,22 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
   if (isDemoMode()) {
     const id = getDemoUserId()
     const profile = demo.getProfile(id)
-    return { id, phone: profile?.phone ?? null }
+    return {
+      id,
+      email: profile?.email ?? null,
+      phone: profile?.phone ?? null,
+    }
   }
   const supabase = createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) return null
-  return { id: user.id, phone: user.phone ?? null }
+  return {
+    id: user.id,
+    email: user.email ?? null,
+    phone: user.phone ?? null,
+  }
 }
 
 export async function signOut(): Promise<void> {

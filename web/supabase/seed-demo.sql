@@ -1,81 +1,37 @@
 -- =============================================
--- DOUROU - Seed de demonstration (Startup Act)
+-- DOUROU - Seed de demonstration (Supabase)
 -- =============================================
--- Ce fichier insere des donnees de demonstration pour evaluer l'application.
--- Il est concu pour etre rejoue sans erreur (ON CONFLICT).
---
 -- PREREQUIS:
--- 1. Le schema (supabase/schema.sql) doit etre applique en premier.
--- 2. Les utilisateurs doivent exister dans auth.users AVANT d'inserer les profils.
---    Creez les comptes via l'application (signup OTP) ou via le Dashboard Supabase:
---      Authentication > Users > Add User > Phone
---      - +21698000001 (Ahmed Trabelsi - admin demo)
---      - +21698000002 (Fatma Ben Youssef)
---      - +21698000003 (Yassine Khelifi)
---      - +21698000004 (Nour Chaabane)
---    Les UUIDs generes par Supabase doivent correspondre aux IDs ci-dessous,
---    OU vous pouvez inserer manuellement dans auth.users avec ces UUIDs fixes.
---
--- UTILISATION:
---   Copiez ce fichier dans le SQL Editor de votre projet Supabase et executez.
---   Vous pouvez le re-executer sans risque grace aux clauses ON CONFLICT.
+-- 1. schema.sql applique
+-- 2. seed-auth-users.sql execute (comptes e-mail @dourou.demo)
 -- =============================================
 
 -- =============================================
--- UUIDs FIXES POUR LA DEMO
--- =============================================
--- Utilisateurs:
---   Ahmed Trabelsi (admin):  aaaaaaaa-0001-0001-0001-000000000001
---   Fatma Ben Youssef:       aaaaaaaa-0001-0001-0001-000000000002
---   Yassine Khelifi:         aaaaaaaa-0001-0001-0001-000000000003
---   Nour Chaabane:           aaaaaaaa-0001-0001-0001-000000000004
---
--- Tontine:
---   Collegues Startup:       bbbbbbbb-0001-0001-0001-000000000001
---
--- Membres tontine:
---   Ahmed (admin, ordre 1):  cccccccc-0001-0001-0001-000000000001
---   Fatma (membre, ordre 2): cccccccc-0001-0001-0001-000000000002
---   Yassine (membre, ordre 3): cccccccc-0001-0001-0001-000000000003
---   Nour (membre, ordre 4):  cccccccc-0001-0001-0001-000000000004
---
--- Rounds:
---   Tour 1 (current):        dddddddd-0001-0001-0001-000000000001
---   Tour 2 (upcoming):       dddddddd-0001-0001-0001-000000000002
---   Tour 3 (upcoming):       dddddddd-0001-0001-0001-000000000003
---   Tour 4 (upcoming):       dddddddd-0001-0001-0001-000000000004
---
--- Paiements (Tour 1):
---   Fatma -> Ahmed (paid):   eeeeeeee-0001-0001-0001-000000000001
---   Yassine -> Ahmed (declared): eeeeeeee-0001-0001-0001-000000000002
---   Nour -> Ahmed (unpaid):  eeeeeeee-0001-0001-0001-000000000003
+-- 1. PROFILS (4 membres)
 -- =============================================
 
--- =============================================
--- 1. PROFILS (4 membres tunisiens)
--- =============================================
-
-INSERT INTO profiles (id, full_name, phone, trust_score, role, created_at, updated_at)
+INSERT INTO profiles (id, full_name, email, phone, trust_score, role, created_at, updated_at)
 VALUES
-  ('aaaaaaaa-0001-0001-0001-000000000001', 'Ahmed Trabelsi', '+21698000001', 4.5, 'user', NOW() - INTERVAL '30 days', NOW()),
-  ('aaaaaaaa-0001-0001-0001-000000000002', 'Fatma Ben Youssef', '+21698000002', 4.8, 'user', NOW() - INTERVAL '28 days', NOW()),
-  ('aaaaaaaa-0001-0001-0001-000000000003', 'Yassine Khelifi', '+21698000003', 3.5, 'user', NOW() - INTERVAL '25 days', NOW()),
-  ('aaaaaaaa-0001-0001-0001-000000000004', 'Nour Chaabane', '+21698000004', 3.0, 'user', NOW() - INTERVAL '20 days', NOW())
+  ('aaaaaaaa-0001-0001-0001-000000000001', 'Ahmed Trabelsi', 'ahmed@dourou.demo', '+21698000001', 4.5, 'user', NOW() - INTERVAL '30 days', NOW()),
+  ('aaaaaaaa-0001-0001-0001-000000000002', 'Fatma Ben Youssef', 'fatma@dourou.demo', '+21698000002', 4.8, 'user', NOW() - INTERVAL '28 days', NOW()),
+  ('aaaaaaaa-0001-0001-0001-000000000003', 'Yassine Khelifi', 'yassine@dourou.demo', '+21698000003', 3.5, 'user', NOW() - INTERVAL '25 days', NOW()),
+  ('aaaaaaaa-0001-0001-0001-000000000004', 'Nour Chaabane', 'nour@dourou.demo', '+21698000004', 3.0, 'user', NOW() - INTERVAL '20 days', NOW())
 ON CONFLICT (id) DO UPDATE SET
   full_name = EXCLUDED.full_name,
+  email = EXCLUDED.email,
   phone = EXCLUDED.phone,
   trust_score = EXCLUDED.trust_score,
   updated_at = NOW();
 
 -- =============================================
--- 2. TONTINE "Collegues Startup"
+-- 2. TONTINE "Equipe du bureau"
 -- =============================================
 
 INSERT INTO tontines (id, creator_id, title, amount, frequency, currency, total_members, current_round, distribution_logic, status, start_date, next_deadline, created_at, updated_at)
 VALUES (
   'bbbbbbbb-0001-0001-0001-000000000001',
   'aaaaaaaa-0001-0001-0001-000000000001',
-  'Collegues Startup',
+  'Equipe du bureau',
   200,
   'monthly',
   'TND',
@@ -97,7 +53,7 @@ ON CONFLICT (id) DO UPDATE SET
   updated_at = NOW();
 
 -- =============================================
--- 3. MEMBRES DE LA TONTINE (4 membres, ordre 1-4)
+-- 3. MEMBRES DE LA TONTINE
 -- =============================================
 
 INSERT INTO tontine_members (id, tontine_id, user_id, name, phone, payout_order, role, joined_at)
@@ -113,7 +69,7 @@ ON CONFLICT (id) DO UPDATE SET
   role = EXCLUDED.role;
 
 -- =============================================
--- 4. ROUNDS (4 tours: 1 current, 3 upcoming)
+-- 4. ROUNDS
 -- =============================================
 
 INSERT INTO rounds (id, tontine_id, round_number, beneficiary_id, status, scheduled_date, created_at)
@@ -129,11 +85,6 @@ ON CONFLICT (tontine_id, round_number) DO UPDATE SET
 
 -- =============================================
 -- 5. PAIEMENTS TOUR 1
---    Beneficiaire: Ahmed (ordre 1)
---    Fatma: paid via d17
---    Yassine: declared via bank (en attente de confirmation)
---    Nour: unpaid (n'a pas encore paye)
---    Note: Ahmed ne se paie pas lui-meme (il est le beneficiaire)
 -- =============================================
 
 INSERT INTO payments (id, round_id, member_id, amount, method, status, reference, declared_at, confirmed_at, created_at)
@@ -182,7 +133,7 @@ ON CONFLICT (id) DO UPDATE SET
   confirmed_at = EXCLUDED.confirmed_at;
 
 -- =============================================
--- 6. NOTIFICATIONS (exemples pour le compte demo)
+-- 6. NOTIFICATIONS
 -- =============================================
 
 INSERT INTO notifications (id, user_id, tontine_id, type, title, body, read, created_at)
@@ -222,9 +173,4 @@ ON CONFLICT (id) DO UPDATE SET
   body = EXCLUDED.body,
   read = EXCLUDED.read;
 
--- =============================================
--- FIN DU SEED DE DEMONSTRATION
--- =============================================
--- Apres execution, connectez-vous avec +21698000001 (Ahmed Trabelsi)
--- pour voir le dashboard avec la tontine active et les paiements en cours.
--- =============================================
+-- Connectez-vous avec ahmed@dourou.demo (magic link) pour le tableau de bord demo.

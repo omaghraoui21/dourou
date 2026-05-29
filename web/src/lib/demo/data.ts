@@ -43,6 +43,7 @@ export const seedProfiles: Profile[] = [
   {
     id: 'u-ahmed',
     full_name: 'Ahmed Trabelsi',
+    email: 'ahmed@dourou.demo',
     phone: '+21698000001',
     avatar_url: null,
     trust_score: 4.5,
@@ -53,6 +54,7 @@ export const seedProfiles: Profile[] = [
   {
     id: 'u-fatma',
     full_name: 'Fatma Ben Youssef',
+    email: 'fatma@dourou.demo',
     phone: '+21698000002',
     avatar_url: null,
     trust_score: 4.8,
@@ -63,6 +65,7 @@ export const seedProfiles: Profile[] = [
   {
     id: 'u-yassine',
     full_name: 'Yassine Khelifi',
+    email: 'yassine@dourou.demo',
     phone: '+21698000003',
     avatar_url: null,
     trust_score: 3.5,
@@ -73,6 +76,7 @@ export const seedProfiles: Profile[] = [
   {
     id: 'u-nour',
     full_name: 'Nour Chaabane',
+    email: 'nour@dourou.demo',
     phone: '+21698000004',
     avatar_url: null,
     trust_score: 3.0,

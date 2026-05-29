@@ -55,6 +55,14 @@ export async function updateSession(request: NextRequest) {
     return supabaseResponse
   }
 
+  const pathname = request.nextUrl.pathname
+  const isMagicLinkCallback =
+    pathname === '/auth/callback' && request.nextUrl.searchParams.has('code')
+
+  if (isMagicLinkCallback) {
+    return supabaseResponse
+  }
+
   const supabase = createServerClient(
     supabaseUrl,
     supabaseAnonKey,
@@ -83,20 +91,14 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   // Redirect unauthenticated users away from dashboard
-  if (
-    !user &&
-    request.nextUrl.pathname.startsWith('/dashboard')
-  ) {
+  if (!user && pathname.startsWith('/dashboard')) {
     const url = request.nextUrl.clone()
     url.pathname = '/auth'
     return NextResponse.redirect(url)
   }
 
-  // Redirect authenticated users away from auth pages
-  if (
-    user &&
-    request.nextUrl.pathname.startsWith('/auth')
-  ) {
+  // Redirect authenticated users away from auth pages (not magic-link callback)
+  if (user && pathname.startsWith('/auth')) {
     const url = request.nextUrl.clone()
     url.pathname = '/dashboard'
     return NextResponse.redirect(url)

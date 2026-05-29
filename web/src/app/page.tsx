@@ -67,8 +67,24 @@ export default function LandingPage() {
         </div>
       </header>
 
+      {/* Bandeau production — demo live sans inscription */}
+      <div className="fixed top-16 left-0 right-0 z-40 bg-emerald-950/90 border-b border-emerald-500/20 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-4 py-2 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-center text-sm">
+          <span className="inline-flex items-center gap-1.5 text-emerald-300 font-medium">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+            </span>
+            Demo en ligne
+          </span>
+          <span className="text-emerald-100/80">
+            Parcours complet sans compte — ou connexion par magic link e-mail
+          </span>
+        </div>
+      </div>
+
       {/* Hero Section */}
-      <section className="pt-32 pb-20 px-4">
+      <section className="pt-40 pb-20 px-4">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">
             Dourou <span className="text-gold">دورو</span>

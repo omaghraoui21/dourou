@@ -47,7 +47,7 @@ Dans ce cas, ajoutez **une seule** variable d'environnement sur Vercel :
 
 - Deployez, puis partagez le lien.
 - Les visiteurs cliquent sur **"Essayer la demo"** pour tester tout le parcours.
-- La connexion reelle par telephone/OTP restera inactive tant que Supabase
+- La connexion reelle par e-mail (magic link) necessite Supabase configure et les Redirect URLs
   n'est pas configure — c'est attendu dans ce mode.
 
 > **Securite** : si vous oubliez les variables Supabase **sans** poser

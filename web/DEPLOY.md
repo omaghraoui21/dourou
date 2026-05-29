@@ -14,7 +14,7 @@ Aucune variable Supabase requise. Le middleware autorise l'accès au tableau de 
 
 1. Restaurer ou créer un projet Supabase
 2. Appliquer `supabase/schema.sql` puis `supabase/seed-demo.sql`
-3. Activer Auth > Phone avec OTP test `123456`
+3. Activer Auth > Email (magic link) et configurer les Redirect URLs (`/auth/callback`)
 4. Variables Vercel :
 
 ```

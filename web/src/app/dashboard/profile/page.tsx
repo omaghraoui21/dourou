@@ -13,7 +13,7 @@ import { Avatar } from '@/components/ui/Avatar'
 import { Button } from '@/components/ui/Button'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { TrustScoreDisplay } from '@/components/tontine/TrustScoreDisplay'
-import { formatDate } from '@/lib/utils'
+import { formatDate, formatMaskedEmail } from '@/lib/utils'
 import { LogOut, Globe } from 'lucide-react'
 import type { Profile } from '@/lib/database.types'
 
@@ -79,9 +79,11 @@ export default function ProfilePage() {
   if (!profile) return null
 
   const trustScore = profile.trust_score || 3.0
-  const maskedPhone = profile.phone
-    ? `+216 ** *** ${profile.phone.slice(-2)}`
-    : 'Non renseigne'
+  const contactLabel = profile.email
+    ? formatMaskedEmail(profile.email, 5)
+    : profile.phone
+      ? `+216 ** *** ${profile.phone.replace(/\D/g, '').slice(-2)}`
+      : 'Non renseigne'
 
   return (
     <div className="max-w-lg mx-auto space-y-6">
@@ -92,7 +94,7 @@ export default function ProfilePage() {
           <h2 className="text-lg font-semibold text-white mt-3">
             {profile.full_name || 'Utilisateur'}
           </h2>
-          <p className="text-sm text-slate-400 mt-1">{maskedPhone}</p>
+          <p className="text-sm text-slate-400 mt-1">{contactLabel}</p>
           <p className="text-xs text-slate-500 mt-1">
             Membre depuis {formatDate(profile.created_at)}
           </p>

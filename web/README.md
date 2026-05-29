@@ -1,6 +1,12 @@
 # Dourou - Tontines Digitales 🇹🇳
 
+[![Demo live](https://img.shields.io/badge/demo-live-dourou--webapp.vercel.app-2563eb?style=for-the-badge&logo=vercel&logoColor=white)](https://dourou-webapp.vercel.app)
+[![Build](https://img.shields.io/badge/build-passing-16a34a?style=flat-square)](https://dourou-webapp.vercel.app)
+[![Auth](https://img.shields.io/badge/auth-magic%20link-9333ea?style=flat-square)](/auth)
+
 Application web pour la gestion transparente des tontines tunisiennes.
+
+> **Demo en ligne :** [dourou-webapp.vercel.app](https://dourou-webapp.vercel.app) — cliquez sur **Essayer la demo** (aucun compte requis).
 
 ## Presentation
 
@@ -113,17 +119,17 @@ Utilisez le bandeau en haut pour basculer entre **Ahmed (admin)** et **Nour (mem
 
 ### Mode reel (avec Supabase configure)
 
-Apres avoir applique le seed `supabase/seed-demo.sql`, ces comptes sont disponibles
-via la connexion par telephone + OTP :
+Apres avoir applique `seed-auth-users.sql` et `seed-demo.sql`, connectez-vous
+par **magic link** (e-mail) sur `/auth` :
 
-| Telephone | Nom | Role |
+| E-mail | Nom | Role |
 |---|---|---|
-| +21698000001 | Ahmed Trabelsi | Admin |
-| +21698000002 | Fatma Ben Youssef | Membre |
-| +21698000003 | Yassine Khelifi | Membre |
-| +21698000004 | Nour Chaabane | Membre |
+| ahmed@dourou.demo | Ahmed Trabelsi | Admin |
+| fatma@dourou.demo | Fatma Ben Youssef | Membre |
+| yassine@dourou.demo | Yassine Khelifi | Membre |
+| nour@dourou.demo | Nour Chaabane | Membre |
 
-**Code OTP de test** : `123456` (necessite l'activation du mode test dans Supabase)
+Pour `@dourou.demo`, recuperez le lien dans Supabase **Authentication > Logs** si besoin.
 
 ## Structure du Projet
 

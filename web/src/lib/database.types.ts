@@ -13,6 +13,7 @@ export type Database = {
         Row: {
           id: string
           full_name: string
+          email: string | null
           phone: string | null
           avatar_url: string | null
           trust_score: number | null
@@ -23,6 +24,7 @@ export type Database = {
         Insert: {
           id: string
           full_name: string
+          email?: string | null
           phone?: string | null
           avatar_url?: string | null
           trust_score?: number | null
@@ -33,6 +35,7 @@ export type Database = {
         Update: {
           id?: string
           full_name?: string
+          email?: string | null
           phone?: string | null
           avatar_url?: string | null
           trust_score?: number | null

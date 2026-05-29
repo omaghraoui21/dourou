@@ -76,7 +76,7 @@ export default function RoundDetailPage() {
     }
 
     fetchData()
-  }, [roundId, tontineId])
+  }, [roundId, tontineId, router])
 
   const handleDeclare = (paymentId: string) => {
     setSelectedPaymentId(paymentId)

@@ -14,6 +14,7 @@
 CREATE TABLE IF NOT EXISTS profiles (
   id UUID REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
   full_name TEXT NOT NULL DEFAULT '',
+  email TEXT,
   phone TEXT,
   avatar_url TEXT,
   trust_score NUMERIC DEFAULT 3.0,
@@ -450,10 +451,11 @@ LANGUAGE plpgsql
 SECURITY DEFINER SET search_path = ''
 AS $$
 BEGIN
-  INSERT INTO public.profiles (id, full_name, phone)
+  INSERT INTO public.profiles (id, full_name, email, phone)
   VALUES (
     NEW.id,
     COALESCE(NEW.raw_user_meta_data->>'full_name', ''),
+    NEW.email,
     NEW.phone
   )
   ON CONFLICT (id) DO UPDATE
@@ -463,6 +465,7 @@ BEGIN
       THEN COALESCE(NEW.raw_user_meta_data->>'full_name', '')
       ELSE public.profiles.full_name
     END,
+    email = COALESCE(NEW.email, public.profiles.email),
     phone = COALESCE(NEW.phone, public.profiles.phone),
     updated_at = NOW();
   RETURN NEW;

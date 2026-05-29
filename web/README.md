@@ -22,7 +22,7 @@ immediatement, **sans compte ni Supabase**.
 
 - Sur la page d'accueil ou la page de connexion, cliquez sur **"Essayer la demo"**.
 - L'application charge des donnees fictives realistes (une tontine active
-  "Collegues Startup", 4 membres, 4 tours, des paiements en differents etats).
+  "Famille Sfax", 4 membres, 4 tours, des paiements en differents etats).
 - Un bandeau "Mode demo" permet de **basculer entre deux profils** :
   - **Ahmed Trabelsi** (administrateur) : peut **confirmer** les paiements declares.
   - **Nour Chaabane** (membre) : peut **declarer** son paiement.

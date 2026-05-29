@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Eye, BarChart3, Shield, Users, Send, CreditCard, Trophy } from 'lucide-react'
+import { DemoButton } from '@/components/demo/DemoButton'
 
 const features = [
   {
@@ -86,13 +87,11 @@ export default function LandingPage() {
             >
               Commencer
             </Link>
-            <a
-              href="#features"
-              className="px-8 py-3 bg-transparent text-white border border-white/10 rounded-xl font-medium text-base hover:bg-white/5 transition-colors inline-flex items-center justify-center"
-            >
-              En savoir plus
-            </a>
+            <DemoButton label="Essayer la demo (sans compte)" />
           </div>
+          <p className="text-slate-500 text-sm mt-4">
+            Testez l&apos;application immediatement, sans inscription ni configuration.
+          </p>
         </div>
       </section>
 
@@ -161,6 +160,9 @@ export default function LandingPage() {
           >
             Commencer gratuitement
           </Link>
+          <div className="mt-4">
+            <DemoButton label="Ou explorer la demo" />
+          </div>
         </div>
       </section>
 

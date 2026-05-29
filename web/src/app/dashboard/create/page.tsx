@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { getCurrentUser, getProfile, createTontine } from '@/lib/data'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Card } from '@/components/ui/Card'
@@ -14,7 +14,6 @@ type Distribution = 'fixed' | 'random' | 'trust'
 
 export default function CreateTontinePage() {
   const router = useRouter()
-  const supabase = createClient()
 
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
@@ -80,51 +79,31 @@ export default function CreateTontinePage() {
     setError('')
 
     try {
-      const { data: { user } } = await supabase.auth.getUser()
+      const user = await getCurrentUser()
       if (!user) {
         router.push('/auth')
         return
       }
 
-      // Get user profile for name
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('full_name, phone')
-        .eq('id', user.id)
-        .single()
+      const profile = await getProfile(user.id)
 
-      // Create tontine
-      const { data: tontine, error: tontineError } = await supabase
-        .from('tontines')
-        .insert({
-          creator_id: user.id,
-          title: name.trim(),
-          amount: parseInt(amount),
-          frequency,
-          total_members: parseInt(totalMembers),
-          distribution_logic: distribution,
-          status: 'draft',
-        })
-        .select()
-        .single()
+      const { id, error: createError } = await createTontine({
+        user,
+        profile,
+        title: name.trim(),
+        amount: parseInt(amount),
+        frequency,
+        totalMembers: parseInt(totalMembers),
+        distribution,
+      })
 
-      if (tontineError) {
-        setError(tontineError.message)
+      if (createError) {
+        setError(createError)
         return
       }
 
-      // Add creator as admin member with payout_order 1
-      if (tontine) {
-        await supabase.from('tontine_members').insert({
-          tontine_id: tontine.id,
-          user_id: user.id,
-          name: profile?.full_name || 'Admin',
-          phone: profile?.phone || user.phone || null,
-          payout_order: 1,
-          role: 'admin',
-        })
-
-        router.push(`/dashboard/tontine/${tontine.id}`)
+      if (id) {
+        router.push(`/dashboard/tontine/${id}`)
       }
     } catch {
       setError('Une erreur est survenue. Veuillez reessayer.')

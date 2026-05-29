@@ -2,14 +2,57 @@
 
 ## Presentation de Dourou pour le Jury
 
-**Dourou** (دورو) est une application mobile qui digitalise la gestion des tontines (جمعية). Elle apporte transparence, suivi en temps reel et confiance entre les membres - sans jamais toucher a l'argent.
+**Dourou** (دورو) digitalise la gestion des tontines (جمعية). Elle apporte transparence, suivi en temps reel et confiance entre les membres - sans jamais toucher a l'argent.
 
 > **Dourou n'est PAS une banque, PAS un portefeuille electronique, PAS une crypto-monnaie.**
 > C'est un outil de gestion et de transparence. L'argent circule directement entre les membres.
 
 ---
 
-## Pre-requis
+## ⭐ Option recommandee : Demo Web instantanee (le plus simple)
+
+Le moyen le plus rapide pour le jury de tester Dourou est l'**application web**
+avec son **mode demo integre** : aucun compte, aucune installation backend.
+
+### Si l'application est deployee (Vercel)
+
+1. Ouvrez le lien fourni (ex : `https://dourou.vercel.app`).
+2. Cliquez sur **"Essayer la demo (sans compte)"**.
+3. Vous etes immediatement dans le tableau de bord avec des donnees realistes.
+
+### En local
+
+```bash
+cd web
+npm install
+npm run dev
+```
+Puis ouvrez [http://localhost:3000](http://localhost:3000) et cliquez sur
+**"Essayer la demo"**. Aucune variable d'environnement n'est necessaire.
+
+### Ce que permet le mode demo
+
+- Un **bandeau** en haut permet de basculer entre deux identites :
+  - **Ahmed Trabelsi** (admin) : peut **confirmer** les paiements declares.
+  - **Nour Chaabane** (membre) : peut **declarer** son propre paiement.
+- Les actions persistent pendant la session (stockage local du navigateur).
+- Aucune donnee reelle, aucun fonds : tout est simule cote client.
+
+### Parcours jury en 3 minutes (mode demo web)
+
+1. **Accueil** : cliquez sur "Essayer la demo".
+2. **Tableau de bord** : observez l'epargne active, la tontine "Collegues Startup".
+3. **Detail tontine** : onglets **Membres** (ordre de distribution), **Tours**, **Paiements**.
+4. **Tour 1** : voyez les statuts (Fatma = paye, Yassine = declare, Nour = non paye).
+5. **Confirmer** (en tant qu'Ahmed) : validez le paiement declare de Yassine -> il passe a "Paye".
+6. **Basculer sur Nour** (bandeau du haut) puis **Declarer** son paiement.
+7. **Notifications** et **Profil** : score de confiance et historique.
+
+---
+
+## Alternative : Application mobile (Expo)
+
+L'application mobile native reste disponible a la racine du depot.
 
 ### Option A : Environnement local
 
@@ -25,7 +68,7 @@ Si l'application est deployee sur un serveur de test, le jury peut y acceder dir
 
 ---
 
-## Compte de Demonstration
+## Compte de Demonstration (mode reel avec Supabase)
 
 | Champ | Valeur |
 |-------|--------|

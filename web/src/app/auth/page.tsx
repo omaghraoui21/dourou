@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Card } from '@/components/ui/Card'
+import { DemoButton } from '@/components/demo/DemoButton'
 
 export default function AuthPage() {
   const router = useRouter()
@@ -190,6 +191,23 @@ export default function AuthPage() {
               >
                 Envoyer le code
               </Button>
+
+              {/* Separateur */}
+              <div className="flex items-center gap-3 my-5">
+                <div className="flex-1 h-px bg-white/10" />
+                <span className="text-xs text-slate-500">ou</span>
+                <div className="flex-1 h-px bg-white/10" />
+              </div>
+
+              <DemoButton
+                variant="outline"
+                label="Essayer la demo (sans compte)"
+                className="w-full"
+              />
+              <p className="text-slate-500 text-xs text-center mt-3">
+                Explorez l&apos;application avec des donnees de demonstration,
+                sans inscription.
+              </p>
             </>
           ) : (
             <>

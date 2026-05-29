@@ -2,56 +2,43 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import {
+  getCurrentUser,
+  getProfile,
+  getMyTontines,
+  type TontineWithRole,
+} from '@/lib/data'
 import { Card } from '@/components/ui/Card'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { TontineCard } from '@/components/tontine/TontineCard'
 import { getGreeting, formatCurrency, formatDate } from '@/lib/utils'
 import { Plus, Coins, PiggyBank, Calendar } from 'lucide-react'
-import type { Profile, Tontine } from '@/lib/database.types'
-
-interface TontineWithMembership extends Tontine {
-  role?: string
-}
+import type { Profile } from '@/lib/database.types'
 
 export default function DashboardPage() {
   const router = useRouter()
-  const supabase = createClient()
 
   const [profile, setProfile] = useState<Profile | null>(null)
-  const [tontines, setTontines] = useState<TontineWithMembership[]>([])
+  const [tontines, setTontines] = useState<TontineWithRole[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const { data: { user } } = await supabase.auth.getUser()
+        const user = await getCurrentUser()
         if (!user) {
           router.push('/auth')
           return
         }
 
-        // Fetch profile and tontines in parallel
-        const [profileRes, membershipsRes] = await Promise.all([
-          supabase.from('profiles').select('*').eq('id', user.id).single(),
-          supabase.from('tontine_members').select('tontine_id, role, tontines(*)').eq('user_id', user.id),
+        const [profileData, userTontines] = await Promise.all([
+          getProfile(user.id),
+          getMyTontines(user.id),
         ])
 
-        const { data: profileData } = profileRes
         if (profileData) setProfile(profileData)
-
-        const { data: memberships } = membershipsRes
-
-        if (memberships) {
-          const userTontines = memberships
-            .filter((m) => m.tontines)
-            .map((m) => ({
-              ...(m.tontines as unknown as Tontine),
-              role: m.role || undefined,
-            }))
-          setTontines(userTontines)
-        }
+        setTontines(userTontines)
       } catch (err) {
         console.error('Error fetching dashboard data:', err)
       } finally {

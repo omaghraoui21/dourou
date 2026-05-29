@@ -15,20 +15,53 @@ Dourou (دورو) digitalise la gestion des tontines (جمعية) en Tunisie. Ce
 - **Notifications** : Alertes pour les paiements, rappels et mises a jour
 - **Interface en francais** : Adaptee au marche tunisien
 
+## Mode Demo (test instantane, sans configuration)
+
+L'application embarque un **mode demo** concu pour le jury Startup Act et toute
+personne souhaitant tester le produit immediatement, **sans compte ni Supabase**.
+
+- Sur la page d'accueil ou la page de connexion, cliquez sur **"Essayer la demo"**.
+- L'application charge des donnees fictives realistes (une tontine active
+  "Collegues Startup", 4 membres, 4 tours, des paiements en differents etats).
+- Un bandeau "Mode demo" permet de **basculer entre deux profils** :
+  - **Ahmed Trabelsi** (administrateur) : peut **confirmer** les paiements declares.
+  - **Nour Chaabane** (membre) : peut **declarer** son paiement.
+- Les actions (declaration, confirmation, creation de tontine, notifications)
+  **persistent** pendant la session grace au stockage local du navigateur.
+- Aucune donnee reelle, aucun fonds, aucun paiement : tout est simule cote client.
+
+> Le mode demo n'a besoin d'**aucune** variable d'environnement. Il fonctionne
+> meme si Supabase n'est pas configure, ce qui le rend ideal pour une
+> demonstration rapide ou un deploiement Vercel sans backend.
+
+Pour le scenario detaille pas-a-pas, voir **[STARTUP_ACT_DEMO.md](../STARTUP_ACT_DEMO.md)**.
+
 ## Stack Technique
 
 - **Frontend** : Next.js 14 (App Router)
 - **Langage** : TypeScript (mode strict)
 - **Styles** : Tailwind CSS (theme sombre + accents dores)
 - **Backend** : Supabase (Auth, Database, Realtime)
+- **Mode demo** : couche de donnees client-side (localStorage), sans backend
 - **Deploiement** : Vercel
+
+## Architecture des donnees
+
+Toutes les pages consomment une **couche d'acces unifiee** (`src/lib/data/`).
+Selon le contexte, cette couche route automatiquement vers :
+
+- le **store de demonstration** (`src/lib/demo/`) si le mode demo est actif ;
+- **Supabase** (backend reel) sinon.
+
+Les pages sont donc identiques dans les deux modes : seul l'aiguillage change.
 
 ## Installation
 
 ### Prerequis
 
 - Node.js 18+
-- Compte Supabase (gratuit sur [supabase.com](https://supabase.com))
+- Compte Supabase (gratuit sur [supabase.com](https://supabase.com)) — **optionnel**
+  si vous voulez seulement tester le mode demo.
 
 ### Etapes
 
@@ -43,7 +76,14 @@ Dourou (دورو) digitalise la gestion des tontines (جمعية) en Tunisie. Ce
    npm install
    ```
 
-3. **Configurer l'environnement**
+3. **Lancer en mode demo (sans Supabase)**
+   ```bash
+   npm run dev
+   ```
+   Ouvrez [http://localhost:3000](http://localhost:3000) et cliquez sur
+   **"Essayer la demo"**. Aucune autre configuration n'est requise.
+
+4. **Configurer l'environnement (pour le mode reel avec Supabase)**
    ```bash
    cp .env.example .env.local
    ```
@@ -53,18 +93,28 @@ Dourou (دورو) digitalise la gestion des tontines (جمعية) en Tunisie. Ce
    NEXT_PUBLIC_SUPABASE_ANON_KEY=votre_cle_anon
    ```
 
-4. **Configurer Supabase**
+5. **Configurer Supabase**
    Suivez les instructions dans [SUPABASE_SETUP.md](./SUPABASE_SETUP.md)
 
-5. **Lancer le serveur de developpement**
+6. **Lancer le serveur de developpement**
    ```bash
    npm run dev
    ```
 
-6. **Ouvrir l'application**
+7. **Ouvrir l'application**
    Accedez a [http://localhost:3000](http://localhost:3000)
 
 ## Comptes de Demonstration
+
+### Mode demo (recommande pour tester)
+
+Cliquez simplement sur **"Essayer la demo"** — aucun identifiant requis.
+Utilisez le bandeau en haut pour basculer entre **Ahmed (admin)** et **Nour (membre)**.
+
+### Mode reel (avec Supabase configure)
+
+Apres avoir applique le seed `supabase/seed-demo.sql`, ces comptes sont disponibles
+via la connexion par telephone + OTP :
 
 | Telephone | Nom | Role |
 |---|---|---|
@@ -73,7 +123,7 @@ Dourou (دورو) digitalise la gestion des tontines (جمعية) en Tunisie. Ce
 | +21698000003 | Yassine Khelifi | Membre |
 | +21698000004 | Nour Chaabane | Membre |
 
-**Code OTP de test** : `123456`
+**Code OTP de test** : `123456` (necessite l'activation du mode test dans Supabase)
 
 ## Structure du Projet
 
@@ -92,9 +142,12 @@ dourou-web/
 │   ├── components/
 │   │   ├── ui/                 # Composants de base (Button, Card, etc.)
 │   │   ├── tontine/            # Composants metier
+│   │   ├── demo/               # Bandeau et bouton du mode demo
 │   │   └── layout/             # Navbar, MobileNav
 │   └── lib/
-│       ├── supabase/           # Clients Supabase
+│       ├── supabase/           # Clients Supabase (mode reel)
+│       ├── demo/               # Mode demo : seed, cookies, store localStorage
+│       ├── data/               # Couche d'acces unifiee (demo OU Supabase)
 │       ├── database.types.ts   # Types TypeScript
 │       ├── translations.ts     # Traductions francaises
 │       └── utils.ts            # Fonctions utilitaires

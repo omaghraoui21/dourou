@@ -2,7 +2,15 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import {
+  getTontine,
+  getMembers,
+  getRounds,
+  getCurrentRound,
+  getPaymentsForRound,
+  type RoundWithBeneficiary,
+  type PaymentWithMember,
+} from '@/lib/data'
 import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Avatar } from '@/components/ui/Avatar'
@@ -10,23 +18,14 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { RoundCard } from '@/components/tontine/RoundCard'
 import { PaymentRow } from '@/components/tontine/PaymentRow'
 import { formatCurrency, formatPhone } from '@/lib/utils'
-import { ArrowLeft, Users, Calendar, Coins } from 'lucide-react'
-import type { Tontine, TontineMember, Round, Payment } from '@/lib/database.types'
+import { ArrowLeft, Users, Coins } from 'lucide-react'
+import type { Tontine, TontineMember } from '@/lib/database.types'
 
 type Tab = 'members' | 'rounds' | 'payments'
-
-interface RoundWithBeneficiary extends Round {
-  beneficiary?: TontineMember | null
-}
-
-interface PaymentWithMember extends Payment {
-  member?: TontineMember | null
-}
 
 export default function TontineDetailPage() {
   const params = useParams()
   const router = useRouter()
-  const supabase = createClient()
   const tontineId = params.id as string
 
   const [tontine, setTontine] = useState<Tontine | null>(null)
@@ -39,56 +38,20 @@ export default function TontineDetailPage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        // Fetch tontine
-        const { data: tontineData } = await supabase
-          .from('tontines')
-          .select('*')
-          .eq('id', tontineId)
-          .single()
+        const [tontineData, membersData, roundsData, currentRound] = await Promise.all([
+          getTontine(tontineId),
+          getMembers(tontineId),
+          getRounds(tontineId),
+          getCurrentRound(tontineId),
+        ])
 
         if (tontineData) setTontine(tontineData)
+        setMembers(membersData)
+        setRounds(roundsData)
 
-        // Fetch members
-        const { data: membersData } = await supabase
-          .from('tontine_members')
-          .select('*')
-          .eq('tontine_id', tontineId)
-          .order('payout_order', { ascending: true })
-
-        if (membersData) setMembers(membersData)
-
-        // Fetch rounds with beneficiary info
-        const { data: roundsData } = await supabase
-          .from('rounds')
-          .select('*, beneficiary:tontine_members(*)')
-          .eq('tontine_id', tontineId)
-          .order('round_number', { ascending: true })
-
-        if (roundsData) {
-          setRounds(
-            roundsData.map((r) => ({
-              ...r,
-              beneficiary: r.beneficiary as unknown as TontineMember | null,
-            }))
-          )
-        }
-
-        // Fetch payments for the current round
-        const currentRound = roundsData?.find((r) => r.status === 'current')
         if (currentRound) {
-          const { data: paymentsData } = await supabase
-            .from('payments')
-            .select('*, member:tontine_members(*)')
-            .eq('round_id', currentRound.id)
-
-          if (paymentsData) {
-            setPayments(
-              paymentsData.map((p) => ({
-                ...p,
-                member: p.member as unknown as TontineMember | null,
-              }))
-            )
-          }
+          const paymentsData = await getPaymentsForRound(currentRound.id)
+          setPayments(paymentsData)
         }
       } catch (err) {
         console.error('Error fetching tontine:', err)

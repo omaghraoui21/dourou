@@ -2,19 +2,23 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import {
+  getCurrentUser,
+  getProfile,
+  getProfileStats,
+  signOut,
+} from '@/lib/data'
 import { Card } from '@/components/ui/Card'
 import { Avatar } from '@/components/ui/Avatar'
 import { Button } from '@/components/ui/Button'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { TrustScoreDisplay } from '@/components/tontine/TrustScoreDisplay'
-import { formatDate, getTrustTier } from '@/lib/utils'
+import { formatDate } from '@/lib/utils'
 import { LogOut, Globe } from 'lucide-react'
 import type { Profile } from '@/lib/database.types'
 
 export default function ProfilePage() {
   const router = useRouter()
-  const supabase = createClient()
 
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
@@ -28,65 +32,27 @@ export default function ProfilePage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const { data: { user } } = await supabase.auth.getUser()
+        const user = await getCurrentUser()
         if (!user) {
           router.push('/auth')
           return
         }
 
-        // Fetch profile
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .single()
+        const [profileData, profileStats] = await Promise.all([
+          getProfile(user.id),
+          getProfileStats(user.id),
+        ])
 
         if (profileData) setProfile(profileData)
 
-        // Fetch tontine stats
-        const { data: memberships } = await supabase
-          .from('tontine_members')
-          .select('tontine_id, tontines(status)')
-          .eq('user_id', user.id)
-
-        if (memberships) {
-          const tontineStatuses = memberships
-            .filter((m) => m.tontines)
-            .map((m) => (m.tontines as unknown as { status: string })?.status)
-
-          const active = tontineStatuses.filter((s) => s === 'active').length
-          const completed = tontineStatuses.filter((s) => s === 'completed').length
-
-          // Calculate payment rate
-          const { data: memberIds } = await supabase
-            .from('tontine_members')
-            .select('id')
-            .eq('user_id', user.id)
-
-          let paymentRate = 100
-          if (memberIds && memberIds.length > 0) {
-            const ids = memberIds.map((m) => m.id)
-            const { data: allPayments } = await supabase
-              .from('payments')
-              .select('status')
-              .in('member_id', ids)
-
-            if (allPayments && allPayments.length > 0) {
-              const paidOnTime = allPayments.filter((p) => p.status === 'paid').length
-              paymentRate = Math.round((paidOnTime / allPayments.length) * 100)
-            }
-          }
-
-          // Calculate months since registration
-          const createdAt = profileData?.created_at
-          let months = 0
-          if (createdAt) {
-            const diff = new Date().getTime() - new Date(createdAt).getTime()
-            months = Math.max(1, Math.floor(diff / (1000 * 60 * 60 * 24 * 30)))
-          }
-
-          setStats({ active, completed, paymentRate, months })
+        // Calculate months since registration
+        let months = 0
+        if (profileData?.created_at) {
+          const diff = new Date().getTime() - new Date(profileData.created_at).getTime()
+          months = Math.max(1, Math.floor(diff / (1000 * 60 * 60 * 24 * 30)))
         }
+
+        setStats({ ...profileStats, months })
       } catch (err) {
         console.error('Error fetching profile:', err)
       } finally {
@@ -98,7 +64,7 @@ export default function ProfilePage() {
   }, [])
 
   const handleLogout = async () => {
-    await supabase.auth.signOut()
+    await signOut()
     router.push('/')
   }
 
@@ -113,7 +79,6 @@ export default function ProfilePage() {
   if (!profile) return null
 
   const trustScore = profile.trust_score || 3.0
-  const tier = getTrustTier(trustScore)
   const maskedPhone = profile.phone
     ? `+216 ** *** ${profile.phone.slice(-2)}`
     : 'Non renseigne'

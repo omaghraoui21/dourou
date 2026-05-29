@@ -2,52 +2,32 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
-import { Card } from '@/components/ui/Card'
+import { getCurrentUser, getMyTontines, type TontineWithRole } from '@/lib/data'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { TontineCard } from '@/components/tontine/TontineCard'
-import { formatCurrency } from '@/lib/utils'
-import { Plus, Coins, Filter } from 'lucide-react'
-import type { Tontine } from '@/lib/database.types'
+import { Plus, Coins } from 'lucide-react'
 
 type FilterTab = 'all' | 'active' | 'completed' | 'draft'
 
-interface TontineWithMembership extends Tontine {
-  role?: string
-}
-
 export default function TontinesPage() {
   const router = useRouter()
-  const supabase = createClient()
 
-  const [tontines, setTontines] = useState<TontineWithMembership[]>([])
+  const [tontines, setTontines] = useState<TontineWithRole[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<FilterTab>('all')
 
   useEffect(() => {
     async function fetchTontines() {
       try {
-        const { data: { user } } = await supabase.auth.getUser()
+        const user = await getCurrentUser()
         if (!user) {
           router.push('/auth')
           return
         }
 
-        const { data: memberships } = await supabase
-          .from('tontine_members')
-          .select('tontine_id, role, tontines(*)')
-          .eq('user_id', user.id)
-
-        if (memberships) {
-          const userTontines = memberships
-            .filter((m) => m.tontines)
-            .map((m) => ({
-              ...(m.tontines as unknown as Tontine),
-              role: m.role || undefined,
-            }))
-          setTontines(userTontines)
-        }
+        const userTontines = await getMyTontines(user.id)
+        setTontines(userTontines)
       } catch (err) {
         console.error('Erreur lors du chargement des tontines:', err)
       } finally {

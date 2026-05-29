@@ -33,6 +33,31 @@ Dans les parametres du projet Vercel, ajoutez :
 
 > **Important** : N'utilisez JAMAIS la `service_role` key cote client. Utilisez uniquement la cle `anon`.
 
+### Deploiement en mode demo uniquement (sans Supabase)
+
+Pour une demonstration rapide au jury, vous pouvez deployer **sans configurer
+Supabase**. Le **mode demo** fonctionne entierement cote client (donnees fictives
+dans le navigateur).
+
+Dans ce cas, ajoutez **une seule** variable d'environnement sur Vercel :
+
+| Variable | Valeur |
+|----------|--------|
+| `NEXT_PUBLIC_DEMO_ONLY` | `1` |
+
+- Deployez, puis partagez le lien.
+- Les visiteurs cliquent sur **"Essayer la demo"** pour tester tout le parcours.
+- La connexion reelle par telephone/OTP restera inactive tant que Supabase
+  n'est pas configure — c'est attendu dans ce mode.
+
+> **Securite** : si vous oubliez les variables Supabase **sans** poser
+> `NEXT_PUBLIC_DEMO_ONLY=1`, l'acces au tableau de bord est volontairement
+> bloque (redirige vers `/auth`). Cela evite tout acces non authentifie en cas
+> de mauvaise configuration d'un deploiement reel.
+
+Ajoutez les variables Supabase plus tard (et retirez `NEXT_PUBLIC_DEMO_ONLY`)
+pour activer le mode reel, sans changement de code.
+
 ## 4. Deployer
 
 1. Cliquez sur **Deploy**

@@ -2,7 +2,17 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import {
+  getCurrentUser,
+  getTontine,
+  getMyMembership,
+  getRound,
+  getMember,
+  getPaymentsForRound,
+  declarePayment,
+  confirmPayment,
+  type PaymentWithMember,
+} from '@/lib/data'
 import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Avatar } from '@/components/ui/Avatar'
@@ -13,16 +23,11 @@ import { PaymentRow } from '@/components/tontine/PaymentRow'
 import { DeclarePaymentModal } from '@/components/tontine/DeclarePaymentModal'
 import { formatCurrency } from '@/lib/utils'
 import { ArrowLeft, Crown } from 'lucide-react'
-import type { Round, TontineMember, Payment, Tontine } from '@/lib/database.types'
-
-interface PaymentWithMember extends Payment {
-  member?: TontineMember | null
-}
+import type { Round, TontineMember, Tontine } from '@/lib/database.types'
 
 export default function RoundDetailPage() {
   const params = useParams()
   const router = useRouter()
-  const supabase = createClient()
   const tontineId = params.id as string
   const roundId = params.roundId as string
 
@@ -32,7 +37,6 @@ export default function RoundDetailPage() {
   const [payments, setPayments] = useState<PaymentWithMember[]>([])
   const [loading, setLoading] = useState(true)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
-  const [currentMemberId, setCurrentMemberId] = useState<string | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
   const [declareModalOpen, setDeclareModalOpen] = useState(false)
   const [selectedPaymentId, setSelectedPaymentId] = useState<string | null>(null)
@@ -41,68 +45,28 @@ export default function RoundDetailPage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const { data: { user } } = await supabase.auth.getUser()
+        const user = await getCurrentUser()
         if (!user) {
           router.push('/auth')
           return
         }
         setCurrentUserId(user.id)
 
-        // Fetch tontine
-        const { data: tontineData } = await supabase
-          .from('tontines')
-          .select('*')
-          .eq('id', tontineId)
-          .single()
+        const [tontineData, membership, roundData, paymentsData] = await Promise.all([
+          getTontine(tontineId),
+          getMyMembership(tontineId, user.id),
+          getRound(roundId),
+          getPaymentsForRound(roundId),
+        ])
 
         if (tontineData) setTontine(tontineData)
-
-        // Check if current user is admin
-        const { data: memberData } = await supabase
-          .from('tontine_members')
-          .select('*')
-          .eq('tontine_id', tontineId)
-          .eq('user_id', user.id)
-          .single()
-
-        if (memberData) {
-          setCurrentMemberId(memberData.id)
-          setIsAdmin(memberData.role === 'admin')
-        }
-
-        // Fetch round
-        const { data: roundData } = await supabase
-          .from('rounds')
-          .select('*')
-          .eq('id', roundId)
-          .single()
-
+        if (membership) setIsAdmin(membership.role === 'admin')
         if (roundData) setRound(roundData)
+        setPayments(paymentsData)
 
-        // Fetch beneficiary
         if (roundData?.beneficiary_id) {
-          const { data: beneficiaryData } = await supabase
-            .from('tontine_members')
-            .select('*')
-            .eq('id', roundData.beneficiary_id)
-            .single()
-
+          const beneficiaryData = await getMember(roundData.beneficiary_id)
           if (beneficiaryData) setBeneficiary(beneficiaryData)
-        }
-
-        // Fetch payments
-        const { data: paymentsData } = await supabase
-          .from('payments')
-          .select('*, member:tontine_members(*)')
-          .eq('round_id', roundId)
-
-        if (paymentsData) {
-          setPayments(
-            paymentsData.map((p) => ({
-              ...p,
-              member: p.member as unknown as TontineMember | null,
-            }))
-          )
         }
       } catch (err) {
         console.error('Error fetching round:', err)
@@ -122,21 +86,18 @@ export default function RoundDetailPage() {
   const handleDeclareSubmit = async (method: string, reference: string) => {
     if (!selectedPaymentId) return
 
-    const { error } = await supabase
-      .from('payments')
-      .update({
-        status: 'declared',
-        method: method as Payment['method'],
-        reference: reference || null,
-        declared_at: new Date().toISOString(),
-      })
-      .eq('id', selectedPaymentId)
+    const { error } = await declarePayment(selectedPaymentId, method, reference)
 
     if (!error) {
       setPayments((prev) =>
         prev.map((p) =>
           p.id === selectedPaymentId
-            ? { ...p, status: 'declared' as const, method: method as Payment['method'], reference }
+            ? {
+                ...p,
+                status: 'declared' as const,
+                method: method as PaymentWithMember['method'],
+                reference,
+              }
             : p
         )
       )
@@ -147,13 +108,7 @@ export default function RoundDetailPage() {
 
   const handleConfirm = async (paymentId: string) => {
     setConfirmingId(paymentId)
-    const { error } = await supabase
-      .from('payments')
-      .update({
-        status: 'paid',
-        confirmed_at: new Date().toISOString(),
-      })
-      .eq('id', paymentId)
+    const { error } = await confirmPayment(paymentId)
 
     if (!error) {
       setPayments((prev) =>

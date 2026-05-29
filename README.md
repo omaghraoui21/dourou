@@ -126,8 +126,10 @@ Pour une demonstration guidee de l'application, consultez le guide de demo :
 
 ## Liens utiles
 
+- [Application Web (dossier web/)](./web/) - **recommande pour la demo Startup Act**
 - [Guide de configuration Supabase](./SUPABASE_SETUP.md)
 - [Demo Startup Act](./STARTUP_ACT_DEMO.md)
+- [Script video demo](./STARTUP_ACT_VIDEO_SCRIPT.md)
 - [Schema de la base de donnees](./supabase/schema.sql)
 - [Guide de deploiement](./DEPLOYMENT_GUIDE.md)
 - [Guide Darija](./DARIJA_GUIDE.md)

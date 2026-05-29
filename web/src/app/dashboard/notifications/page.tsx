@@ -2,7 +2,12 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import {
+  getCurrentUser,
+  getNotifications,
+  markNotificationRead,
+  markAllNotificationsRead,
+} from '@/lib/data'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
@@ -27,27 +32,23 @@ const typeColors: Record<string, string> = {
 
 export default function NotificationsPage() {
   const router = useRouter()
-  const supabase = createClient()
 
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading] = useState(true)
+  const [userId, setUserId] = useState<string | null>(null)
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const { data: { user } } = await supabase.auth.getUser()
+        const user = await getCurrentUser()
         if (!user) {
           router.push('/auth')
           return
         }
+        setUserId(user.id)
 
-        const { data } = await supabase
-          .from('notifications')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-
-        if (data) setNotifications(data)
+        const data = await getNotifications(user.id)
+        setNotifications(data)
       } catch (err) {
         console.error('Error fetching notifications:', err)
       } finally {
@@ -59,26 +60,15 @@ export default function NotificationsPage() {
   }, [])
 
   const handleMarkAsRead = async (id: string) => {
-    await supabase
-      .from('notifications')
-      .update({ read: true })
-      .eq('id', id)
-
+    await markNotificationRead(id)
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, read: true } : n))
     )
   }
 
   const handleMarkAllAsRead = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-
-    await supabase
-      .from('notifications')
-      .update({ read: true })
-      .eq('user_id', user.id)
-      .eq('read', false)
-
+    if (!userId) return
+    await markAllNotificationsRead(userId)
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
   }
 

@@ -1,11 +1,31 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
-import { DEMO_COOKIE } from '@/lib/demo/constants'
+import { DEMO_COOKIE, DEMO_USER_COOKIE } from '@/lib/demo/constants'
+
+const DEMO_COOKIE_MAX_AGE = 60 * 60 * 24
+const DEFAULT_DEMO_USER_ID = 'u-ahmed'
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
   })
+
+  if (request.nextUrl.searchParams.get('demo') === '1') {
+    const url = request.nextUrl.clone()
+    url.searchParams.delete('demo')
+    supabaseResponse = NextResponse.redirect(url)
+    supabaseResponse.cookies.set(DEMO_COOKIE, '1', {
+      path: '/',
+      maxAge: DEMO_COOKIE_MAX_AGE,
+      sameSite: 'lax',
+    })
+    supabaseResponse.cookies.set(DEMO_USER_COOKIE, DEFAULT_DEMO_USER_ID, {
+      path: '/',
+      maxAge: DEMO_COOKIE_MAX_AGE,
+      sameSite: 'lax',
+    })
+    return supabaseResponse
+  }
 
   // En mode demo, on laisse passer toutes les routes (aucune auth reelle,
   // la couche de donnees ne sert que des donnees fictives).

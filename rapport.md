@@ -487,4 +487,83 @@ Mêmes profils téléphoniques ; OTP de test Supabase : **`123456`**.
 
 ---
 
-*Document généré à partir de l’état du dépôt, des transcripts agents Cursor, de la PR #2 GitHub et des vérifications build/lint/tsc locales du 29 mai 2026.*
+## 11. Mise en production — session 29/05/2026 (soir)
+
+### Quota Supabase (free tier : 2 projets actifs)
+
+| Projet | Statut final | Action |
+|---|---|---|
+| **dpi-trs-tracker** | ✅ **ACTIVE_HEALTHY** | Restauré (priorité utilisateur) |
+| **dourou-prod** (`yyufaaxmpoppnmcbypvf`) | ✅ **ACTIVE_HEALTHY** | Schéma + seed + auth e-mail |
+| **trs-pharma** | ⏸ **INACTIVE** (pausé) | Pausé pour libérer un slot — **pas dpi-trs-tracker** |
+| DourouV1, silsila, TRSNF60182, not | INACTIVE | Déjà inactifs |
+
+### Déploiement Vercel
+
+| Élément | Valeur |
+|---|---|
+| **URL production (alias)** | **https://dourou-webapp.vercel.app** |
+| Ancienne URL | https://web-lovat-phi-92.vercel.app (projet `web`, conservé) |
+| Projet Vercel | `dourou-webapp` — Root Directory `web` |
+| Déploiement CLI | ✅ Production `dpl_9hkoMBuZfsDEhFbBpF1nLWfVEpRC` (29/05/2026) |
+
+### Variables Vercel (`dourou-webapp`)
+
+| Variable | Valeur |
+|---|---|
+| `NEXT_PUBLIC_DEMO_ONLY` | `1` (mode démo public pour jury) |
+| `NEXT_PUBLIC_SUPABASE_URL` | `https://yyufaaxmpoppnmcbypvf.supabase.co` |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | clé anon (configurée, non reproduite ici) |
+| `NEXT_PUBLIC_SITE_URL` | `https://dourou-webapp.vercel.app` |
+
+**Mode réel :** retirer `NEXT_PUBLIC_DEMO_ONLY` sur Vercel et redéployer.
+
+### Qualité build (local, 29/05/2026)
+
+| Commande | Résultat |
+|---|---|
+| `npx tsc --noEmit` | ✅ OK |
+| `npm run lint` | ✅ OK (0 warning) |
+| `npm run build` | ✅ OK (11 routes) |
+
+### Tests live (https://dourou-webapp.vercel.app)
+
+| Scénario | Résultat |
+|---|---|
+| Landing + bandeau « Demo en ligne » | ✅ |
+| Parcours démo → `/dashboard` | ✅ (Famille Sfax accessible) |
+| Page `/auth` magic link (UI) | ✅ formulaire e-mail |
+| Envoi magic link `ahmed@dourou.demo` | ⚠️ Supabase rejette le domaine `.demo` (`email_address_invalid`) ; comptes seed corrigés (`fix-auth-tokens.sql`) |
+| Auth e-mail réelle | ⚠️ Non testée avec une vraie adresse — chemin prêt côté app |
+
+### Git / GitHub
+
+| Action | Statut |
+|---|---|
+| Commit local | ✅ `ca6628c` — email auth, polish, scripts Supabase |
+| Push `dourou-webapp` | ⚠️ **Bloqué** — credentials GitHub absents sur la machine (push suspendu >4 min) |
+| Déploiement | ✅ Réalisé via **Vercel CLI** (contournement push) |
+
+> Pour pousser : `git push origin dourou-webapp` depuis un clone authentifié, ou configurer un PAT GitHub.
+
+### Polish « surprise »
+
+- Alias propre **dourou-webapp.vercel.app** (déjà actif sur Vercel)
+- Badges README (demo live, build, auth magic link)
+- Bandeau vert animé « Demo en ligne » sur la landing
+- Script `web/supabase/fix-auth-tokens.sql` pour compatibilité GoTrue
+
+### Prêt dossier Startup Act / grant ?
+
+**Verdict : OUI pour démo jury** — URL live, parcours démo complet, UI FR, disclaimers, build propre.
+
+**Gaps honnêtes :**
+
+1. Push GitHub non finalisé (code déployé via CLI, pas via CI Git)
+2. Magic link `@dourou.demo` bloqué par Supabase (utiliser démo sans compte ou un vrai e-mail)
+3. SMTP custom non configuré (e-mails Supabase par défaut, limites free tier)
+4. Rotation recommandée des tokens API exposés en chat
+
+---
+
+*Document généré à partir de l’état du dépôt, des transcripts agents Cursor, de la PR #2 GitHub et des vérifications build/lint/tsc locales du 29 mai 2026. Section 11 ajoutée après déploiement production.*

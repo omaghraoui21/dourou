@@ -42,7 +42,7 @@ app-example
 .vscode
 .expo/
 
-# Fastshot-specific excludes
-.fastshot-logs/
+# project-specific excludes
+.build-logs/
 examples/
 CLAUDE.md
